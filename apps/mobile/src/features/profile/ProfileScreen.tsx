@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -21,6 +22,7 @@ const INTERVENTION_LEVELS = ['Suave', 'Rígido'] as const;
 
 /** Tela Perfil: sistema pessoal, controle de distração, conexões e ajustes. */
 export function ProfileScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
   const [intervention, setIntervention] =
     useState<(typeof INTERVENTION_LEVELS)[number]>('Suave');
@@ -108,6 +110,14 @@ export function ProfileScreen() {
           }
         />
       ))}
+
+      <ListRow
+        title="Refazer a configuração inicial"
+        subtitle="Revise as áreas de foco escolhidas."
+        onPress={() => router.navigate('/onboarding')}
+        leading={<Icon name="sparkles" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={<Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />}
+      />
 
       <Pressable
         onPress={() => showToast('Sessão encerrada')}
