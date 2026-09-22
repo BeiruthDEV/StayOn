@@ -6,6 +6,7 @@ export { Chip } from './Chip';
 export { IconButton } from './IconButton';
 export { ListRow } from './ListRow';
 export { Progress } from './Progress';
+export { ProgressRing } from './ProgressRing';
 export { Screen } from './Screen';
 export { ScreenHeader } from './ScreenHeader';
 export { SectionHeader } from './SectionHeader';

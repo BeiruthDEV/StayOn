@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/features/placeholder/PlaceholderScreen';
+import { FocusScreen } from '@/features/focus';
 
 export default function FocusRoute() {
-  return <PlaceholderScreen title="Foco" phase="Fase 4" />;
+  return <FocusScreen />;
 }
