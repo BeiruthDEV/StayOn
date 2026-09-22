@@ -60,12 +60,14 @@ export function ProfileScreen() {
               sessions.replaceAll([]);
               reset();
               showToast('Dados apagados');
+              // Sem preferências, o app volta a ser uma primeira abertura.
+              router.replace('/onboarding');
             });
           },
         },
       ],
     );
-  }, [tasks, habits, blocks, events, sessions, reset, showToast]);
+  }, [tasks, habits, blocks, events, sessions, reset, showToast, router]);
 
   return (
     <Screen bottomInset={spacing.section}>
