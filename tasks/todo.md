@@ -57,3 +57,11 @@ O que ficou de fora, e por quê:
   Revisão semanal; a aba explica onde encontrá-lo.
 - **Sincronização entre aparelhos.** Exigiria backend e conta de usuário. O
   aplicativo é gratuito e offline por decisão de escopo.
+
+## Correção — aplicativo começa vazio
+
+Os dados de exemplo do protótipo estavam sendo usados como estado inicial, então
+a primeira abertura trazia tarefas, hábitos, blocos e compromissos que a pessoa
+não criou. Os quatro arquivos de exemplo saíram e cada provider nasce vazio; o
+apagar todos os dados do Perfil agora apaga de verdade em vez de repor os
+exemplos. Registrado em `lessons.md`.

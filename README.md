@@ -41,8 +41,10 @@ cd apps/mobile && npm run typecheck && npm run lint
 
 ## Roteiro de teste
 
-Na primeira abertura o app cai na configuração inicial. O caminho abaixo passa
-pelas oito telas e exercita o que cada uma faz:
+O app começa **vazio** — nenhuma tarefa, hábito ou compromisso de exemplo. Tudo
+o que aparece é o que a pessoa cria. Na primeira abertura ele cai na
+configuração inicial. O caminho abaixo passa pelas oito telas e exercita o que
+cada uma faz:
 
 1. **Configuração inicial** — escreva um nome, escolha duas ou três áreas e toque em *Continuar*.
 2. **Início** — a saudação usa o nome e a hora reais. Toque em **+** e crie uma tarefa; **segure** a tarefa criada para editar ou remover; toque nela para concluir e use *Desfazer* no aviso.
@@ -94,7 +96,7 @@ apps/mobile
   src/components  componentes de interface reutilizáveis
   src/features    uma pasta por tela, com seus subcomponentes
   src/domain      tipos e regras puras, sem React
-  src/data        dados de exemplo da primeira abertura
+  src/data        opções fixas da interface (áreas de foco do onboarding)
   src/state       contextos persistidos (tarefas, hábitos, blocos, eventos, sessões, preferências)
   src/storage     leitura e escrita em AsyncStorage
   src/theme       cores, tipografia, espaçamento, raios, sombras e movimento
