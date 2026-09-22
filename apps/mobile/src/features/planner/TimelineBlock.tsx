@@ -8,10 +8,12 @@ import { colors, motion, radius, spacing } from '@/theme';
 type TimelineBlockProps = {
   block: TimeBlock;
   onPress: (block: TimeBlock) => void;
+  /** Abre a edição — disparado pelo toque longo. */
+  onLongPress: (block: TimeBlock) => void;
 };
 
 /** Cartão de um bloco da agenda, com a barra de status à esquerda. */
-export function TimelineBlock({ block, onPress }: TimelineBlockProps) {
+export function TimelineBlock({ block, onPress, onLongPress }: TimelineBlockProps) {
   const missed = block.status === 'missed';
   const done = block.status === 'done';
 
@@ -23,6 +25,7 @@ export function TimelineBlock({ block, onPress }: TimelineBlockProps) {
 
       <Pressable
         onPress={() => onPress(block)}
+        onLongPress={() => onLongPress(block)}
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.card,

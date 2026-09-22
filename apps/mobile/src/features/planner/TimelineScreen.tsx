@@ -2,33 +2,62 @@ import { useRouter } from 'expo-router';
 import { Fragment, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { IconButton, Screen, ScreenHeader, SegmentedControl } from '@/components';
-import { currentTime, plannerDate, suggestedReplanTime } from '@/data/planner';
-import { findMissed, toMinutes, type TimeBlock } from '@/domain/timeBlock';
+import { EmptyState, IconButton, Screen, ScreenHeader, SegmentedControl } from '@/components';
+import { currentTime, longDateLabel, todayIso } from '@/domain/clock';
+import {
+  findMissed,
+  suggestNewStart,
+  toMinutes,
+  withEffectiveStatus,
+  type TimeBlock,
+} from '@/domain/timeBlock';
 import { useBlocks, useToast } from '@/state';
 import { spacing } from '@/theme';
 
+import { BlockSheet } from './BlockSheet';
 import { NowMarker } from './NowMarker';
 import { ReplanAlert } from './ReplanAlert';
 import { TimelineBlock } from './TimelineBlock';
 
 const RANGES = ['Dia', 'Semana'] as const;
 
-/** Tela Planejar: agenda do dia em linha do tempo, com replanejamento. */
+/** Tela Planejar: agenda do dia em linha do tempo, com criação e replanejamento. */
 export function TimelineScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { blocks, reschedule, restoreBlock } = useBlocks();
+  const { blocks: stored, reschedule, restoreBlock } = useBlocks();
   const [range, setRange] = useState<(typeof RANGES)[number]>('Dia');
 
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editing, setEditing] = useState<TimeBlock | undefined>(undefined);
+
+  const now = currentTime();
+  const nowMinutes = toMinutes(now);
+
+  // A situação é recalculada contra o relógio: um bloco cujo horário passou
+  // aparece como perdido mesmo que tenha sido salvo como futuro.
+  const blocks = useMemo(() => withEffectiveStatus(stored, now), [stored, now]);
   const missed = useMemo(() => findMissed(blocks), [blocks]);
-  const nowMinutes = toMinutes(currentTime);
+  const suggestedTime = useMemo(() => suggestNewStart(now), [now]);
+
+  const openNew = () => {
+    setEditing(undefined);
+    setSheetOpen(true);
+  };
+
+  const openEdit = useCallback((block: TimeBlock) => {
+    setEditing(block);
+    setSheetOpen(true);
+  }, []);
 
   const handleReplan = useCallback(() => {
     if (!missed) return;
-    reschedule(missed.id, suggestedReplanTime);
-    showToast(`Bloco movido para ${suggestedReplanTime}`, () => restoreBlock(missed));
-  }, [missed, reschedule, restoreBlock, showToast]);
+    const original = stored.find((block) => block.id === missed.id);
+    reschedule(missed.id, suggestedTime);
+    showToast(`Bloco movido para ${suggestedTime}`, () => {
+      if (original) restoreBlock(original);
+    });
+  }, [missed, stored, reschedule, restoreBlock, showToast, suggestedTime]);
 
   const handleBlockPress = useCallback(
     (block: TimeBlock) => {
@@ -36,16 +65,16 @@ export function TimelineScreen() {
         router.navigate('/focus');
         return;
       }
-      showToast(`${block.title} · ${block.start}`);
+      openEdit(block);
     },
-    [router, showToast],
+    [router, openEdit],
   );
 
   return (
     <Screen bottomInset={spacing.section}>
       <ScreenHeader
         title="Linha do tempo de hoje"
-        subtitle={plannerDate}
+        subtitle={longDateLabel(todayIso())}
         action={
           <IconButton
             name="calendar"
@@ -58,45 +87,63 @@ export function TimelineScreen() {
 
       <View style={styles.controls}>
         <SegmentedControl options={RANGES} value={range} onChange={setRange} />
-        <View style={styles.navButtons}>
-          <IconButton
-            name="chevronLeft"
-            onPress={() => showToast('Dia anterior')}
-            accessibilityLabel="Dia anterior"
-          />
-          <IconButton
-            name="chevronRight"
-            onPress={() => showToast('Próximo dia')}
-            accessibilityLabel="Próximo dia"
-          />
-        </View>
         <IconButton
           name="plus"
           variant="raised"
           size={20}
-          onPress={() => showToast('Novo bloco chega em breve')}
+          onPress={openNew}
           accessibilityLabel="Novo bloco"
           style={styles.add}
         />
       </View>
 
-      {missed ? (
-        <ReplanAlert block={missed} suggestedTime={suggestedReplanTime} onReplan={handleReplan} />
+      {range === 'Semana' ? (
+        <EmptyState
+          icon="calendar"
+          title="Visão semanal"
+          description="A semana inteira aparece na Revisão semanal, dentro de Insights."
+        />
       ) : null}
 
-      {blocks.map((block, index) => {
-        const previous = blocks[index - 1];
-        const showMarker =
-          toMinutes(block.start) > nowMinutes &&
-          (previous === undefined || toMinutes(previous.start) <= nowMinutes);
+      {range === 'Dia' ? (
+        <>
+          {missed ? (
+            <ReplanAlert
+              block={missed}
+              suggestedTime={suggestedTime}
+              onReplan={handleReplan}
+            />
+          ) : null}
 
-        return (
-          <Fragment key={block.id}>
-            {showMarker ? <NowMarker time={currentTime} /> : null}
-            <TimelineBlock block={block} onPress={handleBlockPress} />
-          </Fragment>
-        );
-      })}
+          {blocks.length === 0 ? (
+            <EmptyState
+              icon="planner"
+              title="Agenda vazia"
+              description="Toque em + para reservar o primeiro bloco de tempo do dia."
+            />
+          ) : null}
+
+          {blocks.map((block, index) => {
+            const previous = blocks[index - 1];
+            const showMarker =
+              toMinutes(block.start) > nowMinutes &&
+              (previous === undefined || toMinutes(previous.start) <= nowMinutes);
+
+            return (
+              <Fragment key={block.id}>
+                {showMarker ? <NowMarker time={now} /> : null}
+                <TimelineBlock
+                  block={block}
+                  onPress={handleBlockPress}
+                  onLongPress={openEdit}
+                />
+              </Fragment>
+            );
+          })}
+        </>
+      ) : null}
+
+      <BlockSheet visible={sheetOpen} block={editing} onClose={() => setSheetOpen(false)} />
     </Screen>
   );
 }
@@ -107,10 +154,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xxl,
     marginBottom: spacing.section,
-  },
-  navButtons: {
-    flexDirection: 'row',
-    gap: spacing.section,
   },
   add: {
     marginLeft: 'auto',

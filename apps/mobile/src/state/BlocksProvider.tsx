@@ -4,6 +4,7 @@ import { initialBlocks } from '@/data/planner';
 import {
   addBlock,
   createBlock,
+  editBlock,
   removeBlock,
   rescheduleBlock,
   setBlockStatus,
@@ -22,6 +23,7 @@ type BlocksContextValue = {
   restoreBlock: (block: TimeBlock) => void;
   /** Cria um bloco e devolve o que foi criado. */
   add: (title: string, start: string, end: string, tag: string, icon: IconName) => TimeBlock;
+  edit: (id: string, title: string, start: string, end: string, tag: string) => void;
   remove: (id: string) => void;
   /** Recoloca um bloco removido na agenda (ação de desfazer). */
   restoreRemoved: (block: TimeBlock) => void;
@@ -60,6 +62,12 @@ export function BlocksProvider({ children }: { children: React.ReactNode }) {
     [setValue],
   );
 
+  const edit = useCallback(
+    (id: string, title: string, start: string, end: string, tag: string) =>
+      setValue((current) => editBlock(current, id, title, start, end, tag)),
+    [setValue],
+  );
+
   const remove = useCallback(
     (id: string) => setValue((current) => removeBlock(current, id)),
     [setValue],
@@ -82,8 +90,18 @@ export function BlocksProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ blocks, reschedule, restoreBlock, add, remove, restoreRemoved, setStatus, replaceAll }),
-    [blocks, reschedule, restoreBlock, add, remove, restoreRemoved, setStatus, replaceAll],
+    () => ({
+      blocks,
+      reschedule,
+      restoreBlock,
+      add,
+      edit,
+      remove,
+      restoreRemoved,
+      setStatus,
+      replaceAll,
+    }),
+    [blocks, reschedule, restoreBlock, add, edit, remove, restoreRemoved, setStatus, replaceAll],
   );
 
   return <BlocksContext.Provider value={value}>{children}</BlocksContext.Provider>;

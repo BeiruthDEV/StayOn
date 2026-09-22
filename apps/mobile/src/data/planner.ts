@@ -1,23 +1,17 @@
 import type { TimeBlock } from '@/domain/timeBlock';
 
-/** Data exibida no cabeçalho da linha do tempo. */
-export const plannerDate = 'Quinta-feira, 26 de outubro';
-
-/** Horário atual simulado — posiciona o marcador "agora" na linha do tempo. */
-export const currentTime = '13:15';
-
-/** Horário sugerido pelo sistema para o bloco perdido. */
-export const suggestedReplanTime = '17:00';
-
-/** Blocos do dia — mock equivalente à agenda do protótipo. */
+/**
+ * Agenda de exemplo da primeira abertura, para a tela não nascer vazia.
+ * A partir daí tudo vem do que a pessoa criar.
+ */
 export const initialBlocks: readonly TimeBlock[] = [
   {
     id: 'block-1',
     title: 'Aulas em vídeo',
     start: '08:00',
     end: '10:00',
-    tag: 'Aprendizado',
-    icon: 'play',
+    tag: 'Estudos',
+    icon: 'graduation',
     status: 'done',
   },
   {
@@ -25,8 +19,8 @@ export const initialBlocks: readonly TimeBlock[] = [
     title: 'Leitura',
     start: '10:15',
     end: '10:45',
-    tag: 'Crescimento',
-    icon: 'bookmark',
+    tag: 'Leitura',
+    icon: 'book',
     status: 'done',
   },
   {
@@ -34,9 +28,9 @@ export const initialBlocks: readonly TimeBlock[] = [
     title: 'Estudar Spring Boot',
     start: '14:30',
     end: '16:00',
-    tag: 'Dev',
-    icon: 'code',
-    status: 'missed',
+    tag: 'Estudos',
+    icon: 'graduation',
+    status: 'upcoming',
   },
   {
     id: 'block-4',
@@ -44,7 +38,7 @@ export const initialBlocks: readonly TimeBlock[] = [
     start: '16:30',
     end: '18:00',
     tag: 'Carreira',
-    icon: 'layout',
+    icon: 'briefcase',
     status: 'upcoming',
   },
   {
@@ -53,7 +47,7 @@ export const initialBlocks: readonly TimeBlock[] = [
     start: '19:00',
     end: '20:00',
     tag: 'Carreira',
-    icon: 'clipboard',
+    icon: 'briefcase',
     status: 'upcoming',
   },
 ];

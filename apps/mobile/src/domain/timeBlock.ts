@@ -138,3 +138,76 @@ export function nextBlock(blocks: readonly TimeBlock[]): TimeBlock | undefined {
 export function isValidRange(start: string, end: string): boolean {
   return toMinutes(end) > toMinutes(start);
 }
+
+/**
+ * Situação real do bloco no momento `now` (HH:MM).
+ * Um bloco não concluído cujo horário já passou conta como perdido, mesmo que
+ * tenha sido salvo como futuro.
+ */
+export function effectiveStatus(block: TimeBlock, now: string): BlockStatus {
+  if (block.status === 'done') return 'done';
+  return toMinutes(block.end) <= toMinutes(now) ? 'missed' : 'upcoming';
+}
+
+/** Aplica a situação real a todos os blocos. */
+export function withEffectiveStatus(
+  blocks: readonly TimeBlock[],
+  now: string,
+): TimeBlock[] {
+  return blocks.map((block) => ({ ...block, status: effectiveStatus(block, now) }));
+}
+
+/** Horário sugerido para remarcar: a próxima hora cheia depois de agora. */
+export function suggestNewStart(now: string): string {
+  return toTime((Math.floor(toMinutes(now) / 60) + 1) * 60);
+}
+
+const TAG_ICONS: readonly (readonly [string, IconName])[] = [
+  ['estud', 'graduation'],
+  ['aprend', 'graduation'],
+  ['carreir', 'briefcase'],
+  ['trabalh', 'briefcase'],
+  ['saúde', 'heart'],
+  ['saud', 'heart'],
+  ['leitur', 'book'],
+  ['projet', 'wrench'],
+  ['dev', 'code'],
+];
+
+/** Ícone do bloco deduzido da área, com relógio como padrão. */
+export function iconForTag(tag: string): IconName {
+  const normalized = tag.toLowerCase();
+  const match = TAG_ICONS.find(([needle]) => normalized.includes(needle));
+  return match?.[1] ?? 'clock';
+}
+
+/** Altera título, horário e área de um bloco existente. */
+export function editBlock(
+  blocks: readonly TimeBlock[],
+  id: string,
+  title: string,
+  start: string,
+  end: string,
+  tag: string,
+): TimeBlock[] {
+  return sortByStart(
+    blocks.map((block) =>
+      block.id === id
+        ? {
+            ...block,
+            title: title.trim(),
+            start,
+            end,
+            tag: tag.trim(),
+            icon: iconForTag(tag),
+          }
+        : block,
+    ),
+  );
+}
+
+/** Verdadeiro para um horário no formato HH:MM válido. */
+export function isValidTime(time: string): boolean {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  return match !== null;
+}
