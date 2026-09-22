@@ -1,61 +1,104 @@
-import { useRouter } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, ProgressRing, Screen, StatTile } from '@/components';
 import { todayIso } from '@/domain/clock';
 import { elapsedPercent, formatRemaining } from '@/domain/focusSession';
 import { sessionsOn } from '@/domain/session';
+import { durationOf, nextBlock, type TimeBlock } from '@/domain/timeBlock';
 import { durationLabel } from '@/domain/usage';
-import { durationOf, nextBlock } from '@/domain/timeBlock';
 import { Icon } from '@/icons';
 import { useBlocks, usePreferences, useSessions, useToast } from '@/state';
 import { colors, motion, spacing } from '@/theme';
 
 import { SessionControls } from './SessionControls';
+import { SessionSetup } from './SessionSetup';
 import { useFocusSession } from './useFocusSession';
 
-/** Tela Foco: sessão imersiva com contador regressivo e registro no histórico. */
+/** Tela Foco: monta a sessão, roda o cronômetro e grava no histórico. */
 export function FocusScreen() {
-  const router = useRouter();
   const { showToast } = useToast();
   const { blocks, setStatus } = useBlocks();
   const { sessions, record } = useSessions();
   const { preferences } = usePreferences();
 
-  const block = useMemo(() => nextBlock(blocks), [blocks]);
-  const minutes = block ? durationOf(block) : preferences.sessionMinutes;
-  const label = block ? block.title : 'Sessão livre';
+  const session = useFocusSession();
 
-  const session = useFocusSession(minutes);
-  const finished = session.remaining === 0;
-
+  const suggested = useMemo(() => nextBlock(blocks), [blocks]);
   const todaySessions = useMemo(() => sessionsOn(sessions, todayIso()), [sessions]);
 
-  const finish = useCallback(() => {
-    if (session.elapsed === 0) {
-      showToast('A sessão nem começou');
+  const [label, setLabel] = useState('');
+  const [minutes, setMinutes] = useState(String(preferences.sessionMinutes));
+  const [error, setError] = useState<string | undefined>(undefined);
+  /** Bloco vinculado à sessão em andamento, para marcar como concluído no fim. */
+  const [linkedBlock, setLinkedBlock] = useState<TimeBlock | undefined>(undefined);
+
+  const runningLabel = label.trim() === '' ? 'Sessão livre' : label.trim();
+
+  const handleStart = useCallback(() => {
+    const parsed = Number(minutes);
+
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 180) {
+      setError('Escolha entre 1 e 180 minutos');
       return;
     }
 
-    record(label, session.elapsed, 'completed');
-    if (block) setStatus(block.id, 'done');
+    setError(undefined);
+    setLinkedBlock(undefined);
+    session.start(parsed);
+  }, [minutes, session]);
+
+  const handleUseBlock = useCallback(
+    (block: TimeBlock) => {
+      setLabel(block.title);
+      setMinutes(String(durationOf(block)));
+      setError(undefined);
+      setLinkedBlock(block);
+      session.start(durationOf(block));
+    },
+    [session],
+  );
+
+  const finish = useCallback(() => {
+    record(runningLabel, session.elapsed, 'completed');
+    if (linkedBlock) setStatus(linkedBlock.id, 'done');
     showToast(`Sessão registrada: ${durationLabel(session.elapsed)}`);
-    // Continua na aba: o cronômetro volta ao início para a próxima sessão.
-    session.reset();
-  }, [session, record, label, block, setStatus, showToast]);
+    session.stop();
+  }, [record, runningLabel, session, linkedBlock, setStatus, showToast]);
 
   const abandon = useCallback(() => {
-    // Abandonar sem ter focado nada não vira registro.
     if (session.elapsed > 0) {
-      record(label, session.elapsed, 'abandoned');
+      record(runningLabel, session.elapsed, 'abandoned');
       showToast(`Sessão abandonada aos ${durationLabel(session.elapsed)}`);
     } else {
-      showToast('Sessão abandonada');
+      showToast('Sessão cancelada');
     }
-    session.reset();
-    router.navigate('/');
-  }, [session, record, label, showToast, router]);
+    session.stop();
+  }, [session, record, runningLabel, showToast]);
+
+  if (session.status === 'idle') {
+    return (
+      <Screen bottomInset={spacing.section}>
+        <SessionSetup
+          label={label}
+          onChangeLabel={setLabel}
+          minutes={minutes}
+          onChangeMinutes={(value) => {
+            setMinutes(value);
+            setError(undefined);
+          }}
+          error={error}
+          block={suggested}
+          onUseBlock={handleUseBlock}
+          onStart={handleStart}
+          todayCount={todaySessions.length}
+        />
+      </Screen>
+    );
+  }
+
+  const running = session.status === 'running';
+  const finished = session.remaining === 0;
 
   return (
     <Screen scroll={false} contentStyle={styles.content}>
@@ -70,11 +113,11 @@ export function FocusScreen() {
         </Pressable>
 
         <Chip
-          label={session.running ? 'Foco profundo ativo' : 'Sessão pausada'}
+          label={running ? 'Foco profundo ativo' : 'Sessão pausada'}
           tone="outline"
           leading={
             <Icon
-              name={session.running ? 'focus' : 'pause'}
+              name={running ? 'focus' : 'pause'}
               size={14}
               strokeWidth={1.7}
               color={colors.textDim}
@@ -85,12 +128,12 @@ export function FocusScreen() {
 
       <View style={styles.header}>
         <Chip
-          label={block ? block.tag : `${preferences.interventionLevel} · ${minutes} min`}
+          label={`${preferences.interventionLevel} · ${Math.round(session.total / 60)} min`}
           leading={<Icon name="check" size={13} strokeWidth={2} color={colors.textMuted} />}
           style={styles.blockChip}
         />
         <AppText variant="display" style={styles.goal}>
-          {label}
+          {runningLabel}
         </AppText>
       </View>
 
@@ -106,8 +149,8 @@ export function FocusScreen() {
       </View>
 
       <SessionControls
-        running={session.running}
-        onToggleRunning={session.toggleRunning}
+        running={running}
+        onToggleRunning={session.togglePause}
         onExtend={session.extend}
         onFinish={finish}
       />
@@ -115,9 +158,8 @@ export function FocusScreen() {
       <View style={styles.stats}>
         <StatTile label="Interrupções" value={String(session.pauses)} />
         <StatTile
-          label="Sessões hoje"
-          value={String(todaySessions.length)}
-          unit={todaySessions.length === 1 ? 'registro' : 'registros'}
+          label="Focado até agora"
+          value={durationLabel(session.elapsed)}
         />
       </View>
     </Screen>

@@ -79,10 +79,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   panelWrapper: {
+    // O limite de altura fica aqui, e não no painel: este é filho direto de
+    // `root`, que tem flex 1 e portanto altura definida. Uma porcentagem
+    // contra um pai auto-dimensionado não resolve e o painel colapsa.
+    maxHeight: '90%',
     justifyContent: 'flex-end',
   },
   panel: {
-    maxHeight: '88%',
     paddingHorizontal: spacing.screen,
     paddingTop: spacing.xl,
     borderTopLeftRadius: 20,
