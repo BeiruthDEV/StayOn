@@ -36,3 +36,30 @@ ela. Sem fonte, a métrica sai da tela — não vira um valor plausível.
 
 **Como verificar:** para cada número na interface, apontar a linha de código que
 o calcula a partir de dado registrado.
+
+---
+
+## Force-push não apaga commit no GitHub
+
+**O que aconteceu:** para tirar a co-autoria do Claude do repositório, o
+histórico foi reescrito com `filter-branch` e enviado com `--force-with-lease`.
+As APIs `/contributors` e `stats/contributors` passaram a mostrar só o dono —
+mas o card Contributors da interface continuou mostrando dois.
+
+**Causa:** force-push só move a referência do branch. Os commits antigos viram
+objetos órfãos e seguem acessíveis por SHA no GitHub por tempo indeterminado.
+O índice de contributors é montado a partir de todos os commits que o
+repositório conhece, órfãos incluídos.
+
+**Diagnóstico errado no caminho:** concluí "é cache do navegador" a partir de um
+`curl` em `/contributors-list`, que na verdade devolve 404 — eu estava contando
+ocorrências no HTML da própria página de erro. Duas idas e vindas desperdiçadas.
+
+**Regras:**
+- Reescrever histórico remove o vestígio do *branch*, não do *servidor*. Se o
+  objetivo é apagar de verdade no GitHub, o caminho é apagar e recriar o
+  repositório.
+- Antes de usar a resposta de um endpoint como prova, conferir o status HTTP.
+  Um 404 com corpo HTML passa por `grep` como se fosse dado válido.
+- Melhor ainda: não gerar o vestígio. Definir a atribuição de commit antes do
+  primeiro push, não depois.
