@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/features/placeholder/PlaceholderScreen';
+import { TimelineScreen } from '@/features/planner';
 
 export default function PlannerRoute() {
-  return <PlaceholderScreen title="Planejar" phase="Fase 3" />;
+  return <TimelineScreen />;
 }

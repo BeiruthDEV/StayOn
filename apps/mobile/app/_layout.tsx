@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { HabitsProvider, TasksProvider, ToastProvider } from '@/state';
+import { BlocksProvider, HabitsProvider, TasksProvider, ToastProvider } from '@/state';
 import { colors } from '@/theme';
 
 export default function RootLayout() {
@@ -30,9 +30,11 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <TasksProvider>
         <HabitsProvider>
-          <ToastProvider>
-            <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
-          </ToastProvider>
+          <BlocksProvider>
+            <ToastProvider>
+              <Stack screenOptions={{ headerShown: false, contentStyle: styles.screen }} />
+            </ToastProvider>
+          </BlocksProvider>
         </HabitsProvider>
       </TasksProvider>
     </SafeAreaProvider>
