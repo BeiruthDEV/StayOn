@@ -27,6 +27,18 @@ export const colors = {
   onLight: '#080808',
   /** Preenchimento sólido claro (checkbox marcado, barra de progresso). */
   fillLight: '#F5F5F5',
+  /** Texto de alerta — bloco perdido, aumento de distração. */
+  danger: '#EFA3A3',
+  /** Texto de alerta com ênfase (rótulo de botão de alerta). */
+  dangerStrong: '#F7BEBE',
+  /** Superfície do cartão de alerta. */
+  dangerSurface: '#1C0F11',
+  /** Borda do cartão de alerta. */
+  dangerBorder: '#3B1E21',
+  /** Preenchimento sólido do botão de alerta. */
+  dangerFill: '#F6B9B9',
+  /** Texto de confirmação — conexão ativa, meta batida. */
+  success: '#8FD9A8',
   transparent: 'transparent',
 } as const;
 

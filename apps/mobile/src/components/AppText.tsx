@@ -3,7 +3,15 @@ import { Text, type StyleProp, type TextStyle } from 'react-native';
 import { colors, textVariants, type TextVariant } from '@/theme';
 
 /** Cores de texto permitidas — evita cor arbitrária espalhada pelas telas. */
-export type TextColor = 'text' | 'textMuted' | 'textDim' | 'textFaint' | 'onLight';
+export type TextColor =
+  | 'text'
+  | 'textMuted'
+  | 'textDim'
+  | 'textFaint'
+  | 'onLight'
+  | 'danger'
+  | 'dangerStrong'
+  | 'success';
 
 type AppTextProps = {
   variant?: TextVariant;
