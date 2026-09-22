@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { initialEvents } from '@/data/events';
 import { todayIso } from '@/domain/clock';
 import {
   addEvent,
@@ -25,10 +24,13 @@ type EventsContextValue = {
 
 const EventsContext = createContext<EventsContextValue | null>(null);
 
+/** A agenda começa vazia: só entra o que a pessoa marcar. */
+const NO_EVENTS: readonly CalendarEvent[] = [];
+
 export function EventsProvider({ children }: { children: React.ReactNode }) {
   const { value: stored, setValue } = usePersistentState<readonly CalendarEvent[]>(
     storageKeys.events,
-    initialEvents,
+    NO_EVENTS,
   );
 
   const today = todayIso();

@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { initialBlocks } from '@/data/planner';
 import {
   addBlock,
   createBlock,
@@ -33,10 +32,13 @@ type BlocksContextValue = {
 
 const BlocksContext = createContext<BlocksContextValue | null>(null);
 
+/** A agenda começa vazia: só entra o que a pessoa planejar. */
+const NO_BLOCKS: readonly TimeBlock[] = [];
+
 export function BlocksProvider({ children }: { children: React.ReactNode }) {
   const { value: blocks, setValue } = usePersistentState<readonly TimeBlock[]>(
     storageKeys.blocks,
-    sortByStart(initialBlocks),
+    NO_BLOCKS,
   );
 
   const reschedule = useCallback(

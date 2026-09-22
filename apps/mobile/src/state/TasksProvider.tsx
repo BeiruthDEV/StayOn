@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { initialTasks } from '@/data/tasks';
 import {
   addTask,
   createTask,
@@ -28,10 +27,13 @@ type TasksContextValue = {
 
 const TasksContext = createContext<TasksContextValue | null>(null);
 
+/** A lista começa vazia: só entra o que a pessoa criar. */
+const NO_TASKS: readonly Task[] = [];
+
 export function TasksProvider({ children }: { children: React.ReactNode }) {
   const { value: tasks, setValue } = usePersistentState<readonly Task[]>(
     storageKeys.tasks,
-    initialTasks,
+    NO_TASKS,
   );
 
   const toggleTask = useCallback(

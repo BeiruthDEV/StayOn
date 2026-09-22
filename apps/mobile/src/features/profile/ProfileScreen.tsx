@@ -10,10 +10,6 @@ import {
   SectionHeader,
   SegmentedControl,
 } from '@/components';
-import { initialBlocks } from '@/data/planner';
-import { initialEvents } from '@/data/events';
-import { initialHabits } from '@/data/habits';
-import { initialTasks } from '@/data/tasks';
 import { minutesLabel } from '@/domain/usage';
 import { Icon } from '@/icons';
 import {
@@ -49,7 +45,7 @@ export function ProfileScreen() {
   const handleReset = useCallback(() => {
     Alert.alert(
       'Apagar todos os dados?',
-      'Tarefas, hábitos, agenda, compromissos, sessões e preferências voltam ao estado inicial. Não dá para desfazer.',
+      'Tarefas, hábitos, agenda, compromissos, sessões e preferências são apagados. Não dá para desfazer.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -57,10 +53,10 @@ export function ProfileScreen() {
           style: 'destructive',
           onPress: () => {
             void clearAll().then(() => {
-              tasks.replaceAll(initialTasks);
-              habits.replaceAll(initialHabits);
-              blocks.replaceAll(initialBlocks);
-              events.replaceAll(initialEvents);
+              tasks.replaceAll([]);
+              habits.replaceAll([]);
+              blocks.replaceAll([]);
+              events.replaceAll([]);
               sessions.replaceAll([]);
               reset();
               showToast('Dados apagados');
@@ -134,7 +130,7 @@ export function ProfileScreen() {
 
       <ListRow
         title="Apagar todos os dados"
-        subtitle="Volta o aplicativo ao estado inicial"
+        subtitle="Deixa o aplicativo vazio, como na primeira abertura"
         onPress={handleReset}
         leading={<Icon name="trash" size={20} strokeWidth={1.6} color={colors.danger} />}
         style={styles.destructive}

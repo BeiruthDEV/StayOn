@@ -153,7 +153,9 @@ export function WeeklyReviewScreen() {
             <Progress percent={accuracy} />
           </View>
           <AppText variant="caption" color="textDim" style={styles.note}>
-            {accuracy}% da agenda de hoje foi cumprida.
+            {review.blocksTotal === 0
+              ? 'Nenhum bloco na agenda de hoje.'
+              : `${accuracy}% da agenda de hoje foi cumprida.`}
           </AppText>
         </Card>
       </View>

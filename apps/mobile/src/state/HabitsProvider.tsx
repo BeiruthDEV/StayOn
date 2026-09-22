@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { initialHabits } from '@/data/habits';
 import {
   addHabit,
   createHabit,
@@ -31,10 +30,13 @@ type HabitsContextValue = {
 
 const HabitsContext = createContext<HabitsContextValue | null>(null);
 
+/** A lista começa vazia: só entra o que a pessoa criar. */
+const NO_HABITS: readonly Habit[] = [];
+
 export function HabitsProvider({ children }: { children: React.ReactNode }) {
   const { value: habits, setValue } = usePersistentState<readonly Habit[]>(
     storageKeys.habits,
-    initialHabits,
+    NO_HABITS,
   );
 
   const toggleHabit = useCallback(

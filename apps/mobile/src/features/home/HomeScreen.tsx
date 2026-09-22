@@ -76,7 +76,7 @@ export function HomeScreen() {
           />
         )}
 
-        <DayProgressBar progress={progress} />
+        {progress.total > 0 ? <DayProgressBar progress={progress} /> : null}
 
         <PriorityList
           tasks={tasks}
