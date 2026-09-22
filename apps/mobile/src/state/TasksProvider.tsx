@@ -1,31 +1,82 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { initialTasks } from '@/data/tasks';
-import { setTaskDone, toggleTaskDone, type Task } from '@/domain/task';
+import {
+  addTask,
+  createTask,
+  editTask,
+  removeTask,
+  setTaskDone,
+  toggleTaskDone,
+  type Task,
+} from '@/domain/task';
+import { storageKeys, usePersistentState } from '@/storage';
 
 type TasksContextValue = {
   tasks: readonly Task[];
   toggleTask: (id: string) => void;
   /** Restaura um estado de conclusão anterior (ação de desfazer). */
   restoreTask: (id: string, done: boolean) => void;
+  /** Cria uma tarefa e devolve a que foi criada. */
+  add: (title: string, tag: string) => Task;
+  edit: (id: string, title: string, tag: string) => void;
+  remove: (id: string) => void;
+  /** Recoloca uma tarefa removida na lista (ação de desfazer). */
+  restoreRemoved: (task: Task) => void;
+  replaceAll: (tasks: readonly Task[]) => void;
 };
 
 const TasksContext = createContext<TasksContextValue | null>(null);
 
 export function TasksProvider({ children }: { children: React.ReactNode }) {
-  const [tasks, setTasks] = useState<readonly Task[]>(initialTasks);
+  const { value: tasks, setValue } = usePersistentState<readonly Task[]>(
+    storageKeys.tasks,
+    initialTasks,
+  );
 
-  const toggleTask = useCallback((id: string) => {
-    setTasks((current) => toggleTaskDone(current, id));
-  }, []);
+  const toggleTask = useCallback(
+    (id: string) => setValue((current) => toggleTaskDone(current, id)),
+    [setValue],
+  );
 
-  const restoreTask = useCallback((id: string, done: boolean) => {
-    setTasks((current) => setTaskDone(current, id, done));
-  }, []);
+  const restoreTask = useCallback(
+    (id: string, done: boolean) => setValue((current) => setTaskDone(current, id, done)),
+    [setValue],
+  );
+
+  const add = useCallback(
+    (title: string, tag: string) => {
+      const task = createTask(title, tag);
+      setValue((current) => addTask(current, task));
+      return task;
+    },
+    [setValue],
+  );
+
+  const edit = useCallback(
+    (id: string, title: string, tag: string) =>
+      setValue((current) => editTask(current, id, title, tag)),
+    [setValue],
+  );
+
+  const remove = useCallback(
+    (id: string) => setValue((current) => removeTask(current, id)),
+    [setValue],
+  );
+
+  const restoreRemoved = useCallback(
+    (task: Task) => setValue((current) => addTask(current, task)),
+    [setValue],
+  );
+
+  const replaceAll = useCallback(
+    (next: readonly Task[]) => setValue(() => next),
+    [setValue],
+  );
 
   const value = useMemo(
-    () => ({ tasks, toggleTask, restoreTask }),
-    [tasks, toggleTask, restoreTask],
+    () => ({ tasks, toggleTask, restoreTask, add, edit, remove, restoreRemoved, replaceAll }),
+    [tasks, toggleTask, restoreTask, add, edit, remove, restoreRemoved, replaceAll],
   );
 
   return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;

@@ -1,5 +1,7 @@
 import type { IconName } from '@/icons';
 
+import { createId } from './id';
+
 /** Situação de um bloco na agenda do dia. */
 export type BlockStatus = 'done' | 'missed' | 'upcoming';
 
@@ -82,4 +84,57 @@ export function rescheduleBlock(
       };
     }),
   );
+}
+
+/** Cria um bloco a partir do que foi preenchido no formulário. */
+export function createBlock(
+  title: string,
+  start: string,
+  end: string,
+  tag: string,
+  icon: IconName,
+): TimeBlock {
+  return {
+    id: createId('block'),
+    title: title.trim(),
+    start,
+    end,
+    tag: tag.trim(),
+    icon,
+    status: 'upcoming',
+  };
+}
+
+/** Acrescenta um bloco mantendo a agenda ordenada por horário. */
+export function addBlock(blocks: readonly TimeBlock[], block: TimeBlock): TimeBlock[] {
+  return sortByStart([...blocks, block]);
+}
+
+/** Remove um bloco da agenda. */
+export function removeBlock(blocks: readonly TimeBlock[], id: string): TimeBlock[] {
+  return blocks.filter((block) => block.id !== id);
+}
+
+/** Define a situação de um bloco. */
+export function setBlockStatus(
+  blocks: readonly TimeBlock[],
+  id: string,
+  status: BlockStatus,
+): TimeBlock[] {
+  return blocks.map((block) => (block.id === id ? { ...block, status } : block));
+}
+
+/** Blocos já concluídos. */
+export function completedBlocks(blocks: readonly TimeBlock[]): TimeBlock[] {
+  return blocks.filter((block) => block.status === 'done');
+}
+
+/** Próximo bloco ainda não realizado. */
+export function nextBlock(blocks: readonly TimeBlock[]): TimeBlock | undefined {
+  return sortByStart(blocks).find((block) => block.status === 'upcoming');
+}
+
+/** Verdadeiro quando o horário de fim vem depois do de início. */
+export function isValidRange(start: string, end: string): boolean {
+  return toMinutes(end) > toMinutes(start);
 }

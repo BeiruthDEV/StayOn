@@ -1,3 +1,5 @@
+import { createId } from './id';
+
 /** Hábito acompanhado diariamente. */
 export type Habit = {
   id: string;
@@ -32,4 +34,41 @@ export function setHabitDone(habits: readonly Habit[], id: string, done: boolean
 /** Hábitos ativos exibidos na Home — o protótipo mostra os dois primeiros. */
 export function habitsForToday(habits: readonly Habit[], limit = 2): Habit[] {
   return habits.filter((habit) => !habit.paused).slice(0, limit);
+}
+
+/** Cria um hábito a partir do que foi digitado. */
+export function createHabit(name: string, goal: string): Habit {
+  return {
+    id: createId('habit'),
+    name: name.trim(),
+    goal: goal.trim(),
+    streak: 0,
+    done: false,
+    progressLabel: goal.trim(),
+    paused: false,
+  };
+}
+
+/** Acrescenta um hábito ao fim da lista. */
+export function addHabit(habits: readonly Habit[], habit: Habit): Habit[] {
+  return [...habits, habit];
+}
+
+/** Remove um hábito. */
+export function removeHabit(habits: readonly Habit[], id: string): Habit[] {
+  return habits.filter((habit) => habit.id !== id);
+}
+
+/** Alterna entre pausado e ativo. Pausar também desmarca a conclusão do dia. */
+export function togglePaused(habits: readonly Habit[], id: string): Habit[] {
+  return habits.map((habit) =>
+    habit.id === id
+      ? { ...habit, paused: !habit.paused, done: habit.paused ? habit.done : false }
+      : habit,
+  );
+}
+
+/** Quantos hábitos ativos já foram cumpridos hoje. */
+export function completedToday(habits: readonly Habit[]): number {
+  return habits.filter((habit) => !habit.paused && habit.done).length;
 }
