@@ -1,60 +1,55 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Card, Chip } from '@/components';
-import { upNextEvent } from '@/data/events';
+import type { CalendarEvent } from '@/domain/event';
 import { Icon } from '@/icons';
 import { colors, motion, radius, spacing } from '@/theme';
 
 type UpNextCardProps = {
-  onJoin: () => void;
-  onDetails: () => void;
+  event: CalendarEvent;
+  onRemove: () => void;
 };
 
-/** Destaque do próximo compromisso com as ações de entrar e ver detalhes. */
-export function UpNextCard({ onJoin, onDetails }: UpNextCardProps) {
+/** Destaque do compromisso mais próximo. */
+export function UpNextCard({ event, onRemove }: UpNextCardProps) {
   return (
     <Card>
       <View style={styles.header}>
         <Chip label="A seguir" />
         <AppText variant="caption" color="textDim">
-          {upNextEvent.when}
+          {event.countdown}
         </AppText>
       </View>
 
       <AppText variant="title" style={styles.title}>
-        {upNextEvent.title}
+        {event.title}
       </AppText>
 
       <View style={styles.meta}>
         <View style={styles.metaItem}>
-          <Icon name="clock" size={15} strokeWidth={1.6} color={colors.textDim} />
+          <Icon name="calendar" size={15} strokeWidth={1.6} color={colors.textDim} />
           <AppText variant="caption" color="textMuted">
-            {upNextEvent.timeRange}
+            {event.dateLabel}
           </AppText>
         </View>
-        <View style={styles.metaItem}>
-          <Icon name="video" size={15} strokeWidth={1.6} color={colors.textDim} />
-          <AppText variant="caption" color="textMuted">
-            {upNextEvent.place}
-          </AppText>
-        </View>
+        {event.meta ? (
+          <View style={styles.metaItem}>
+            <Icon name="mapPin" size={15} strokeWidth={1.6} color={colors.textDim} />
+            <AppText variant="caption" color="textMuted">
+              {event.meta}
+            </AppText>
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.actions}>
         <Pressable
-          onPress={onJoin}
+          onPress={onRemove}
           accessibilityRole="button"
           style={({ pressed }) => [styles.join, pressed && styles.pressed]}
         >
-          <AppText variant="captionMedium">Abrir link</AppText>
-        </Pressable>
-        <Pressable
-          onPress={onDetails}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.details, pressed && styles.pressed]}
-        >
           <AppText variant="captionMedium" color="textMuted">
-            Ver detalhes
+            Remover
           </AppText>
         </Pressable>
       </View>
@@ -95,9 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderStrong,
     backgroundColor: colors.surfaceRaised,
-  },
-  details: {
-    paddingVertical: spacing.lg,
   },
   pressed: {
     opacity: motion.pressedOpacity,

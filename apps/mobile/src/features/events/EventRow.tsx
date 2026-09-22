@@ -1,23 +1,19 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AppText, Chip } from '@/components';
+import { AppText, Chip, IconButton } from '@/components';
 import type { CalendarEvent } from '@/domain/event';
 import { Icon } from '@/icons';
-import { colors, motion, radius, spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 
 type EventRowProps = {
   event: CalendarEvent;
-  onPress: (event: CalendarEvent) => void;
+  onRemove: () => void;
 };
 
-/** Linha da lista de próximos compromissos. */
-export function EventRow({ event, onPress }: EventRowProps) {
+/** Linha da lista de compromissos, com remoção à direita. */
+export function EventRow({ event, onRemove }: EventRowProps) {
   return (
-    <Pressable
-      onPress={() => onPress(event)}
-      accessibilityRole="button"
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-    >
+    <View style={styles.row}>
       <View style={styles.badge}>
         <Icon name={event.icon} size={19} strokeWidth={1.6} color={colors.textMuted} />
       </View>
@@ -31,13 +27,21 @@ export function EventRow({ event, onPress }: EventRowProps) {
         </AppText>
         <Chip label={event.countdown} tone="outline" style={styles.countdown} />
       </View>
-    </Pressable>
+
+      <IconButton
+        name="trash"
+        size={18}
+        onPress={onRemove}
+        accessibilityLabel={`Remover ${event.title}`}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.xl,
     paddingVertical: spacing.xxl,
     borderBottomWidth: 1,
@@ -62,8 +66,5 @@ const styles = StyleSheet.create({
   },
   countdown: {
     marginTop: spacing.lg,
-  },
-  pressed: {
-    opacity: motion.pressedOpacity,
   },
 });
