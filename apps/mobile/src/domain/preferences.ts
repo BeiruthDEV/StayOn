@@ -44,3 +44,11 @@ export function clampSessionMinutes(minutes: number): number {
   if (!Number.isFinite(minutes)) return defaultPreferences.sessionMinutes;
   return Math.min(180, Math.max(5, Math.round(minutes)));
 }
+
+/** Áreas usadas quando a pessoa ainda não escolheu nenhuma. */
+const FALLBACK_AREAS = ['Estudos', 'Carreira', 'Saúde', 'Pessoal'] as const;
+
+/** Etiquetas oferecidas ao criar tarefas e blocos. */
+export function availableTags(preferences: Preferences): readonly string[] {
+  return preferences.focusAreas.length > 0 ? preferences.focusAreas : FALLBACK_AREAS;
+}

@@ -39,12 +39,8 @@ export function useHomeActions() {
   const goToFocus = useCallback(() => router.navigate('/focus'), [router]);
   const goToPlanner = useCallback(() => router.navigate('/planner'), [router]);
   const goToInsights = useCallback(() => router.navigate('/insights'), [router]);
-
-  /** Recursos ainda não construídos avisam em vez de navegar. */
-  const notifyPending = useCallback(
-    (feature: string) => showToast(`${feature} chega em breve`),
-    [showToast],
-  );
+  const goToHabits = useCallback(() => router.navigate('/habits'), [router]);
+  const goToDates = useCallback(() => router.navigate('/dates'), [router]);
 
   return {
     completeTask,
@@ -52,6 +48,7 @@ export function useHomeActions() {
     goToFocus,
     goToPlanner,
     goToInsights,
-    notifyPending,
+    goToHabits,
+    goToDates,
   };
 }

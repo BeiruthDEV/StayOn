@@ -2,11 +2,11 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card } from '@/components';
 import { Icon } from '@/icons';
-import type { NextAction } from '@/data/home';
+import { scheduleLabel, type TimeBlock } from '@/domain/timeBlock';
 import { colors } from '@/theme';
 
 type NextActionCardProps = {
-  action: NextAction;
+  action: TimeBlock;
   onStartFocus: () => void;
 };
 
@@ -19,14 +19,14 @@ export function NextActionCard({ action, onStartFocus }: NextActionCardProps) {
           Próxima ação
         </AppText>
         <AppText variant="captionMedium" color="textMuted">
-          {action.timeRange}
+          {scheduleLabel(action)}
         </AppText>
       </View>
       <AppText variant="title" style={styles.title}>
         {action.title}
       </AppText>
       <AppText variant="supporting" color="textMuted">
-        {action.goal}
+        {action.tag}
       </AppText>
       <Button
         label="Iniciar foco"

@@ -7,6 +7,8 @@ import { AppText } from './AppText';
 type ListRowProps = {
   title: string;
   onPress: () => void;
+  /** Ação secundária no toque longo, normalmente editar. */
+  onLongPress?: () => void;
   /** Elemento à esquerda: checkbox ou ícone. */
   leading?: React.ReactNode;
   /** Texto de apoio abaixo do título. */
@@ -26,6 +28,7 @@ type ListRowProps = {
 export function ListRow({
   title,
   onPress,
+  onLongPress,
   leading,
   subtitle,
   trailing,
@@ -37,6 +40,7 @@ export function ListRow({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       accessibilityRole="button"
       style={({ pressed }) => [
         styles.row,

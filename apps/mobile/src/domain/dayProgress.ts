@@ -1,10 +1,5 @@
+import type { Habit } from './habit';
 import type { Task } from './task';
-
-/**
- * Itens do dia já concluídos antes da lista de prioridades (blocos da manhã).
- * O protótipo soma 2 ao numerador e ao denominador do progresso diário.
- */
-const COMPLETED_BASELINE = 2;
 
 export type DayProgress = {
   /** Percentual de 0 a 100. */
@@ -15,10 +10,19 @@ export type DayProgress = {
   total: number;
 };
 
-/** Calcula o progresso do dia a partir das tarefas priorizadas. */
-export function computeDayProgress(tasks: readonly Task[]): DayProgress {
-  const done = tasks.filter((task) => task.done).length + COMPLETED_BASELINE;
-  const total = tasks.length + COMPLETED_BASELINE;
+/**
+ * Progresso do dia a partir do que a pessoa realmente marcou:
+ * tarefas concluídas mais hábitos ativos cumpridos, sobre o total de itens.
+ */
+export function computeDayProgress(
+  tasks: readonly Task[],
+  habits: readonly Habit[],
+): DayProgress {
+  const activeHabits = habits.filter((habit) => !habit.paused);
+
+  const done =
+    tasks.filter((task) => task.done).length + activeHabits.filter((habit) => habit.done).length;
+  const total = tasks.length + activeHabits.length;
 
   return {
     done,

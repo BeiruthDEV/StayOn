@@ -72,3 +72,17 @@ export function togglePaused(habits: readonly Habit[], id: string): Habit[] {
 export function completedToday(habits: readonly Habit[]): number {
   return habits.filter((habit) => !habit.paused && habit.done).length;
 }
+
+/** Altera o nome e a meta de um hábito existente. */
+export function editHabit(
+  habits: readonly Habit[],
+  id: string,
+  name: string,
+  goal: string,
+): Habit[] {
+  return habits.map((habit) =>
+    habit.id === id
+      ? { ...habit, name: name.trim(), goal: goal.trim(), progressLabel: goal.trim() }
+      : habit,
+  );
+}

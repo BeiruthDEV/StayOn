@@ -4,6 +4,7 @@ import { initialHabits } from '@/data/habits';
 import {
   addHabit,
   createHabit,
+  editHabit,
   removeHabit,
   setHabitDone,
   toggleHabitDone,
@@ -19,6 +20,7 @@ type HabitsContextValue = {
   restoreHabit: (id: string, done: boolean) => void;
   /** Cria um hábito e devolve o que foi criado. */
   add: (name: string, goal: string) => Habit;
+  edit: (id: string, name: string, goal: string) => void;
   remove: (id: string) => void;
   /** Recoloca um hábito removido na lista (ação de desfazer). */
   restoreRemoved: (habit: Habit) => void;
@@ -54,6 +56,12 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
     [setValue],
   );
 
+  const edit = useCallback(
+    (id: string, name: string, goal: string) =>
+      setValue((current) => editHabit(current, id, name, goal)),
+    [setValue],
+  );
+
   const remove = useCallback(
     (id: string) => setValue((current) => removeHabit(current, id)),
     [setValue],
@@ -80,12 +88,23 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       toggleHabit,
       restoreHabit,
       add,
+      edit,
       remove,
       restoreRemoved,
       togglePause,
       replaceAll,
     }),
-    [habits, toggleHabit, restoreHabit, add, remove, restoreRemoved, togglePause, replaceAll],
+    [
+      habits,
+      toggleHabit,
+      restoreHabit,
+      add,
+      edit,
+      remove,
+      restoreRemoved,
+      togglePause,
+      replaceAll,
+    ],
   );
 
   return <HabitsContext.Provider value={value}>{children}</HabitsContext.Provider>;

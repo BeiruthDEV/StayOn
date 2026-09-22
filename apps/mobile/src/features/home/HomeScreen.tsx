@@ -1,72 +1,115 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, IconButton, Screen } from '@/components';
-import {
-  defaultUserName,
-  distractionSummary,
-  homeGreetingDate,
-  nextAction,
-  upcomingEvent,
-} from '@/data/home';
+import { AppText, EmptyState, IconButton, Screen } from '@/components';
+import { greeting, longDateLabel, todayIso } from '@/domain/clock';
 import { computeDayProgress } from '@/domain/dayProgress';
 import { habitsForToday } from '@/domain/habit';
-import { useHabits, useTasks } from '@/state';
+import { firstName } from '@/domain/preferences';
+import { sessionsOn, totalFocusMinutes } from '@/domain/session';
+import { nextBlock } from '@/domain/timeBlock';
+import type { Task } from '@/domain/task';
+import { TaskSheet } from '@/features/tasks';
+import { useBlocks, useEvents, useHabits, usePreferences, useSessions, useTasks } from '@/state';
 
 import { DayProgressBar } from './DayProgressBar';
-import { DistractionNote } from './DistractionNote';
+import { FocusSummary } from './FocusSummary';
 import { NextActionCard } from './NextActionCard';
 import { PriorityList } from './PriorityList';
 import { TodayHabitsList } from './TodayHabitsList';
 import { UpcomingEventRow } from './UpcomingEventRow';
 import { useHomeActions } from './useHomeActions';
 
-/** Tela inicial: próxima ação, progresso do dia, prioridades, hábitos e insight. */
+/** Tela inicial: próxima ação, progresso do dia, prioridades, hábitos e foco. */
 export function HomeScreen() {
   const { tasks } = useTasks();
   const { habits } = useHabits();
+  const { blocks } = useBlocks();
+  const { events } = useEvents();
+  const { sessions } = useSessions();
+  const { preferences } = usePreferences();
   const actions = useHomeActions();
 
-  const progress = useMemo(() => computeDayProgress(tasks), [tasks]);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | undefined>(undefined);
+
+  const today = todayIso();
+  const progress = useMemo(() => computeDayProgress(tasks, habits), [tasks, habits]);
   const todayHabits = useMemo(() => habitsForToday(habits), [habits]);
+  const action = useMemo(() => nextBlock(blocks), [blocks]);
+  const upcoming = events[0];
+
+  const focusToday = useMemo(
+    () => sessionsOn(sessions, today),
+    [sessions, today],
+  );
+
+  const openNewTask = () => {
+    setEditing(undefined);
+    setSheetOpen(true);
+  };
+
+  const openEditTask = (task: Task) => {
+    setEditing(task);
+    setSheetOpen(true);
+  };
+
+  const name = firstName(preferences);
 
   return (
     <View style={styles.root}>
       <Screen bottomInset={SCROLL_BOTTOM_INSET}>
         <AppText variant="overline" color="textDim">
-          {homeGreetingDate}
+          {longDateLabel(today)}
         </AppText>
         <AppText variant="display" style={styles.greeting}>
-          Boa tarde, {defaultUserName}.
+          {name === '' ? `${greeting()}.` : `${greeting()}, ${name}.`}
         </AppText>
 
-        <NextActionCard action={nextAction} onStartFocus={actions.goToFocus} />
+        {action ? (
+          <NextActionCard action={action} onStartFocus={actions.goToFocus} />
+        ) : (
+          <EmptyState
+            icon="planner"
+            title="Nada planejado agora"
+            description="Crie um bloco na agenda para o StayOn saber o que vem a seguir."
+          />
+        )}
+
         <DayProgressBar progress={progress} />
 
         <PriorityList
           tasks={tasks}
           onToggleTask={actions.completeTask}
-          onAddTask={() => actions.notifyPending('Captura rápida')}
+          onEditTask={openEditTask}
+          onAddTask={openNewTask}
         />
 
         <TodayHabitsList
           habits={todayHabits}
           onToggleHabit={actions.completeHabit}
-          onSeeAll={() => actions.notifyPending('Hábitos')}
+          onSeeAll={actions.goToHabits}
         />
 
-        <UpcomingEventRow event={upcomingEvent} onPress={actions.goToPlanner} />
-        <DistractionNote summary={distractionSummary} onSeeInsights={actions.goToInsights} />
+        {upcoming ? <UpcomingEventRow event={upcoming} onPress={actions.goToDates} /> : null}
+
+        <FocusSummary
+          sessions={focusToday.length}
+          minutes={totalFocusMinutes(focusToday)}
+          onSeeInsights={actions.goToInsights}
+        />
       </Screen>
 
       <IconButton
         name="plus"
         variant="raised"
         size={24}
-        onPress={() => actions.notifyPending('Captura rápida')}
-        accessibilityLabel="Captura rápida"
+        onPress={openNewTask}
+        accessibilityLabel="Nova tarefa"
         style={styles.fab}
       />
+
+      <TaskSheet visible={sheetOpen} task={editing} onClose={() => setSheetOpen(false)} />
     </View>
   );
 }

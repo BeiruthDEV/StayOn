@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Checkbox, ListRow, SectionHeader } from '@/components';
+import { AppText, Button, Checkbox, EmptyState, ListRow, SectionHeader } from '@/components';
 import type { Habit } from '@/domain/habit';
 
 type TodayHabitsListProps = {
@@ -18,6 +18,14 @@ export function TodayHabitsList({ habits, onToggleHabit, onSeeAll }: TodayHabits
         style={styles.header}
         action={<Button label="Ver todos" variant="ghost" onPress={onSeeAll} />}
       />
+      {habits.length === 0 ? (
+        <EmptyState
+          icon="check"
+          title="Nenhum hábito ativo"
+          description="Toque em Ver todos para criar ou retomar um hábito."
+        />
+      ) : null}
+
       {habits.map((habit) => (
         <ListRow
           key={habit.id}

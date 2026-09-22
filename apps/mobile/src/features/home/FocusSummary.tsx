@@ -1,26 +1,35 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components';
-import type { DistractionSummary } from '@/data/home';
+import { minutesLabel } from '@/domain/usage';
 import { colors, motion } from '@/theme';
 
-type DistractionNoteProps = {
-  summary: DistractionSummary;
+type FocusSummaryProps = {
+  /** Sessões de foco encerradas hoje. */
+  sessions: number;
+  /** Minutos focados hoje. */
+  minutes: number;
   onSeeInsights: () => void;
 };
 
-/** Nota de rodapé com o resumo de distração do dia e atalho para Insights. */
-export function DistractionNote({ summary, onSeeInsights }: DistractionNoteProps) {
+/** Resumo do foco de hoje, medido pelas sessões que a pessoa realmente fez. */
+export function FocusSummary({ sessions, minutes, onSeeInsights }: FocusSummaryProps) {
   return (
     <View style={styles.container}>
       <View style={styles.rule} />
       <View style={styles.content}>
-        <AppText variant="supporting" color="textMuted">
-          Você usou redes sociais por{' '}
-          <AppText variant="supportingStrong">{summary.totalTime}</AppText> hoje —{' '}
-          <AppText variant="supportingStrong">{summary.duringFocus}</AppText> durante blocos de
-          estudo planejados.
-        </AppText>
+        {sessions === 0 ? (
+          <AppText variant="supporting" color="textMuted">
+            Nenhuma sessão de foco hoje ainda. A primeira começa pela próxima ação.
+          </AppText>
+        ) : (
+          <AppText variant="supporting" color="textMuted">
+            Você focou <AppText variant="supportingStrong">{minutesLabel(minutes)}</AppText> hoje
+            em <AppText variant="supportingStrong">{sessions}</AppText>{' '}
+            {sessions === 1 ? 'sessão' : 'sessões'}.
+          </AppText>
+        )}
+
         <Pressable
           onPress={onSeeInsights}
           accessibilityRole="button"

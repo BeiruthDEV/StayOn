@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 
 import { AppText, ListRow } from '@/components';
-import type { UpcomingEvent } from '@/data/home';
+import type { CalendarEvent } from '@/domain/event';
 import { Icon } from '@/icons';
 import { colors } from '@/theme';
 
 type UpcomingEventRowProps = {
-  event: UpcomingEvent;
+  event: CalendarEvent;
   onPress: () => void;
 };
 
@@ -15,7 +15,7 @@ export function UpcomingEventRow({ event, onPress }: UpcomingEventRowProps) {
   return (
     <ListRow
       title={event.title}
-      subtitle={event.schedule}
+      subtitle={event.meta ? `${event.dateLabel} · ${event.meta}` : event.dateLabel}
       onPress={onPress}
       style={styles.row}
       leading={<Icon name="calendar" size={20} color={colors.textMuted} />}
