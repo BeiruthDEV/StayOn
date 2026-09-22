@@ -6,7 +6,7 @@ import { greeting, longDateLabel, todayIso } from '@/domain/clock';
 import { computeDayProgress } from '@/domain/dayProgress';
 import { habitsForToday } from '@/domain/habit';
 import { firstName } from '@/domain/preferences';
-import { sessionsOn, totalFocusMinutes } from '@/domain/session';
+import { sessionsOn, totalFocusSeconds } from '@/domain/session';
 import { nextBlock } from '@/domain/timeBlock';
 import type { Task } from '@/domain/task';
 import { TaskSheet } from '@/features/tasks';
@@ -95,7 +95,7 @@ export function HomeScreen() {
 
         <FocusSummary
           sessions={focusToday.length}
-          minutes={totalFocusMinutes(focusToday)}
+          seconds={totalFocusSeconds(focusToday)}
           onSeeInsights={actions.goToInsights}
         />
       </Screen>

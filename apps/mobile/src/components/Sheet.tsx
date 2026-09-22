@@ -106,7 +106,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.section,
   },
   body: {
-    flexGrow: 0,
+    // Precisa poder encolher: dentro do maxHeight do painel, um ScrollView que
+    // não encolhe estoura o limite e o conteúdo é cortado em vez de rolar.
+    flexShrink: 1,
   },
   footer: {
     gap: spacing.lg,

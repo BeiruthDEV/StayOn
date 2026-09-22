@@ -10,7 +10,6 @@ import {
   SectionHeader,
   SegmentedControl,
 } from '@/components';
-import { minutesLabel } from '@/domain/usage';
 import { Icon } from '@/icons';
 import {
   useBlocks,
@@ -94,7 +93,7 @@ export function ProfileScreen() {
         leading={<Icon name="stopwatch" size={20} strokeWidth={1.6} color={colors.textMuted} />}
         trailing={
           <AppText variant="caption" color="textDim">
-            {minutesLabel(preferences.sessionMinutes)}
+            {preferences.sessionMinutes} min
           </AppText>
         }
       />

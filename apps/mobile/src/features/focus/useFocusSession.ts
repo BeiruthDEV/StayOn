@@ -10,12 +10,14 @@ type FocusSession = {
   running: boolean;
   /** Quantas vezes a sessão foi pausada — as interrupções da sessão. */
   pauses: number;
-  /** Minutos já focados, arredondados para baixo. */
-  elapsedMinutes: number;
+  /** Segundos já focados. */
+  elapsed: number;
   /** Alterna entre pausado e em andamento. */
   toggleRunning: () => void;
   /** Acrescenta EXTENSION_MINUTES ao tempo restante e ao total. */
   extend: () => void;
+  /** Volta ao início, pronto para uma nova sessão. */
+  reset: () => void;
 };
 
 /**
@@ -46,12 +48,11 @@ export function useFocusSession(durationMinutes: number): FocusSession {
   }, [running, remaining]);
 
   const toggleRunning = useCallback(() => {
-    setRunning((current) => {
-      // Só conta como interrupção quando a sessão é pausada, não ao retomar.
-      if (current) setPauses((count) => count + 1);
-      return !current;
-    });
-  }, []);
+    // A contagem de pausas é decidida aqui fora: atualizador de estado precisa
+    // ser puro, senão o React pode executá-lo mais de uma vez.
+    if (running) setPauses((count) => count + 1);
+    setRunning(!running);
+  }, [running]);
 
   const extend = useCallback(() => {
     const extra = EXTENSION_MINUTES * 60;
@@ -59,13 +60,21 @@ export function useFocusSession(durationMinutes: number): FocusSession {
     setRemaining((current) => current + extra);
   }, []);
 
+  const reset = useCallback(() => {
+    setTotal(initialSeconds);
+    setRemaining(initialSeconds);
+    setPauses(0);
+    setRunning(true);
+  }, [initialSeconds]);
+
   return {
     remaining,
     total,
     running,
     pauses,
-    elapsedMinutes: Math.floor((total - remaining) / 60),
+    elapsed: total - remaining,
     toggleRunning,
     extend,
+    reset,
   };
 }

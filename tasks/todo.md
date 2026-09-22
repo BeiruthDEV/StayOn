@@ -65,3 +65,12 @@ a primeira abertura trazia tarefas, hábitos, blocos e compromissos que a pessoa
 não criou. Os quatro arquivos de exemplo saíram e cada provider nasce vazio; o
 apagar todos os dados do Perfil agora apaga de verdade em vez de repor os
 exemplos. Registrado em `lessons.md`.
+
+## Correções do teste no aparelho
+
+- [x] Formulários cortados: o corpo do Sheet precisa encolher para rolar → verificar no celular
+- [x] Pause da sessão não funciona: updater impuro em toggleRunning → verificar
+- [x] Sessão curta grava 0 minuto: passar a guardar segundos → verificar nos Insights
+- [x] Encerrar sessão sai da aba: deve registrar e continuar em Foco
+- [x] Fundir Insights e Revisão semanal numa aba só
+- [x] README direto, sem enchimento

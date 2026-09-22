@@ -8,7 +8,7 @@ type SessionsContextValue = {
   /** Histórico de sessões de foco, da mais antiga para a mais recente. */
   sessions: readonly FocusSessionRecord[];
   /** Registra uma sessão encerrada e devolve o registro criado. */
-  record: (label: string, minutes: number, outcome: SessionOutcome) => FocusSessionRecord;
+  record: (label: string, seconds: number, outcome: SessionOutcome) => FocusSessionRecord;
   replaceAll: (sessions: readonly FocusSessionRecord[]) => void;
 };
 
@@ -24,8 +24,8 @@ export function SessionsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const record = useCallback(
-    (label: string, minutes: number, outcome: SessionOutcome) => {
-      const session = createSession(todayIso(), label, minutes, outcome);
+    (label: string, seconds: number, outcome: SessionOutcome) => {
+      const session = createSession(todayIso(), label, seconds, outcome);
       setValue((current) => [...current, session]);
       return session;
     },

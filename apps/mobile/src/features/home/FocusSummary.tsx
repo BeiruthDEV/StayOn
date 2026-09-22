@@ -1,19 +1,19 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components';
-import { minutesLabel } from '@/domain/usage';
+import { durationLabel } from '@/domain/usage';
 import { colors, motion } from '@/theme';
 
 type FocusSummaryProps = {
   /** Sessões de foco encerradas hoje. */
   sessions: number;
-  /** Minutos focados hoje. */
-  minutes: number;
+  /** Segundos focados hoje. */
+  seconds: number;
   onSeeInsights: () => void;
 };
 
 /** Resumo do foco de hoje, medido pelas sessões que a pessoa realmente fez. */
-export function FocusSummary({ sessions, minutes, onSeeInsights }: FocusSummaryProps) {
+export function FocusSummary({ sessions, seconds, onSeeInsights }: FocusSummaryProps) {
   return (
     <View style={styles.container}>
       <View style={styles.rule} />
@@ -24,7 +24,7 @@ export function FocusSummary({ sessions, minutes, onSeeInsights }: FocusSummaryP
           </AppText>
         ) : (
           <AppText variant="supporting" color="textMuted">
-            Você focou <AppText variant="supportingStrong">{minutesLabel(minutes)}</AppText> hoje
+            Você focou <AppText variant="supportingStrong">{durationLabel(seconds)}</AppText> hoje
             em <AppText variant="supportingStrong">{sessions}</AppText>{' '}
             {sessions === 1 ? 'sessão' : 'sessões'}.
           </AppText>

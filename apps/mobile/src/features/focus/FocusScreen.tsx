@@ -6,6 +6,7 @@ import { AppText, Chip, ProgressRing, Screen, StatTile } from '@/components';
 import { todayIso } from '@/domain/clock';
 import { elapsedPercent, formatRemaining } from '@/domain/focusSession';
 import { sessionsOn } from '@/domain/session';
+import { durationLabel } from '@/domain/usage';
 import { durationOf, nextBlock } from '@/domain/timeBlock';
 import { Icon } from '@/icons';
 import { useBlocks, usePreferences, useSessions, useToast } from '@/state';
@@ -32,22 +33,29 @@ export function FocusScreen() {
   const todaySessions = useMemo(() => sessionsOn(sessions, todayIso()), [sessions]);
 
   const finish = useCallback(() => {
-    record(label, session.elapsedMinutes, 'completed');
+    if (session.elapsed === 0) {
+      showToast('A sessão nem começou');
+      return;
+    }
+
+    record(label, session.elapsed, 'completed');
     if (block) setStatus(block.id, 'done');
-    showToast(`Sessão registrada: ${session.elapsedMinutes} min`);
-    router.navigate('/');
-  }, [record, label, session.elapsedMinutes, block, setStatus, showToast, router]);
+    showToast(`Sessão registrada: ${durationLabel(session.elapsed)}`);
+    // Continua na aba: o cronômetro volta ao início para a próxima sessão.
+    session.reset();
+  }, [session, record, label, block, setStatus, showToast]);
 
   const abandon = useCallback(() => {
-    // Abandonar nos primeiros segundos não vira registro: não houve foco.
-    if (session.elapsedMinutes > 0) {
-      record(label, session.elapsedMinutes, 'abandoned');
-      showToast(`Sessão abandonada aos ${session.elapsedMinutes} min`);
+    // Abandonar sem ter focado nada não vira registro.
+    if (session.elapsed > 0) {
+      record(label, session.elapsed, 'abandoned');
+      showToast(`Sessão abandonada aos ${durationLabel(session.elapsed)}`);
     } else {
       showToast('Sessão abandonada');
     }
+    session.reset();
     router.navigate('/');
-  }, [session.elapsedMinutes, record, label, showToast, router]);
+  }, [session, record, label, showToast, router]);
 
   return (
     <Screen scroll={false} contentStyle={styles.content}>

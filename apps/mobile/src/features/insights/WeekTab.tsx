@@ -1,19 +1,10 @@
-import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import {
-  AppText,
-  Button,
-  Card,
-  IconButton,
-  Progress,
-  Screen,
-  ScreenHeader,
-  SectionHeader,
-} from '@/components';
+import { AppText, Card, Progress, SectionHeader } from '@/components';
 import { rangeLabel, shiftDate, todayIso, weekRange } from '@/domain/clock';
-import { minutesLabel } from '@/domain/usage';
+import type { FocusSessionRecord } from '@/domain/session';
+import type { TimeBlock } from '@/domain/timeBlock';
+import { durationLabel } from '@/domain/usage';
 import {
   buildWeeklyReview,
   emptyReflection,
@@ -24,32 +15,25 @@ import {
   type Reflection,
 } from '@/domain/weeklyReview';
 import { Icon } from '@/icons';
-import { useBlocks, useSessions, useToast } from '@/state';
 import { storageKeys, usePersistentState } from '@/storage';
 import { colors, spacing } from '@/theme';
 
 import { MetricCard } from './MetricCard';
 import { ReflectionField } from './ReflectionField';
 
-/** Tela Revisão semanal: métricas da semana corrente e reflexão salva. */
-export function WeeklyReviewScreen() {
-  const router = useRouter();
-  const { showToast } = useToast();
-  const { sessions } = useSessions();
-  const { blocks } = useBlocks();
+type WeekTabProps = {
+  sessions: readonly FocusSessionRecord[];
+  blocks: readonly TimeBlock[];
+};
 
+/** Aba Semana: consolidado dos últimos sete dias e a reflexão. */
+export function WeekTab({ sessions, blocks }: WeekTabProps) {
   const { from, to } = weekRange(todayIso());
-  const dates = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => shiftDate(from, index)),
-    [from],
-  );
+  const dates = Array.from({ length: 7 }, (_, index) => shiftDate(from, index));
+  const review = buildWeeklyReview(sessions, blocks, dates);
+  const accuracy = planningAccuracy(review);
 
-  const review = useMemo(
-    () => buildWeeklyReview(sessions, blocks, dates),
-    [sessions, blocks, dates],
-  );
-
-  // A reflexão é guardada por semana, com a data de segunda como chave.
+  // A reflexão é guardada por semana, com a segunda-feira como chave.
   const { value: reflections, setValue: setReflections } = usePersistentState<
     Record<string, Reflection>
   >(storageKeys.reflections, {});
@@ -63,29 +47,18 @@ export function WeeklyReviewScreen() {
     }));
   };
 
-  const accuracy = planningAccuracy(review);
-
   return (
-    <Screen bottomInset={spacing.section}>
-      <ScreenHeader
-        title="Revisão semanal"
-        subtitle={rangeLabel(from, to)}
-        action={
-          <IconButton
-            name="close"
-            onPress={() => router.back()}
-            accessibilityLabel="Fechar"
-            size={22}
-          />
-        }
-      />
+    <>
+      <AppText variant="caption" color="textDim" style={styles.range}>
+        {rangeLabel(from, to)}
+      </AppText>
 
       <View style={styles.block}>
         <MetricCard
           title="Foco na semana"
           icon="stopwatch"
-          value={minutesLabel(review.focusMinutes)}
-          note={`Meta: ${minutesLabel(WEEKLY_FOCUS_TARGET)} · ${targetProgress(review)}% cumprido`}
+          value={durationLabel(review.focusSeconds)}
+          note={`Meta: ${durationLabel(WEEKLY_FOCUS_TARGET)} · ${targetProgress(review)}% cumprido`}
           footer={
             <View style={styles.progress}>
               <Progress percent={targetProgress(review)} />
@@ -103,7 +76,7 @@ export function WeeklyReviewScreen() {
           note={
             review.sessionCount === 0
               ? 'Nenhuma sessão registrada nesta semana.'
-              : `${review.sessionCount} ${review.sessionCount === 1 ? 'sessão' : 'sessões'} encerradas.`
+              : `${review.sessionCount} ${review.sessionCount === 1 ? 'sessão encerrada' : 'sessões encerradas'}.`
           }
           footer={
             <View style={styles.progress}>
@@ -123,7 +96,7 @@ export function WeeklyReviewScreen() {
             <AppText variant="title">
               {review.bestDayLabel === ''
                 ? 'Sem registros'
-                : `${review.bestDayLabel} · ${minutesLabel(review.bestDayMinutes)}`}
+                : `${review.bestDayLabel} · ${durationLabel(review.bestDaySeconds)}`}
             </AppText>
           </View>
           <AppText variant="caption" color="textDim">
@@ -173,7 +146,7 @@ export function WeeklyReviewScreen() {
               <Icon name="target" size={20} strokeWidth={1.6} color={colors.textMuted} />
             </View>
             <AppText variant="caption" color="textDim" style={styles.note}>
-              {minutesLabel(review.topAreaMinutes)} nesta semana
+              {durationLabel(review.topAreaSeconds)} nesta semana
             </AppText>
           </Card>
         </View>
@@ -206,25 +179,17 @@ export function WeeklyReviewScreen() {
         onChangeText={(toChange) => updateReflection({ toChange })}
       />
 
-      <AppText variant="caption" color="textDim" style={styles.autosave}>
+      <AppText variant="caption" color="textDim">
         A reflexão é salva sozinha, por semana.
       </AppText>
-
-      <Button label="Voltar aos insights" variant="ghost" onPress={() => router.back()} />
-
-      <Button
-        label="Concluir revisão"
-        onPress={() => {
-          showToast('Revisão da semana registrada');
-          router.back();
-        }}
-        style={styles.finish}
-      />
-    </Screen>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  range: {
+    marginBottom: spacing.xxl,
+  },
   block: {
     marginBottom: spacing.section,
   },
@@ -269,11 +234,5 @@ const styles = StyleSheet.create({
   },
   reflectionHeader: {
     marginBottom: spacing.xxl,
-  },
-  autosave: {
-    marginBottom: spacing.xxl,
-  },
-  finish: {
-    marginTop: spacing.lg,
   },
 });

@@ -1,4 +1,10 @@
-import { focusByDay, focusByLabel, sessionsBetween, type FocusSessionRecord } from './session';
+import {
+  focusByDay,
+  focusByLabel,
+  sessionsBetween,
+  totalFocusSeconds,
+  type FocusSessionRecord,
+} from './session';
 import { completedBlocks, type TimeBlock } from './timeBlock';
 
 /** Texto livre que a pessoa escreve no fim da semana. */
@@ -11,25 +17,25 @@ export const emptyReflection: Reflection = { worked: '', toChange: '' };
 
 /** Métricas da semana, todas derivadas do que foi registrado no aplicativo. */
 export type WeeklyReview = {
-  /** Minutos focados no período. */
-  focusMinutes: number;
+  /** Segundos focados no período. */
+  focusSeconds: number;
   /** Sessões encerradas no período. */
   sessionCount: number;
   /** Percentual de sessões levadas até o fim. */
   completionRate: number;
   /** Dia de maior foco, ex.: "qua". Vazio quando não houve sessão. */
   bestDayLabel: string;
-  bestDayMinutes: number;
+  bestDaySeconds: number;
   /** Área ou tarefa que mais consumiu foco. Vazio sem sessões. */
   topArea: string;
-  topAreaMinutes: number;
+  topAreaSeconds: number;
   /** Blocos da agenda já concluídos. */
   blocksDone: number;
   blocksTotal: number;
 };
 
-/** Meta semanal padrão de foco, em minutos (10 horas). */
-export const WEEKLY_FOCUS_TARGET = 600;
+/** Meta semanal padrão de foco, em segundos (10 horas). */
+export const WEEKLY_FOCUS_TARGET = 10 * 60 * 60;
 
 /** Monta a revisão de um intervalo de datas a partir das sessões e da agenda. */
 export function buildWeeklyReview(
@@ -43,7 +49,7 @@ export function buildWeeklyReview(
 
   const days = focusByDay(weekSessions, dates);
   const bestDay = days.reduce<(typeof days)[number] | undefined>(
-    (best, day) => (best === undefined || day.minutes > best.minutes ? day : best),
+    (best, day) => (best === undefined || day.seconds > best.seconds ? day : best),
     undefined,
   );
 
@@ -53,14 +59,14 @@ export function buildWeeklyReview(
   const completed = weekSessions.filter((session) => session.outcome === 'completed').length;
 
   return {
-    focusMinutes: weekSessions.reduce((total, session) => total + session.minutes, 0),
+    focusSeconds: totalFocusSeconds(weekSessions),
     sessionCount: weekSessions.length,
     completionRate:
       weekSessions.length === 0 ? 0 : Math.round((100 * completed) / weekSessions.length),
-    bestDayLabel: bestDay !== undefined && bestDay.minutes > 0 ? bestDay.label : '',
-    bestDayMinutes: bestDay?.minutes ?? 0,
+    bestDayLabel: bestDay !== undefined && bestDay.seconds > 0 ? bestDay.label : '',
+    bestDaySeconds: bestDay?.seconds ?? 0,
     topArea: topArea?.label ?? '',
-    topAreaMinutes: topArea?.minutes ?? 0,
+    topAreaSeconds: topArea?.seconds ?? 0,
     blocksDone: completedBlocks(blocks).length,
     blocksTotal: blocks.length,
   };
@@ -68,7 +74,7 @@ export function buildWeeklyReview(
 
 /** Percentual da meta semanal de foco já cumprido, de 0 a 100. */
 export function targetProgress(review: WeeklyReview): number {
-  return Math.min(100, Math.round((100 * review.focusMinutes) / WEEKLY_FOCUS_TARGET));
+  return Math.min(100, Math.round((100 * review.focusSeconds) / WEEKLY_FOCUS_TARGET));
 }
 
 /** Percentual de blocos da agenda concluídos. */
@@ -87,7 +93,7 @@ export function recommendation(review: WeeklyReview): string {
     return `Você abandonou mais de um terço das sessões. Experimente reduzir a duração padrão em Perfil e ver se a taxa sobe.`;
   }
 
-  if (review.focusMinutes < WEEKLY_FOCUS_TARGET / 2) {
+  if (review.focusSeconds < WEEKLY_FOCUS_TARGET / 2) {
     return 'O volume ficou abaixo da metade da meta. Reserve blocos fixos na agenda em vez de decidir na hora.';
   }
 
