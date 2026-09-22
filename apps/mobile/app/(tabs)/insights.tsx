@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/features/placeholder/PlaceholderScreen';
+import { InsightsScreen } from '@/features/insights';
 
 export default function InsightsRoute() {
-  return <PlaceholderScreen title="Insights" phase="Fase 5" />;
+  return <InsightsScreen />;
 }
