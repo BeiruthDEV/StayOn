@@ -1,5 +1,5 @@
-import { PlaceholderScreen } from '@/features/placeholder/PlaceholderScreen';
+import { ProfileScreen } from '@/features/profile';
 
 export default function ProfileRoute() {
-  return <PlaceholderScreen title="Perfil" phase="Fase 5" />;
+  return <ProfileScreen />;
 }
