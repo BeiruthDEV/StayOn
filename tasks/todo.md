@@ -16,16 +16,16 @@ Nenhum botão responde apenas com "chega em breve".
 - [x] Providers de tarefas, hábitos e blocos persistidos, com CRUD → verificar: typecheck
 - [x] Providers de eventos, sessões de foco e preferências → verificar: typecheck
 - [x] Componentes de formulário: Sheet, TextField, OptionPicker, EmptyState → verificar: lint
-- [ ] Início: criar/editar/apagar tarefa, data e saudação reais, próxima ação vinda da agenda
-- [ ] Hábitos: tela própria com criar, pausar e remover
-- [ ] Planejar: criar, editar e apagar blocos; concluir bloco
-- [ ] Datas: criar e apagar compromissos, calendário no mês corrente
-- [ ] Foco: gravar a sessão encerrada no histórico
-- [ ] Insights: métricas calculadas a partir das sessões e tarefas reais
-- [ ] Revisão semanal: métricas da semana corrente, reflexão salva
-- [ ] Perfil: nome editável, preferências salvas, apagar dados, sem assinatura
-- [ ] Onboarding: primeira abertura, nome e áreas salvos
-- [ ] README com o passo a passo para o professor rodar e testar
+- [x] Início: criar/editar/apagar tarefa, data e saudação reais, próxima ação vinda da agenda
+- [x] Hábitos: tela própria com criar, pausar e remover
+- [x] Planejar: criar, editar e apagar blocos; concluir bloco
+- [x] Datas: criar e apagar compromissos, calendário no mês corrente
+- [x] Foco: gravar a sessão encerrada no histórico
+- [x] Insights: métricas calculadas a partir das sessões e tarefas reais
+- [x] Revisão semanal: métricas da semana corrente, reflexão salva
+- [x] Perfil: nome editável, preferências salvas, apagar dados, sem assinatura
+- [x] Onboarding: primeira abertura, nome e áreas salvos
+- [x] README com o passo a passo para o professor rodar e testar
 
 ## Decisões
 
@@ -35,3 +35,25 @@ Nenhum botão responde apenas com "chega em breve".
 - **Tempo de tela não é medido.** Não existe API pública para isso em Expo Go.
   Os Insights passam a mostrar o que dá para medir de verdade (sessões de foco,
   tarefas, blocos) em vez de inventar número de tempo de tela.
+
+## Revisão
+
+Todos os passos concluídos. Verificações rodadas a cada commit:
+`npm run typecheck` e `npm run lint` limpos, e `npx expo export --platform
+android` empacotando sem erro.
+
+Nenhuma ação do aplicativo responde mais com "chega em breve" — a busca por
+essa string no código não retorna nada.
+
+O que ficou de fora, e por quê:
+
+- **Tempo de tela e bloqueio de aplicativos.** Sem API pública no Expo Go.
+  Seria necessário um build nativo com permissões especiais em cada
+  plataforma, fora do escopo do trabalho. As telas que dependiam disso foram
+  refeitas com métricas que o app apura sozinho.
+- **Integrações (calendário do sistema, app desktop, extensão).** Os quatro
+  cartões de conexão saíram do Perfil em vez de continuarem decorativos.
+- **Visão semanal na aba Planejar.** O consolidado da semana já existe na
+  Revisão semanal; a aba explica onde encontrá-lo.
+- **Sincronização entre aparelhos.** Exigiria backend e conta de usuário. O
+  aplicativo é gratuito e offline por decisão de escopo.
