@@ -1,26 +1,36 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Screen } from '@/components';
-import { currentStep, focusAreas, onboardingSteps } from '@/data/onboarding';
+import { AppText, Button, Screen, TextField } from '@/components';
+import { focusAreas } from '@/data/onboarding';
 import { Icon } from '@/icons';
-import { useToast } from '@/state';
+import { usePreferences, useToast } from '@/state';
 import { colors, motion, radius, spacing } from '@/theme';
 
-/** Configuração inicial: escolha das áreas de foco da pessoa. */
+/** Configuração inicial: nome e áreas de foco, salvos no aparelho. */
 export function OnboardingScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const { preferences, completeOnboarding } = usePreferences();
 
-  const toggleArea = useCallback((id: string) => {
+  const [name, setName] = useState('');
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // Reabrir pelo Perfil mostra o que já estava escolhido.
+  useEffect(() => {
+    setName(preferences.name);
+    setSelected(new Set(preferences.focusAreas));
+  }, [preferences]);
+
+  const toggleArea = useCallback((label: string) => {
     setSelected((current) => {
       const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
+      if (next.has(label)) {
+        next.delete(label);
       } else {
-        next.add(id);
+        next.add(label);
       }
       return next;
     });
@@ -28,41 +38,58 @@ export function OnboardingScreen() {
 
   const handleContinue = useCallback(() => {
     if (selected.size === 0) {
-      showToast('Escolha ao menos uma área');
+      setError('Escolha ao menos uma área');
       return;
     }
-    showToast(`${selected.size} ${selected.size === 1 ? 'área salva' : 'áreas salvas'}`);
-    router.navigate('/');
-  }, [router, selected, showToast]);
+
+    completeOnboarding(name, [...selected]);
+    showToast(preferences.onboarded ? 'Preferências salvas' : 'Tudo pronto');
+
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }, [selected, completeOnboarding, name, showToast, preferences.onboarded, router]);
 
   return (
     <Screen bottomInset={spacing.section}>
       <View style={styles.brandRow}>
         <AppText variant="title">StayOn</AppText>
-        <View style={styles.steps}>
-          {Array.from({ length: onboardingSteps }, (_, index) => (
-            <View
-              key={index}
-              style={[styles.step, index < currentStep && styles.stepActive]}
-            />
-          ))}
-        </View>
+        {preferences.onboarded ? (
+          <AppText variant="caption" color="textDim">
+            Editando
+          </AppText>
+        ) : null}
       </View>
 
       <AppText variant="display" style={styles.question}>
         Em que você quer avançar?
       </AppText>
       <AppText variant="supporting" color="textMuted" style={styles.hint}>
-        Escolha suas áreas de foco principais. Dá para ajustar depois.
+        As áreas escolhidas viram as etiquetas das suas tarefas e blocos. Dá para mudar
+        depois no Perfil.
       </AppText>
 
+      <TextField
+        label="Como quer ser chamado"
+        value={name}
+        onChangeText={setName}
+        placeholder="Seu nome"
+        hint="Opcional. Aparece na saudação da tela inicial."
+        maxLength={40}
+      />
+
       {focusAreas.map((area) => {
-        const isSelected = selected.has(area.id);
+        const isSelected = selected.has(area.label);
 
         return (
           <Pressable
-            key={area.id}
-            onPress={() => toggleArea(area.id)}
+            key={area.label}
+            onPress={() => {
+              toggleArea(area.label);
+              if (error !== undefined) setError(undefined);
+            }}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: isSelected }}
             style={({ pressed }) => [
@@ -89,8 +116,14 @@ export function OnboardingScreen() {
         );
       })}
 
+      {error !== undefined ? (
+        <AppText variant="caption" color="danger" style={styles.error}>
+          {error}
+        </AppText>
+      ) : null}
+
       <Button
-        label="Continuar"
+        label={preferences.onboarded ? 'Salvar' : 'Continuar'}
         onPress={handleContinue}
         trailing={<Icon name="arrowRight" size={16} strokeWidth={1.8} color={colors.onLight} />}
         style={styles.continue}
@@ -104,20 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 48,
-  },
-  steps: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  step: {
-    width: 26,
-    height: 3,
-    borderRadius: radius.xs,
-    backgroundColor: colors.border,
-  },
-  stepActive: {
-    backgroundColor: colors.fillLight,
+    marginBottom: 40,
   },
   question: {
     marginBottom: spacing.md,
@@ -144,11 +164,11 @@ const styles = StyleSheet.create({
     borderColor: colors.borderStrong,
     backgroundColor: colors.surfaceRaised,
   },
+  error: {
+    marginTop: spacing.md,
+  },
   continue: {
-    alignSelf: 'flex-end',
-    marginTop: spacing.xxl,
-    paddingHorizontal: spacing.section,
-    minWidth: 180,
+    marginTop: spacing.section,
   },
   pressed: {
     opacity: motion.pressedOpacity,

@@ -1,30 +1,45 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip } from '@/components';
-import { account } from '@/data/profile';
-import { colors, radius, spacing } from '@/theme';
+import { initials, type Preferences } from '@/domain/preferences';
+import { colors, motion, radius, spacing } from '@/theme';
 
-/** Avatar, nome, papel e selos da conta. */
-export function ProfileIdentity() {
+type ProfileIdentityProps = {
+  preferences: Preferences;
+  /** Abre o formulário de edição do nome. */
+  onEdit: () => void;
+};
+
+/** Avatar, nome e áreas de foco escolhidas. */
+export function ProfileIdentity({ preferences, onEdit }: ProfileIdentityProps) {
+  const hasName = preferences.name.trim() !== '';
+
   return (
-    <View style={styles.root}>
+    <Pressable
+      onPress={onEdit}
+      accessibilityRole="button"
+      accessibilityLabel="Editar perfil"
+      style={({ pressed }) => [styles.root, pressed && styles.pressed]}
+    >
       <View style={styles.avatar}>
-        <AppText variant="title">{account.initials}</AppText>
+        <AppText variant="title">{initials(preferences)}</AppText>
       </View>
 
       <AppText variant="title" style={styles.name}>
-        {account.name}
+        {hasName ? preferences.name : 'Sem nome'}
       </AppText>
       <AppText variant="caption" color="textDim">
-        {account.role}
+        {hasName ? 'Toque para editar' : 'Toque para se apresentar'}
       </AppText>
 
-      <View style={styles.badges}>
-        {account.badges.map((badge) => (
-          <Chip key={badge} label={badge} />
-        ))}
-      </View>
-    </View>
+      {preferences.focusAreas.length > 0 ? (
+        <View style={styles.badges}>
+          {preferences.focusAreas.slice(0, 3).map((area) => (
+            <Chip key={area} label={area} />
+          ))}
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 
@@ -50,7 +65,12 @@ const styles = StyleSheet.create({
   },
   badges: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: spacing.lg,
     marginTop: spacing.xxl,
+  },
+  pressed: {
+    opacity: motion.pressedOpacity,
   },
 });

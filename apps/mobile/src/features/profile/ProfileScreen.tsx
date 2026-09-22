@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import {
   AppText,
@@ -10,125 +10,162 @@ import {
   SectionHeader,
   SegmentedControl,
 } from '@/components';
-import { appSettings, systemItems, type Connection } from '@/data/profile';
+import { initialBlocks } from '@/data/planner';
+import { initialEvents } from '@/data/events';
+import { initialHabits } from '@/data/habits';
+import { initialTasks } from '@/data/tasks';
+import { minutesLabel } from '@/domain/usage';
 import { Icon } from '@/icons';
-import { useToast } from '@/state';
-import { colors, motion, radius, spacing } from '@/theme';
+import {
+  useBlocks,
+  useEvents,
+  useHabits,
+  usePreferences,
+  useSessions,
+  useTasks,
+  useToast,
+} from '@/state';
+import { clearAll } from '@/storage';
+import { colors, spacing } from '@/theme';
 
-import { ConnectionGrid } from './ConnectionGrid';
 import { ProfileIdentity } from './ProfileIdentity';
+import { ProfileSheet } from './ProfileSheet';
 
 const INTERVENTION_LEVELS = ['Suave', 'Rígido'] as const;
 
-/** Tela Perfil: sistema pessoal, controle de distração, conexões e ajustes. */
+/** Tela Perfil: identidade, preferências de foco, dados e informações do app. */
 export function ProfileScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [intervention, setIntervention] =
-    useState<(typeof INTERVENTION_LEVELS)[number]>('Suave');
+  const { preferences, setInterventionLevel, reset } = usePreferences();
+  const tasks = useTasks();
+  const habits = useHabits();
+  const blocks = useBlocks();
+  const events = useEvents();
+  const sessions = useSessions();
 
-  const handleConnection = useCallback(
-    (connection: Connection) =>
-      showToast(
-        connection.status === 'connected'
-          ? `${connection.name} já está conectado`
-          : `Conectando ${connection.name}`,
-      ),
-    [showToast],
-  );
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const handleReset = useCallback(() => {
+    Alert.alert(
+      'Apagar todos os dados?',
+      'Tarefas, hábitos, agenda, compromissos, sessões e preferências voltam ao estado inicial. Não dá para desfazer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Apagar',
+          style: 'destructive',
+          onPress: () => {
+            void clearAll().then(() => {
+              tasks.replaceAll(initialTasks);
+              habits.replaceAll(initialHabits);
+              blocks.replaceAll(initialBlocks);
+              events.replaceAll(initialEvents);
+              sessions.replaceAll([]);
+              reset();
+              showToast('Dados apagados');
+            });
+          },
+        },
+      ],
+    );
+  }, [tasks, habits, blocks, events, sessions, reset, showToast]);
 
   return (
     <Screen bottomInset={spacing.section}>
-      <ProfileIdentity />
+      <ProfileIdentity preferences={preferences} onEdit={() => setSheetOpen(true)} />
 
-      <SectionHeader title="Sistema pessoal" style={styles.sectionHeader} />
-      {systemItems.map((item) => (
-        <ListRow
-          key={item.id}
-          title={item.title}
-          subtitle={item.description}
-          onPress={() => showToast(`${item.title} chega em breve`)}
-          leading={<Icon name={item.icon} size={20} strokeWidth={1.6} color={colors.textMuted} />}
-          trailing={
-            <Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />
-          }
-        />
-      ))}
+      <SectionHeader title="Foco" style={styles.sectionHeader} />
 
-      <SectionHeader title="Controle de distração" style={styles.sectionHeaderSpaced} />
-      <Card>
-        <View style={styles.settingRow}>
-          <View style={styles.settingText}>
-            <AppText variant="bodyStrong">Apps bloqueados</AppText>
-            <AppText variant="caption" color="textDim" style={styles.settingNote}>
-              Restrições ativas durante o foco.
-            </AppText>
-          </View>
-          <Pressable
-            onPress={() => showToast('Gerenciamento chega em breve')}
-            accessibilityRole="button"
-            style={({ pressed }) => [styles.manage, pressed && styles.pressed]}
-          >
-            <AppText variant="captionMedium">Gerenciar</AppText>
-          </Pressable>
-        </View>
+      <ListRow
+        title="Áreas de foco"
+        subtitle={
+          preferences.focusAreas.length === 0
+            ? 'Nenhuma escolhida'
+            : preferences.focusAreas.join(', ')
+        }
+        onPress={() => router.navigate('/onboarding')}
+        leading={<Icon name="target" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={<Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />}
+      />
 
-        <View style={styles.divider} />
+      <ListRow
+        title="Duração padrão da sessão"
+        subtitle="Usada quando não há bloco planejado"
+        onPress={() => setSheetOpen(true)}
+        leading={<Icon name="stopwatch" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={
+          <AppText variant="caption" color="textDim">
+            {minutesLabel(preferences.sessionMinutes)}
+          </AppText>
+        }
+      />
 
-        <View style={styles.settingColumn}>
-          <View style={styles.settingText}>
-            <AppText variant="bodyStrong">Nível de intervenção</AppText>
-            <AppText variant="caption" color="textDim" style={styles.settingNote}>
-              Rigidez dos bloqueios de foco.
-            </AppText>
-          </View>
+      <ListRow
+        title="Hábitos"
+        subtitle="Criar, pausar e remover"
+        onPress={() => router.navigate('/habits')}
+        leading={<Icon name="check" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={<Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />}
+      />
+
+      <Card style={styles.card}>
+        <AppText variant="bodyStrong">Nível de intervenção</AppText>
+        <AppText variant="caption" color="textDim" style={styles.cardNote}>
+          Define o tom dos avisos durante uma sessão de foco.
+        </AppText>
+        <View style={styles.segmented}>
           <SegmentedControl
             options={INTERVENTION_LEVELS}
-            value={intervention}
-            onChange={setIntervention}
+            value={preferences.interventionLevel}
+            onChange={setInterventionLevel}
           />
         </View>
       </Card>
 
-      <SectionHeader title="Conexões" style={styles.sectionHeaderSpaced} />
-      <ConnectionGrid onPress={handleConnection} />
+      <SectionHeader title="Seus dados" style={styles.sectionHeaderSpaced} />
 
-      <SectionHeader title="Aplicativo" style={styles.sectionHeaderSpaced} />
-      {appSettings.map((setting) => (
-        <ListRow
-          key={setting.id}
-          title={setting.title}
-          onPress={() => showToast(`${setting.title} chega em breve`)}
-          trailing={
-            setting.trailing ? (
-              <AppText variant="caption" color="textDim">
-                {setting.trailing}
-              </AppText>
-            ) : (
-              <Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />
-            )
-          }
-        />
-      ))}
+      <Card>
+        <AppText variant="supporting" color="textMuted">
+          Tudo o que você cria fica guardado só neste aparelho. O StayOn não envia nada para
+          servidor nenhum e funciona sem internet.
+        </AppText>
+      </Card>
 
       <ListRow
-        title="Refazer a configuração inicial"
-        subtitle="Revise as áreas de foco escolhidas."
-        onPress={() => router.navigate('/onboarding')}
-        leading={<Icon name="sparkles" size={20} strokeWidth={1.6} color={colors.textMuted} />}
-        trailing={<Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />}
+        title="Apagar todos os dados"
+        subtitle="Volta o aplicativo ao estado inicial"
+        onPress={handleReset}
+        leading={<Icon name="trash" size={20} strokeWidth={1.6} color={colors.danger} />}
+        style={styles.destructive}
       />
 
-      <Pressable
-        onPress={() => showToast('Sessão encerrada')}
-        accessibilityRole="button"
-        style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}
-      >
-        <Icon name="logout" size={18} strokeWidth={1.6} color={colors.textDim} />
-        <AppText variant="captionMedium" color="textDim">
-          Sair da conta
-        </AppText>
-      </Pressable>
+      <SectionHeader title="Sobre" style={styles.sectionHeaderSpaced} />
+
+      <Card>
+        <View style={styles.aboutRow}>
+          <AppText variant="body" color="textMuted">
+            Preço
+          </AppText>
+          <AppText variant="bodyStrong" color="success">
+            Gratuito
+          </AppText>
+        </View>
+        <View style={styles.aboutRow}>
+          <AppText variant="body" color="textMuted">
+            Conta
+          </AppText>
+          <AppText variant="bodyStrong">Não precisa</AppText>
+        </View>
+        <View style={styles.aboutRow}>
+          <AppText variant="body" color="textMuted">
+            Versão
+          </AppText>
+          <AppText variant="bodyStrong">1.0.0</AppText>
+        </View>
+      </Card>
+
+      <ProfileSheet visible={sheetOpen} onClose={() => setSheetOpen(false)} />
     </Screen>
   );
 }
@@ -141,44 +178,22 @@ const styles = StyleSheet.create({
     marginTop: spacing.section,
     marginBottom: spacing.xxl,
   },
-  settingRow: {
+  card: {
+    marginTop: spacing.xxl,
+  },
+  cardNote: {
+    marginTop: spacing.xxs,
+  },
+  segmented: {
+    marginTop: spacing.xxl,
+  },
+  destructive: {
+    marginTop: spacing.md,
+  },
+  aboutRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.xxl,
-  },
-  settingColumn: {
-    gap: spacing.xxl,
-  },
-  settingText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  settingNote: {
-    marginTop: spacing.xxs,
-  },
-  manage: {
-    paddingHorizontal: spacing.xxl,
-    paddingVertical: spacing.lg,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.surfaceRaised,
-  },
-  divider: {
-    height: 1,
-    marginVertical: spacing.xxl,
-    backgroundColor: colors.hairline,
-  },
-  signOut: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    gap: spacing.md,
-    marginTop: spacing.section,
-    paddingVertical: spacing.xl,
-  },
-  pressed: {
-    opacity: motion.pressedOpacity,
+    paddingVertical: spacing.md,
   },
 });
