@@ -43,7 +43,18 @@ export function TimelineScreen() {
 
   return (
     <Screen bottomInset={spacing.section}>
-      <ScreenHeader title="Linha do tempo de hoje" subtitle={plannerDate} />
+      <ScreenHeader
+        title="Linha do tempo de hoje"
+        subtitle={plannerDate}
+        action={
+          <IconButton
+            name="calendar"
+            onPress={() => router.navigate('/dates')}
+            accessibilityLabel="Datas importantes"
+            size={22}
+          />
+        }
+      />
 
       <View style={styles.controls}>
         <SegmentedControl options={RANGES} value={range} onChange={setRange} />
