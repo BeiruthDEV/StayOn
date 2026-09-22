@@ -8,6 +8,10 @@ type FocusSession = {
   /** Duração total, já considerando as extensões. */
   total: number;
   running: boolean;
+  /** Quantas vezes a sessão foi pausada — as interrupções da sessão. */
+  pauses: number;
+  /** Minutos já focados, arredondados para baixo. */
+  elapsedMinutes: number;
   /** Alterna entre pausado e em andamento. */
   toggleRunning: () => void;
   /** Acrescenta EXTENSION_MINUTES ao tempo restante e ao total. */
@@ -24,6 +28,7 @@ export function useFocusSession(durationMinutes: number): FocusSession {
   const [total, setTotal] = useState(initialSeconds);
   const [remaining, setRemaining] = useState(initialSeconds);
   const [running, setRunning] = useState(true);
+  const [pauses, setPauses] = useState(0);
 
   useEffect(() => {
     setTotal(initialSeconds);
@@ -40,7 +45,13 @@ export function useFocusSession(durationMinutes: number): FocusSession {
     return () => clearInterval(interval);
   }, [running, remaining]);
 
-  const toggleRunning = useCallback(() => setRunning((current) => !current), []);
+  const toggleRunning = useCallback(() => {
+    setRunning((current) => {
+      // Só conta como interrupção quando a sessão é pausada, não ao retomar.
+      if (current) setPauses((count) => count + 1);
+      return !current;
+    });
+  }, []);
 
   const extend = useCallback(() => {
     const extra = EXTENSION_MINUTES * 60;
@@ -48,5 +59,13 @@ export function useFocusSession(durationMinutes: number): FocusSession {
     setRemaining((current) => current + extra);
   }, []);
 
-  return { remaining, total, running, toggleRunning, extend };
+  return {
+    remaining,
+    total,
+    running,
+    pauses,
+    elapsedMinutes: Math.floor((total - remaining) / 60),
+    toggleRunning,
+    extend,
+  };
 }

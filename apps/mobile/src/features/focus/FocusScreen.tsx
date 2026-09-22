@@ -3,41 +3,57 @@ import { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, ProgressRing, Screen, StatTile } from '@/components';
-import { blockedAttempts, defaultSessionMinutes, interruptionCount, sessionGoal } from '@/data/focus';
+import { todayIso } from '@/domain/clock';
 import { elapsedPercent, formatRemaining } from '@/domain/focusSession';
-import { durationOf } from '@/domain/timeBlock';
+import { sessionsOn } from '@/domain/session';
+import { durationOf, nextBlock } from '@/domain/timeBlock';
 import { Icon } from '@/icons';
-import { useBlocks, useToast } from '@/state';
+import { useBlocks, usePreferences, useSessions, useToast } from '@/state';
 import { colors, motion, spacing } from '@/theme';
 
 import { SessionControls } from './SessionControls';
 import { useFocusSession } from './useFocusSession';
 
-/** Tela Foco: sessão imersiva com contador regressivo e controles. */
+/** Tela Foco: sessão imersiva com contador regressivo e registro no histórico. */
 export function FocusScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const { blocks } = useBlocks();
+  const { blocks, setStatus } = useBlocks();
+  const { sessions, record } = useSessions();
+  const { preferences } = usePreferences();
 
-  const block = useMemo(() => blocks.find((item) => item.status === 'upcoming'), [blocks]);
-  const minutes = block ? durationOf(block) : defaultSessionMinutes;
+  const block = useMemo(() => nextBlock(blocks), [blocks]);
+  const minutes = block ? durationOf(block) : preferences.sessionMinutes;
+  const label = block ? block.title : 'Sessão livre';
 
   const session = useFocusSession(minutes);
   const finished = session.remaining === 0;
 
-  const leave = useCallback(
-    (message: string) => {
-      showToast(message);
-      router.navigate('/');
-    },
-    [router, showToast],
-  );
+  const todaySessions = useMemo(() => sessionsOn(sessions, todayIso()), [sessions]);
+
+  const finish = useCallback(() => {
+    record(label, session.elapsedMinutes, 'completed');
+    if (block) setStatus(block.id, 'done');
+    showToast(`Sessão registrada: ${session.elapsedMinutes} min`);
+    router.navigate('/');
+  }, [record, label, session.elapsedMinutes, block, setStatus, showToast, router]);
+
+  const abandon = useCallback(() => {
+    // Abandonar nos primeiros segundos não vira registro: não houve foco.
+    if (session.elapsedMinutes > 0) {
+      record(label, session.elapsedMinutes, 'abandoned');
+      showToast(`Sessão abandonada aos ${session.elapsedMinutes} min`);
+    } else {
+      showToast('Sessão abandonada');
+    }
+    router.navigate('/');
+  }, [session.elapsedMinutes, record, label, showToast, router]);
 
   return (
     <Screen scroll={false} contentStyle={styles.content}>
       <View style={styles.topBar}>
         <Pressable
-          onPress={() => leave('Sessão abandonada')}
+          onPress={abandon}
           accessibilityRole="button"
           style={({ pressed }) => [styles.abandon, pressed && styles.pressed]}
         >
@@ -61,12 +77,12 @@ export function FocusScreen() {
 
       <View style={styles.header}>
         <Chip
-          label={block ? block.title : 'Sessão livre'}
+          label={block ? block.tag : `${preferences.interventionLevel} · ${minutes} min`}
           leading={<Icon name="check" size={13} strokeWidth={2} color={colors.textMuted} />}
           style={styles.blockChip}
         />
         <AppText variant="display" style={styles.goal}>
-          {sessionGoal}
+          {label}
         </AppText>
       </View>
 
@@ -76,7 +92,7 @@ export function FocusScreen() {
             {formatRemaining(session.remaining)}
           </AppText>
           <AppText variant="caption" color="textDim">
-            {finished ? 'Sessão concluída' : 'Restante'}
+            {finished ? 'Tempo esgotado' : 'Restante'}
           </AppText>
         </ProgressRing>
       </View>
@@ -85,12 +101,16 @@ export function FocusScreen() {
         running={session.running}
         onToggleRunning={session.toggleRunning}
         onExtend={session.extend}
-        onFinish={() => leave('Sessão encerrada')}
+        onFinish={finish}
       />
 
       <View style={styles.stats}>
-        <StatTile label="Interrupções" value={String(interruptionCount)} />
-        <StatTile label="Apps bloqueados" value={String(blockedAttempts)} unit="tentativas" />
+        <StatTile label="Interrupções" value={String(session.pauses)} />
+        <StatTile
+          label="Sessões hoje"
+          value={String(todaySessions.length)}
+          unit={todaySessions.length === 1 ? 'registro' : 'registros'}
+        />
       </View>
     </Screen>
   );
