@@ -1,7 +1,14 @@
 # StayOn
 
-App de foco e produtividade em React Native + Expo. Funciona offline, é
-gratuito, não pede cadastro e guarda tudo no próprio celular.
+Projeto pessoal: um app de produtividade e foco, feito em React Native + Expo.
+
+A ideia é juntar num lugar só o que costuma ficar espalhado — as tarefas do
+dia, os hábitos que você quer manter, a agenda em blocos de tempo e as sessões
+de foco cronometradas. No fim, o app mostra quanto tempo você realmente focou,
+calculado a partir das sessões que você fez, e não de estimativa.
+
+Funciona offline, é gratuito, não pede cadastro e guarda tudo no próprio
+celular. Nenhum dado sai do aparelho.
 
 ## Como rodar
 
