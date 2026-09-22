@@ -1,32 +1,52 @@
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, IconButton, Screen, ScreenHeader } from '@/components';
+import { shiftDate, todayIso } from '@/domain/clock';
 import {
-  blockedAttemptsToday,
-  hourlyUsage,
-  keyInsight,
-  todayScreenTime,
-  topDistractions,
-} from '@/data/insights';
+  completionRate,
+  focusByDay,
+  focusByLabel,
+  sessionsOn,
+  totalFocusMinutes,
+} from '@/domain/session';
+import { minutesLabel } from '@/domain/usage';
 import { Icon } from '@/icons';
-import { useToast } from '@/state';
+import { useSessions, useTasks } from '@/state';
 import { colors, spacing } from '@/theme';
 
-import { DistractionList } from './DistractionList';
-import { HourlyUsageChart } from './HourlyUsageChart';
-import { ScreenTimeCard } from './ScreenTimeCard';
+import { FocusTodayCard } from './FocusTodayCard';
+import { TimeByAreaList } from './TimeByAreaList';
+import { WeeklyFocusChart } from './WeeklyFocusChart';
 
-/** Tela Insights: tempo de tela, uso por hora e principais distrações do dia. */
+/** Tela Insights: foco de hoje, últimos sete dias e onde o tempo foi. */
 export function InsightsScreen() {
   const router = useRouter();
-  const { showToast } = useToast();
+  const { sessions } = useSessions();
+  const { tasks } = useTasks();
+
+  const today = todayIso();
+  const yesterday = shiftDate(today, -1);
+
+  const todaySessions = useMemo(() => sessionsOn(sessions, today), [sessions, today]);
+  const minutesToday = totalFocusMinutes(todaySessions);
+  const minutesYesterday = totalFocusMinutes(sessionsOn(sessions, yesterday));
+
+  const lastSevenDays = useMemo(
+    () => focusByDay(sessions, Array.from({ length: 7 }, (_, index) => shiftDate(today, index - 6))),
+    [sessions, today],
+  );
+
+  const byArea = useMemo(() => focusByLabel(sessions), [sessions]);
+  const rate = completionRate(sessions);
+  const doneTasks = tasks.filter((task) => task.done).length;
 
   return (
     <Screen bottomInset={spacing.section}>
       <ScreenHeader
-        title="Análise comportamental"
-        subtitle="Tempo de tela e distrações de hoje."
+        title="Seus números"
+        subtitle="Calculados a partir das suas sessões de foco."
         action={
           <IconButton
             name="calendar"
@@ -38,7 +58,11 @@ export function InsightsScreen() {
       />
 
       <View style={styles.block}>
-        <ScreenTimeCard screenTime={todayScreenTime} />
+        <FocusTodayCard
+          minutesToday={minutesToday}
+          minutesYesterday={minutesYesterday}
+          todaySessions={todaySessions}
+        />
       </View>
 
       <View style={styles.block}>
@@ -50,43 +74,62 @@ export function InsightsScreen() {
             </AppText>
           </View>
           <AppText variant="supporting" color="textMuted" style={styles.insightText}>
-            {keyInsight}
+            {buildInsight(sessions.length, rate, minutesToday, doneTasks)}
           </AppText>
         </Card>
       </View>
 
       <View style={styles.block}>
-        <HourlyUsageChart usage={hourlyUsage} />
+        <WeeklyFocusChart days={lastSevenDays} today={today} />
       </View>
 
       <View style={styles.block}>
-        <DistractionList
-          distractions={topDistractions}
-          blockedAttempts={blockedAttemptsToday}
-          onManage={(distraction) => showToast(`Opções de ${distraction.name}`)}
-        />
+        <TimeByAreaList entries={byArea} />
       </View>
 
       <Card>
-        <AppText variant="sectionTitle">Limites de apps</AppText>
-        <AppText variant="supporting" color="textMuted" style={styles.limitsText}>
-          Ajuste a rigidez dos bloqueios para os blocos de foco de amanhã.
+        <AppText variant="sectionTitle">Revisão da semana</AppText>
+        <AppText variant="supporting" color="textMuted" style={styles.reviewText}>
+          O consolidado dos últimos sete dias, com taxa de execução e espaço para registrar o
+          que funcionou.
         </AppText>
         <Button
-          label="Editar limites"
-          onPress={() => showToast('Edição de limites chega em breve')}
-          trailing={<Icon name="sliders" size={16} strokeWidth={1.8} color={colors.onLight} />}
-          style={styles.limitsAction}
-        />
-        <Button
-          label="Ver relatório completo"
-          variant="ghost"
+          label="Abrir revisão semanal"
           onPress={() => router.navigate('/weekly-review')}
-          style={styles.limitsGhost}
+          trailing={<Icon name="arrowRight" size={16} strokeWidth={1.8} color={colors.onLight} />}
+          style={styles.reviewAction}
         />
       </Card>
     </Screen>
   );
+}
+
+/** Frase do insight, escolhida pelo estado real dos dados. */
+function buildInsight(
+  totalSessions: number,
+  rate: number,
+  minutesToday: number,
+  doneTasks: number,
+): string {
+  if (totalSessions === 0) {
+    return 'Assim que você encerrar a primeira sessão de foco, os números desta tela começam a aparecer.';
+  }
+
+  if (minutesToday === 0) {
+    const plural = totalSessions === 1 ? 'sessão registrada' : 'sessões registradas';
+    return `Você tem ${totalSessions} ${plural}, mas nenhuma hoje. Uma sessão curta já mantém o ritmo.`;
+  }
+
+  if (rate < 60) {
+    return `Você leva ${rate}% das sessões até o fim. Sessões mais curtas costumam elevar esse número.`;
+  }
+
+  const tasksPart =
+    doneTasks > 0
+      ? `${doneTasks} ${doneTasks === 1 ? 'tarefa concluída' : 'tarefas concluídas'}.`
+      : 'Marque as tarefas concluídas para completar o quadro.';
+
+  return `${minutesLabel(minutesToday)} de foco hoje e ${rate}% das sessões concluídas. ${tasksPart}`;
 }
 
 const styles = StyleSheet.create({
@@ -101,14 +144,10 @@ const styles = StyleSheet.create({
   insightText: {
     marginTop: spacing.lg,
   },
-  limitsText: {
+  reviewText: {
     marginTop: spacing.sm,
   },
-  limitsAction: {
+  reviewAction: {
     marginTop: spacing.xxl,
-  },
-  limitsGhost: {
-    alignSelf: 'center',
-    marginTop: spacing.xl,
   },
 });

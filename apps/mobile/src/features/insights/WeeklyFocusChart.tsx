@@ -1,45 +1,46 @@
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card } from '@/components';
-import { barPercent, peakWindow, type HourlyUsage } from '@/domain/usage';
+import { barPercent, peakMinutes, type DailyFocus } from '@/domain/session';
+import { minutesLabel } from '@/domain/usage';
 import { colors, radius, spacing } from '@/theme';
 
-type HourlyUsageChartProps = {
-  usage: readonly HourlyUsage[];
+type WeeklyFocusChartProps = {
+  days: readonly DailyFocus[];
+  /** Data de hoje, destacada no eixo. */
+  today: string;
 };
 
-/** Gráfico de barras do uso por faixa de horário, com destaque no pico. */
-export function HourlyUsageChart({ usage }: HourlyUsageChartProps) {
-  const peak = peakWindow(usage);
+/** Minutos focados em cada um dos últimos dias. */
+export function WeeklyFocusChart({ days, today }: WeeklyFocusChartProps) {
+  const peak = peakMinutes(days);
 
   return (
     <Card>
       <View style={styles.header}>
-        <AppText variant="sectionTitle">Uso por hora</AppText>
-        {peak ? (
-          <AppText variant="caption" color="textDim">
-            Pico: {peak.label}
-          </AppText>
-        ) : null}
+        <AppText variant="sectionTitle">Últimos 7 dias</AppText>
+        <AppText variant="caption" color="textDim">
+          {peak === 0 ? 'Sem registros' : `Melhor dia: ${minutesLabel(peak)}`}
+        </AppText>
       </View>
 
-      <View style={styles.chart} accessibilityLabel="Gráfico de uso por faixa de horário">
-        {usage.map((entry) => {
-          const isPeak = entry.label === peak?.label;
+      <View style={styles.chart} accessibilityLabel="Gráfico de foco por dia">
+        {days.map((day) => {
+          const isToday = day.date === today;
 
           return (
-            <View key={entry.label} style={styles.column}>
+            <View key={day.date} style={styles.column}>
               <View style={styles.track}>
                 <View
                   style={[
                     styles.bar,
-                    isPeak && styles.barPeak,
-                    { height: `${barPercent(entry, usage)}%` },
+                    isToday && styles.barToday,
+                    { height: `${barPercent(day.minutes, peak)}%` },
                   ]}
                 />
               </View>
-              <AppText variant="caption" color={isPeak ? 'text' : 'textDim'} style={styles.label}>
-                {entry.label}
+              <AppText variant="caption" color={isToday ? 'text' : 'textDim'} style={styles.label}>
+                {day.label}
               </AppText>
             </View>
           );
@@ -74,10 +75,11 @@ const styles = StyleSheet.create({
   },
   bar: {
     width: '100%',
+    minHeight: 2,
     borderRadius: radius.xs,
     backgroundColor: colors.borderStrong,
   },
-  barPeak: {
+  barToday: {
     backgroundColor: colors.fillLight,
   },
   label: {

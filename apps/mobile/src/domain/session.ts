@@ -60,3 +60,52 @@ export function completionRate(sessions: readonly FocusSessionRecord[]): number 
   if (sessions.length === 0) return 0;
   return Math.round((100 * completedCount(sessions)) / sessions.length);
 }
+
+/** Uma barra do gráfico de foco por dia. */
+export type DailyFocus = {
+  /** Data no formato YYYY-MM-DD. */
+  date: string;
+  /** Rótulo curto do eixo, ex.: "seg". */
+  label: string;
+  minutes: number;
+};
+
+const WEEKDAY_ABBREVIATIONS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'] as const;
+
+/** Minutos focados em cada uma das datas informadas, na mesma ordem. */
+export function focusByDay(
+  sessions: readonly FocusSessionRecord[],
+  dates: readonly string[],
+): DailyFocus[] {
+  return dates.map((date) => {
+    const parsed = new Date(`${date}T12:00:00`);
+    const label = WEEKDAY_ABBREVIATIONS[parsed.getDay()] ?? '';
+    return { date, label, minutes: totalFocusMinutes(sessionsOn(sessions, date)) };
+  });
+}
+
+/** Onde o tempo foi: minutos somados por tarefa ou bloco, do maior para o menor. */
+export function focusByLabel(
+  sessions: readonly FocusSessionRecord[],
+): { label: string; minutes: number }[] {
+  const totals = new Map<string, number>();
+
+  for (const session of sessions) {
+    totals.set(session.label, (totals.get(session.label) ?? 0) + session.minutes);
+  }
+
+  return [...totals.entries()]
+    .map(([label, minutes]) => ({ label, minutes }))
+    .sort((a, b) => b.minutes - a.minutes);
+}
+
+/** Maior valor do conjunto, usado para escalar as barras. */
+export function peakMinutes(entries: readonly { minutes: number }[]): number {
+  return entries.reduce((peak, entry) => Math.max(peak, entry.minutes), 0);
+}
+
+/** Altura relativa de uma barra, de 0 a 100. */
+export function barPercent(minutes: number, peak: number): number {
+  if (peak <= 0) return 0;
+  return (100 * minutes) / peak;
+}
