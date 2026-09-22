@@ -9,6 +9,7 @@ export const storageKeys = {
   events: 'stayon:events',
   sessions: 'stayon:sessions',
   preferences: 'stayon:preferences',
+  reflections: 'stayon:reflections',
 } as const;
 
 export type StorageKey = (typeof storageKeys)[keyof typeof storageKeys];

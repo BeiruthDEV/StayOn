@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import {
@@ -12,23 +12,56 @@ import {
   ScreenHeader,
   SectionHeader,
 } from '@/components';
-import { currentWeekReview } from '@/data/weeklyReview';
-import { executionDeltaLabel, metTarget, planningAccuracy } from '@/domain/weeklyReview';
+import { rangeLabel, shiftDate, todayIso, weekRange } from '@/domain/clock';
+import { minutesLabel } from '@/domain/usage';
+import {
+  buildWeeklyReview,
+  emptyReflection,
+  planningAccuracy,
+  recommendation,
+  targetProgress,
+  WEEKLY_FOCUS_TARGET,
+  type Reflection,
+} from '@/domain/weeklyReview';
 import { Icon } from '@/icons';
-import { useToast } from '@/state';
+import { useBlocks, useSessions, useToast } from '@/state';
+import { storageKeys, usePersistentState } from '@/storage';
 import { colors, spacing } from '@/theme';
 
 import { MetricCard } from './MetricCard';
 import { ReflectionField } from './ReflectionField';
 
-/** Tela Revisão semanal: métricas da semana, recomendação e reflexão. */
+/** Tela Revisão semanal: métricas da semana corrente e reflexão salva. */
 export function WeeklyReviewScreen() {
   const router = useRouter();
   const { showToast } = useToast();
-  const review = currentWeekReview;
+  const { sessions } = useSessions();
+  const { blocks } = useBlocks();
 
-  const [worked, setWorked] = useState('');
-  const [toChange, setToChange] = useState('');
+  const { from, to } = weekRange(todayIso());
+  const dates = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => shiftDate(from, index)),
+    [from],
+  );
+
+  const review = useMemo(
+    () => buildWeeklyReview(sessions, blocks, dates),
+    [sessions, blocks, dates],
+  );
+
+  // A reflexão é guardada por semana, com a data de segunda como chave.
+  const { value: reflections, setValue: setReflections } = usePersistentState<
+    Record<string, Reflection>
+  >(storageKeys.reflections, {});
+
+  const reflection = reflections[from] ?? emptyReflection;
+
+  const updateReflection = (patch: Partial<Reflection>) => {
+    setReflections((current) => ({
+      ...current,
+      [from]: { ...(current[from] ?? emptyReflection), ...patch },
+    }));
+  };
 
   const accuracy = planningAccuracy(review);
 
@@ -36,7 +69,7 @@ export function WeeklyReviewScreen() {
     <Screen bottomInset={spacing.section}>
       <ScreenHeader
         title="Revisão semanal"
-        subtitle={review.range}
+        subtitle={rangeLabel(from, to)}
         action={
           <IconButton
             name="close"
@@ -49,14 +82,13 @@ export function WeeklyReviewScreen() {
 
       <View style={styles.block}>
         <MetricCard
-          title="Taxa de execução"
-          icon="target"
-          value={String(review.executionRate)}
-          unit="%"
-          note={`Meta: ${review.executionTarget}% · ${executionDeltaLabel(review)} vs semana passada`}
+          title="Foco na semana"
+          icon="stopwatch"
+          value={minutesLabel(review.focusMinutes)}
+          note={`Meta: ${minutesLabel(WEEKLY_FOCUS_TARGET)} · ${targetProgress(review)}% cumprido`}
           footer={
             <View style={styles.progress}>
-              <Progress percent={review.executionRate} />
+              <Progress percent={targetProgress(review)} />
             </View>
           }
         />
@@ -64,14 +96,19 @@ export function WeeklyReviewScreen() {
 
       <View style={styles.block}>
         <MetricCard
-          title="Foco profundo"
-          icon="stopwatch"
-          value={String(review.deepFocusHours)}
-          unit="h"
+          title="Taxa de execução"
+          icon="target"
+          value={String(review.completionRate)}
+          unit="%"
           note={
-            metTarget(review)
-              ? 'Meta da semana atingida, hábito diário mantido.'
-              : 'Abaixo da meta da semana.'
+            review.sessionCount === 0
+              ? 'Nenhuma sessão registrada nesta semana.'
+              : `${review.sessionCount} ${review.sessionCount === 1 ? 'sessão' : 'sessões'} encerradas.`
+          }
+          footer={
+            <View style={styles.progress}>
+              <Progress percent={review.completionRate} />
+            </View>
           }
         />
       </View>
@@ -79,14 +116,18 @@ export function WeeklyReviewScreen() {
       <View style={styles.block}>
         <Card>
           <AppText variant="overlineSmall" color="textDim">
-            Janela de pico
+            Melhor dia
           </AppText>
           <View style={styles.peak}>
             <Icon name="sunrise" size={20} strokeWidth={1.6} color={colors.textMuted} />
-            <AppText variant="title">{review.peakWindow}</AppText>
+            <AppText variant="title">
+              {review.bestDayLabel === ''
+                ? 'Sem registros'
+                : `${review.bestDayLabel} · ${minutesLabel(review.bestDayMinutes)}`}
+            </AppText>
           </View>
           <AppText variant="caption" color="textDim">
-            Maior densidade de produção
+            O dia em que você somou mais tempo de foco.
           </AppText>
         </Card>
       </View>
@@ -94,58 +135,57 @@ export function WeeklyReviewScreen() {
       <View style={styles.block}>
         <Card>
           <AppText variant="overlineSmall" color="textDim" style={styles.cardTitle}>
-            Precisão do planejamento
+            Execução da agenda
           </AppText>
           <View style={styles.statRow}>
             <AppText variant="body" color="textMuted">
-              Concluídos
+              Blocos concluídos
             </AppText>
-            <AppText variant="bodyStrong">{review.completedBlocks}</AppText>
+            <AppText variant="bodyStrong">{review.blocksDone}</AppText>
           </View>
           <View style={styles.statRow}>
             <AppText variant="body" color="textMuted">
-              Reagendados
+              Blocos na agenda
             </AppText>
-            <AppText variant="bodyStrong">{review.rescheduledBlocks}</AppText>
+            <AppText variant="bodyStrong">{review.blocksTotal}</AppText>
           </View>
           <View style={styles.progress}>
             <Progress percent={accuracy} />
           </View>
-          <AppText variant="caption" color="textDim" style={styles.accuracy}>
-            {accuracy}% dos blocos aconteceram no horário planejado.
+          <AppText variant="caption" color="textDim" style={styles.note}>
+            {accuracy}% da agenda de hoje foi cumprida.
           </AppText>
         </Card>
       </View>
 
-      <View style={styles.block}>
-        <Card>
-          <AppText variant="overlineSmall" color="textDim" style={styles.cardTitle}>
-            Maior distração
-          </AppText>
-          <View style={styles.distraction}>
-            <AppText variant="title">{review.topDistraction}</AppText>
-            <Icon name="phone" size={20} strokeWidth={1.6} color={colors.textMuted} />
-          </View>
-          <AppText variant="caption" color="danger" style={styles.accuracy}>
-            {review.topDistractionShare}% do tempo de distração
-          </AppText>
-        </Card>
-      </View>
+      {review.topArea !== '' ? (
+        <View style={styles.block}>
+          <Card>
+            <AppText variant="overlineSmall" color="textDim" style={styles.cardTitle}>
+              Onde foi o tempo
+            </AppText>
+            <View style={styles.topArea}>
+              <AppText variant="title" numberOfLines={1} style={styles.topAreaName}>
+                {review.topArea}
+              </AppText>
+              <Icon name="target" size={20} strokeWidth={1.6} color={colors.textMuted} />
+            </View>
+            <AppText variant="caption" color="textDim" style={styles.note}>
+              {minutesLabel(review.topAreaMinutes)} nesta semana
+            </AppText>
+          </Card>
+        </View>
+      ) : null}
 
       <View style={styles.block}>
         <Card>
           <View style={styles.recommendationHeader}>
             <Icon name="sparkles" size={19} strokeWidth={1.6} color={colors.textMuted} />
-            <AppText variant="sectionTitle">Recomendação do sistema</AppText>
+            <AppText variant="sectionTitle">Recomendação</AppText>
           </View>
-          <AppText variant="supporting" color="textMuted" style={styles.accuracy}>
-            {review.recommendation}
+          <AppText variant="supporting" color="textMuted" style={styles.note}>
+            {recommendation(review)}
           </AppText>
-          <Button
-            label="Aplicar regra"
-            onPress={() => showToast('Regra aplicada para a próxima semana')}
-            style={styles.apply}
-          />
         </Card>
       </View>
 
@@ -154,17 +194,30 @@ export function WeeklyReviewScreen() {
       <ReflectionField
         label="O que funcionou?"
         placeholder="Anote as estratégias que deram certo…"
-        value={worked}
-        onChangeText={setWorked}
+        value={reflection.worked}
+        onChangeText={(worked) => updateReflection({ worked })}
       />
       <ReflectionField
         label="O que mudar?"
         placeholder="Aponte os pontos de melhoria…"
-        value={toChange}
-        onChangeText={setToChange}
+        value={reflection.toChange}
+        onChangeText={(toChange) => updateReflection({ toChange })}
       />
 
-      <Button label="Salvar reflexão" onPress={() => showToast('Reflexão salva')} />
+      <AppText variant="caption" color="textDim" style={styles.autosave}>
+        A reflexão é salva sozinha, por semana.
+      </AppText>
+
+      <Button label="Voltar aos insights" variant="ghost" onPress={() => router.back()} />
+
+      <Button
+        label="Concluir revisão"
+        onPress={() => {
+          showToast('Revisão da semana registrada');
+          router.back();
+        }}
+        style={styles.finish}
+      />
     </Screen>
   );
 }
@@ -193,13 +246,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
   },
-  accuracy: {
+  note: {
     marginTop: spacing.lg,
   },
-  distraction: {
+  topArea: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.xxl,
+  },
+  topAreaName: {
+    flex: 1,
+    minWidth: 0,
   },
   recommendationHeader: {
     flexDirection: 'row',
@@ -207,10 +265,13 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     marginBottom: spacing.sm,
   },
-  apply: {
-    marginTop: spacing.section,
-  },
   reflectionHeader: {
     marginBottom: spacing.xxl,
+  },
+  autosave: {
+    marginBottom: spacing.xxl,
+  },
+  finish: {
+    marginTop: spacing.lg,
   },
 });
