@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, IconButton, Screen, ScreenHeader } from '@/components';
@@ -18,6 +19,7 @@ import { ScreenTimeCard } from './ScreenTimeCard';
 
 /** Tela Insights: tempo de tela, uso por hora e principais distrações do dia. */
 export function InsightsScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
 
   return (
@@ -28,7 +30,7 @@ export function InsightsScreen() {
         action={
           <IconButton
             name="calendar"
-            onPress={() => showToast('Revisão semanal chega em breve')}
+            onPress={() => router.navigate('/weekly-review')}
             accessibilityLabel="Revisão semanal"
             size={22}
           />
@@ -79,7 +81,7 @@ export function InsightsScreen() {
         <Button
           label="Ver relatório completo"
           variant="ghost"
-          onPress={() => showToast('Relatório completo chega em breve')}
+          onPress={() => router.navigate('/weekly-review')}
           style={styles.limitsGhost}
         />
       </Card>
