@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;font-family:'Geist',-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#F5F5F5}a:hover{color:#A3A3AA}
+*{box-sizing:border-box}
+::-webkit-scrollbar{display:none}
+input,textarea{outline:none}
+input::placeholder,textarea::placeholder{color:#525258}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;background:#050505;display:flex;justify-content:center">
+<div style="width:100%;max-width:430px;height:100%;position:relative;display:flex;flex-direction:column;background:#050505;overflow:hidden">
+
+<div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 28px">
+  <span style="font-size:14px;font-weight:600;color:#F5F5F5;letter-spacing:.02em">9:41</span>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div style="display:flex;align-items:flex-end;gap:1.5px"><div style="width:3px;height:4px;background:#F5F5F5;border-radius:1px"></div><div style="width:3px;height:6px;background:#F5F5F5;border-radius:1px"></div><div style="width:3px;height:8px;background:#F5F5F5;border-radius:1px"></div><div style="width:3px;height:10px;background:#707077;border-radius:1px"></div></div>
+    <div style="width:22px;height:11px;border:1px solid #707077;border-radius:3px;padding:1.5px"><div style="width:70%;height:100%;background:#F5F5F5;border-radius:1px"></div></div>
+  </div>
+</div>
+
+<sc-if value="{{ isOnb }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Onboarding" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:8px 20px 0">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex:none">
+    <span style="font-size:19px;font-weight:600;color:#F5F5F5;letter-spacing:-.02em">StayOn</span>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;gap:5px">
+        <sc-for list="{{ onbDots }}" as="d" hint-placeholder-count="4"><div style="width:22px;height:3px;border-radius:2px;background:{{ d.bg }};transition:background .2s"></div></sc-for>
+      </div>
+      <button onClick="{{ skipOnb }}" style="background:none;border:none;padding:6px 0;cursor:pointer;font-family:inherit;font-size:13px;color:#707077">Pular</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:36px 0 20px">
+    <h1 style="margin:0;font-size:30px;line-height:1.15;font-weight:500;letter-spacing:-.02em;color:#F5F5F5;text-wrap:pretty">{{ onbTitle }}</h1>
+    <p style="margin:10px 0 28px;font-size:15px;line-height:1.5;color:#A3A3AA;text-wrap:pretty">{{ onbSub }}</p>
+
+    <sc-if value="{{ onbIsGoals }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ goalsList }}" as="g" hint-placeholder-count="6">
+          <button onClick="{{ g.on }}" style="display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;border-radius:14px;background:{{ g.bg }};border:1px solid {{ g.bd }};cursor:pointer;font-family:inherit;text-align:left;transition:background .15s,border-color .15s" style-active="transform:scale(.99)">
+            <span style="color:#A3A3AA;display:flex">{{ g.icon }}</span>
+            <span style="flex:1;font-size:16px;font-weight:500;color:#F5F5F5">{{ g.label }}</span>
+            <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{ g.cbd }};background:{{ g.cbg }};display:flex;align-items:center;justify-content:center;color:#080808;opacity:{{ g.cop }};transition:opacity .15s">{{ checkIcon }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ onbIsRoutine }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:28px">
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Horário de acordar</div>
+          <div style="display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:3px;gap:3px">
+            <sc-for list="{{ wakeSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:42px;border:none;border-radius:9px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Melhores períodos para foco</div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ whenChips }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:44px;border-radius:12px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Duração preferida das sessões</div>
+          <div style="display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:3px;gap:3px">
+            <sc-for list="{{ durSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:42px;border:none;border-radius:9px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Dias disponíveis</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ daysChips }}" as="o" hint-placeholder-count="7"><button onClick="{{ o.on }}" style="flex:1;height:40px;border-radius:10px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:{{ o.c }};font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">{{ o.label }}</button></sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ onbIsHabits }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ onbHabitsList }}" as="g" hint-placeholder-count="6">
+          <button onClick="{{ g.on }}" style="display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;border-radius:14px;background:{{ g.bg }};border:1px solid {{ g.bd }};cursor:pointer;font-family:inherit;text-align:left;transition:background .15s,border-color .15s" style-active="transform:scale(.99)">
+            <span style="flex:1;font-size:16px;font-weight:500;color:#F5F5F5">{{ g.label }}</span>
+            <span style="font-size:13px;color:#707077">{{ g.meta }}</span>
+            <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{ g.cbd }};background:{{ g.cbg }};display:flex;align-items:center;justify-content:center;color:#080808;opacity:{{ g.cop }};transition:opacity .15s">{{ checkIcon }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ onbIsApps }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:28px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ appsChips }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.on }}" style="height:42px;padding:0 18px;border-radius:21px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Nível de intervenção</div>
+          <div style="display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:3px;gap:3px">
+            <sc-for list="{{ levelSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:42px;border:none;border-radius:9px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+          </div>
+          <p style="margin:10px 2px 0;font-size:13px;line-height:1.5;color:#707077">{{ levelDesc }}</p>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:4px">Permissões</div>
+          <sc-for list="{{ permsList }}" as="p" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 2px;border-bottom:1px solid #121214">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:500;color:#F5F5F5">{{ p.t }}</div>
+                <div style="font-size:13px;color:#707077;margin-top:2px">{{ p.d }}</div>
+              </div>
+              <button onClick="{{ p.on }}" style="height:34px;padding:0 14px;border-radius:9px;background:{{ p.bg }};border:1px solid {{ p.bd }};color:{{ p.c }};font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s">{{ p.label }}</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+  <div style="flex:none;display:flex;gap:10px;padding:12px 0 28px">
+    <sc-if value="{{ onbHasBack }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onbBack }}" style="height:50px;padding:0 22px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="background:#121214">Voltar</button>
+    </sc-if>
+    <button onClick="{{ onbNext }}" style="flex:1;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">{{ onbBtnLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Início" style="flex:1;overflow-y:auto;padding:8px 20px 150px">
+  <div style="font-size:12px;font-weight:500;letter-spacing:.08em;color:#707077;text-transform:uppercase">Segunda-feira, 4 de agosto</div>
+  <h1 style="margin:6px 0 24px;font-size:31px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Boa tarde, {{ usuario }}.</h1>
+
+  <div style="background:#0A0A0B;border:1px solid #1B1B1E;border-radius:16px;padding:18px 18px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 12px 32px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.09em;color:#A3A3AA;text-transform:uppercase">Próxima ação</span>
+      <span style="font-size:13px;font-weight:500;color:#A3A3AA">14:30 – 16:00</span>
+    </div>
+    <div style="font-size:22px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5;margin:10px 0 4px">Estudar Spring Boot</div>
+    <div style="font-size:14px;line-height:1.5;color:#A3A3AA;text-wrap:pretty">Meta: finalizar a autenticação JWT e testar os endpoints.</div>
+    <button onClick="{{ goFocusSetup }}" style="margin-top:16px;width:100%;height:50px;border-radius:12px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-active="transform:scale(.98);filter:brightness(.93)">Iniciar foco {{ playIcon }}</button>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;padding:18px 2px 6px">
+    <span style="font-size:13px;color:#A3A3AA;flex:none">Hoje</span>
+    <div style="flex:1;height:3px;border-radius:2px;background:#1B1B1E;overflow:hidden"><div style="width:{{ dayPct }}%;height:100%;background:#F5F5F5;border-radius:2px;transition:width .3s"></div></div>
+    <span style="font-size:13px;font-weight:600;color:#F5F5F5;flex:none">{{ tasksDone }}</span>
+  </div>
+
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 4px">
+    <span style="font-size:17px;font-weight:500;color:#F5F5F5">Prioridades</span>
+    <button onClick="{{ openCapture }}" style="background:none;border:none;padding:4px 0;cursor:pointer;color:#707077;display:flex">{{ plusIcon }}</button>
+  </div>
+  <sc-for list="{{ tarefas }}" as="t" hint-placeholder-count="3">
+    <button onClick="{{ t.on }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:14px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+      <span style="width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid {{ t.cbd }};background:{{ t.cbg }};display:flex;align-items:center;justify-content:center;color:#080808;transition:background .15s,border-color .15s">{{ t.check }}</span>
+      <span style="flex:1;font-size:15px;color:{{ t.c }};text-decoration:{{ t.deco }};transition:color .15s">{{ t.t }}</span>
+      <span style="font-size:12px;color:#707077;letter-spacing:.03em">{{ t.tag }}</span>
+    </button>
+  </sc-for>
+
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 4px">
+    <span style="font-size:17px;font-weight:500;color:#F5F5F5">Hábitos de hoje</span>
+    <button onClick="{{ goHabits }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:inherit;font-size:13px;color:#A3A3AA">Ver todos</button>
+  </div>
+  <sc-for list="{{ habitsHome }}" as="h" hint-placeholder-count="2">
+    <button onClick="{{ h.on }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:14px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+      <span style="width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid {{ h.cbd }};background:{{ h.cbg }};display:flex;align-items:center;justify-content:center;color:#080808;transition:background .15s,border-color .15s">{{ h.check }}</span>
+      <span style="flex:1;font-size:15px;color:{{ h.c }}">{{ h.n }}</span>
+      <span style="font-size:13px;color:#707077">{{ h.prog }}</span>
+    </button>
+  </sc-for>
+
+  <button onClick="{{ goPlannerDatas }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:18px 2px 14px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+    <span style="color:#A3A3AA;display:flex">{{ calIcon }}</span>
+    <span style="flex:1;min-width:0">
+      <span style="display:block;font-size:15px;font-weight:500;color:#F5F5F5">Prova de Banco de Dados</span>
+      <span style="display:block;font-size:13px;color:#707077;margin-top:2px">Sáb, 9 de ago · 09:00</span>
+    </span>
+    <span style="font-size:13px;font-weight:600;color:#F5F5F5">em 5 dias</span>
+  </button>
+
+  <div style="display:flex;gap:13px;padding:18px 2px 0">
+    <div style="width:2px;flex:none;border-radius:1px;background:#29292D"></div>
+    <div>
+      <p style="margin:0;font-size:14px;line-height:1.55;color:#A3A3AA;text-wrap:pretty">Você usou redes sociais por <span style="color:#F5F5F5;font-weight:500">2h11</span> hoje — <span style="color:#F5F5F5;font-weight:500">46 min</span> durante blocos de estudo planejados.</p>
+      <button onClick="{{ goInsights }}" style="background:none;border:none;padding:8px 0 0;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;color:#F5F5F5;text-decoration:underline;text-underline-offset:3px">Ver insights</button>
+    </div>
+  </div>
+</div>
+<button onClick="{{ openCapture }}" style="position:absolute;right:20px;bottom:104px;width:54px;height:54px;border-radius:50%;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;color:#080808;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 #FFFFFF,0 8px 24px rgba(0,0,0,.6)" style-active="transform:scale(.94)">{{ plusIconBig }}</button>
+</sc-if>
+
+<sc-if value="{{ isPlanner }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Planejar" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <h1 style="margin:0;font-size:31px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Planejar</h1>
+    <button onClick="{{ openCapture }}" style="width:44px;height:44px;border-radius:50%;background:#121214;border:1px solid #1B1B1E;color:#F5F5F5;cursor:pointer;display:flex;align-items:center;justify-content:center" style-active="background:#0E0E10">{{ plusIcon }}</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin:16px 0 20px">
+    <div style="flex:1;display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:11px;padding:3px;gap:3px">
+      <sc-for list="{{ plannerSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:38px;border:none;border-radius:8px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ plIsDia }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-size:15px;font-weight:500;color:#F5F5F5">Hoje, 4 de agosto</span>
+      <div style="display:flex;gap:6px">
+        <button onClick="{{ noop }}" style="width:36px;height:36px;border-radius:9px;background:transparent;border:1px solid #1B1B1E;color:#A3A3AA;cursor:pointer;display:flex;align-items:center;justify-content:center" style-active="background:#121214">{{ chevL }}</button>
+        <button onClick="{{ noop }}" style="width:36px;height:36px;border-radius:9px;background:transparent;border:1px solid #1B1B1E;color:#A3A3AA;cursor:pointer;display:flex;align-items:center;justify-content:center" style-active="background:#121214">{{ chevR }}</button>
+      </div>
+    </div>
+
+    <sc-if value="{{ showReplanAlert }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:12px;background:#0E0E10;border:1px solid #29292D;border-radius:13px;padding:14px 14px 14px 16px;margin-bottom:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)">
+        <div style="flex:1;font-size:14px;line-height:1.45;color:#F5F5F5;text-wrap:pretty">Você perdeu o bloco de estudo das 14:30.</div>
+        <button onClick="{{ openReplan }}" style="height:38px;padding:0 16px;border-radius:10px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF;color:#080808;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;flex:none" style-active="transform:scale(.97);filter:brightness(.93)">Replanejar</button>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;gap:14px;min-height:88px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">08:00</span>
+        <div style="flex:1;border-left:2px solid #29292D;padding:0 0 10px 14px">
+          <div style="background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:12px 14px;opacity:.6">
+            <div style="display:flex;align-items:center;gap:8px"><span style="color:#A3A3AA;display:flex">{{ checkSm }}</span><span style="font-size:15px;font-weight:500;color:#A3A3AA;text-decoration:line-through">Aula em vídeo</span></div>
+            <div style="font-size:13px;color:#707077;margin-top:3px">08:00 – 10:00 · 2h · Aprendizado</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;min-height:64px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">10:15</span>
+        <div style="flex:1;border-left:2px solid #29292D;padding:0 0 10px 14px">
+          <div style="background:transparent;border:1px dashed #29292D;border-radius:12px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:14px;color:#A3A3AA">Leitura · hábito</span><span style="font-size:12px;color:#707077">30 min</span>
+          </div>
+        </div
+      </div>
+      <div style="display:flex;gap:14px;min-height:56px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">12:00</span>
+        <div style="flex:1;border-left:2px solid #1B1B1E;padding:0 0 10px 14px;display:flex;align-items:center"><span style="font-size:13px;color:#707077">Livre — 2h30</span></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;margin:2px 0 8px">
+        <span style="width:44px;flex:none;font-size:12px;font-weight:600;color:#F5F5F5;text-align:right">13:15</span>
+        <div style="flex:1;display:flex;align-items:center;gap:0"><div style="width:8px;height:8px;border-radius:50%;background:#F5F5F5"></div><div style="flex:1;height:1.5px;background:#F5F5F5"></div></div>
+      </div>
+      <sc-if value="{{ showMissedBlock }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:14px;min-height:88px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">14:30</span>
+        <div style="flex:1;border-left:2px solid #29292D;padding:0 0 10px 14px">
+          <button onClick="{{ openReplan }}" style="width:100%;text-align:left;background:#070708;border:1px solid #1B1B1E;border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit" style-active="background:#0E0E10">
+            <div style="font-size:15px;font-weight:500;color:#707077;text-decoration:line-through">Estudar Spring Boot</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px"><span style="font-size:13px;color:#707077">14:30 – 16:00 · Perdido</span><span style="font-size:13px;font-weight:500;color:#F5F5F5;text-decoration:underline;text-underline-offset:3px">Replanejar</span></div>
+          </button>
+        </div>
+      </div>
+      </sc-if>
+      <div style="display:flex;gap:14px;min-height:80px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">16:30</span>
+        <div style="flex:1;border-left:2px solid #29292D;padding:0 0 10px 14px">
+          <div style="background:#0E0E10;border:1px solid #29292D;border-radius:12px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)">
+            <div style="font-size:15px;font-weight:500;color:#F5F5F5">Portfólio</div>
+            <div style="font-size:13px;color:#A3A3AA;margin-top:3px">16:30 – 18:00 · 1h30 · Carreira</div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ showMovedBlock }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:14px;min-height:88px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">18:00</span>
+        <div style="flex:1;border-left:2px solid #F5F5F5;padding:0 0 10px 14px">
+          <div style="background:#121214;border:1px solid #29292D;border-radius:12px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)">
+            <div style="font-size:15px;font-weight:500;color:#F5F5F5">Estudar Spring Boot</div>
+            <div style="font-size:13px;color:#A3A3AA;margin-top:3px">18:00 – 19:00 · Movido de 14:30</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+      <div style="display:flex;gap:14px;min-height:80px">
+        <span style="width:44px;flex:none;font-size:12px;color:#707077;padding-top:2px;text-align:right">19:00</span>
+        <div style="flex:1;border-left:2px solid #29292D;padding:0 0 10px 14px">
+          <div style="background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:12px 14px">
+            <div style="font-size:15px;font-weight:500;color:#F5F5F5">Candidaturas</div>
+            <div style="font-size:13px;color:#A3A3AA;margin-top:3px">19:00 – 20:00 · 1h · Carreira</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 2px">
+        <span style="font-size:13px;font-weight:500;color:#A3A3AA">Sem horário · {{ unschedCount }}</span><span style="font-size:12px;color:#707077">toque para agendar</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ unschedChips }}" as="u" hint-placeholder-count="4">
+          <button onClick="{{ u.on }}" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:19px;background:#121214;border:1px solid #29292D;font-size:13px;color:#F5F5F5;font-family:inherit;cursor:pointer" style-active="background:#0E0E10">{{ u.t }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ plIsSemana }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:15px;font-weight:500;color:#F5F5F5">3 – 9 de agosto</div>
+        <div style="font-size:13px;color:#707077;margin-top:2px">18h planejadas · 6h livres</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onClick="{{ noop }}" style="width:36px;height:36px;border-radius:9px;background:transparent;border:1px solid #1B1B1E;color:#A3A3AA;cursor:pointer;display:flex;align-items:center;justify-content:center" style-active="background:#121214">{{ chevL }}</button>
+        <button onClick="{{ noop }}" style="width:36px;height:36px;border-radius:9px;background:transparent;border:1px solid #1B1B1E;color:#A3A3AA;cursor:pointer;display:flex;align-items:center;justify-content:center" style-active="background:#121214">{{ chevR }}</button>
+      </div>
+    </div>
+
+    <button onClick="{{ selQua }}" style="width:100%;display:flex;align-items:center;gap:12px;background:#0E0E10;border:1px solid #29292D;border-radius:13px;padding:13px 16px;margin:16px 0 0;cursor:pointer;font-family:inherit;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)" style-active="background:#121214">
+      <span style="flex:1;font-size:14px;line-height:1.45;color:#F5F5F5;text-wrap:pretty">Quarta-feira excede sua capacidade em <span style="font-weight:600">1h30</span>.</span>
+      <span style="color:#707077;display:flex">{{ chevR }}</span>
+    </button>
+
+    <div style="display:flex;gap:5px;margin:18px 0 0">
+      <sc-for list="{{ weekDays }}" as="d" hint-placeholder-count="7">
+        <button onClick="{{ d.on }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 9px;border-radius:12px;background:{{ d.bg }};border:1px solid {{ d.bd }};cursor:pointer;font-family:inherit;transition:background .15s" style-active="transform:scale(.97)">
+          <span style="font-size:11px;color:{{ d.lc }}">{{ d.d }}</span>
+          <span style="font-size:16px;font-weight:{{ d.nw }};color:{{ d.nc }}">{{ d.n }}</span>
+          <span style="font-size:11px;font-weight:{{ d.hw }};color:{{ d.hc }}">{{ d.h }}</span>
+          <span style="width:22px;height:3px;border-radius:2px;background:#1B1B1E;overflow:hidden;display:block"><span style="display:block;width:{{ d.occ }}%;height:100%;background:{{ d.occC }}"></span></span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="margin:26px 0 0">
+      <div style="font-size:17px;font-weight:500;color:#F5F5F5;margin-bottom:4px">Resultados da semana</div>
+      <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="3">
+        <div style="padding:13px 2px;border-bottom:1px solid #121214">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <span style="font-size:15px;font-weight:500;color:#F5F5F5">{{ o.t }}</span>
+            <span style="font-size:13px;color:#707077;flex:none">{{ o.prog }}</span>
+          </div>
+          <div style="height:3px;border-radius:2px;background:#1B1B1E;margin-top:9px;overflow:hidden"><div style="width:{{ o.pct }}%;height:100%;background:#F5F5F5;border-radius:2px"></div></div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin:26px 0 0">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:17px;font-weight:500;color:#F5F5F5">{{ selDayName }}</span>
+        <button onClick="{{ goDia }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:inherit;font-size:13px;color:#A3A3AA">Ver dia completo →</button>
+      </div>
+      <sc-if value="{{ selDayHasBlocks }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ selDayBlocks }}" as="b" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid #121214">
+            <span style="width:44px;flex:none;font-size:13px;font-weight:500;color:#A3A3AA;font-variant-numeric:tabular-nums">{{ b.h }}</span>
+            <span style="flex:1;font-size:15px;color:#F5F5F5">{{ b.t }}</span>
+            <span style="font-size:12px;color:#707077">{{ b.d }}</span>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ selDayEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:22px 2px;border-bottom:1px solid #121214">
+          <div style="font-size:14px;color:#707077">Nenhum bloco planejado.</div>
+          <button onClick="{{ openCapture }}" style="margin-top:10px;height:38px;padding:0 14px;border-radius:10px;background:#121214;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer">Adicionar bloco</button>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="margin:26px 0 0">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:17px;font-weight:500;color:#F5F5F5">Sem horário · {{ unschedCount }}</span>
+        <span style="font-size:12px;color:#707077">toque para agendar</span>
+      </div>
+      <sc-for list="{{ unschedRows }}" as="u" hint-placeholder-count="4">
+        <button onClick="{{ u.on }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:13px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+          <span style="width:6px;height:6px;flex:none;border-radius:50%;background:#29292D"></span>
+          <span style="flex:1;font-size:15px;color:#F5F5F5">{{ u.t }}</span>
+          <span style="font-size:13px;color:#707077">{{ u.d }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="margin:26px 0 0">
+      <div style="font-size:17px;font-weight:500;color:#F5F5F5;margin-bottom:4px">Capacidade</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Horas disponíveis</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">24h</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Planejadas</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">18h</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Livres</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">6h</span></div>
+      <div style="display:flex;gap:13px;padding:14px 2px 0">
+        <div style="width:2px;flex:none;border-radius:1px;background:#29292D"></div>
+        <p style="margin:0;font-size:13px;line-height:1.55;color:#A3A3AA;text-wrap:pretty">Você planejou <span style="color:#F5F5F5;font-weight:500">9h30</span> na quarta, mas normalmente conclui cerca de <span style="color:#F5F5F5;font-weight:500">6h</span> por dia.</p>
+      </div>
+    </div>
+
+    <div style="margin:26px 0 0">
+      <div style="font-size:17px;font-weight:500;color:#F5F5F5;margin-bottom:10px">Hábitos da semana</div>
+      <sc-for list="{{ habitMatrix }}" as="h" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #121214">
+          <span style="flex:1;font-size:14px;color:#F5F5F5;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.n }}</span>
+          <span style="display:flex;gap:7px;flex:none">
+            <sc-for list="{{ h.dots }}" as="d" hint-placeholder-count="7"><span style="width:9px;height:9px;border-radius:50%;background:{{ d.bg }};border:1px solid {{ d.bd }}"></span></sc-for>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+
+    <button onClick="{{ openReview }}" style="margin-top:24px;width:100%;height:50px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="background:#121214">Revisar planejamento</button>
+  </sc-if>
+
+  <sc-if value="{{ plIsDatas }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#0A0A0B;border:1px solid #1B1B1E;border-radius:14px;padding:14px 12px 10px;margin-bottom:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px">
+        <span style="font-size:14px;font-weight:500;color:#F5F5F5">Agosto de 2026</span>
+        <div style="display:flex;gap:4px"><button onClick="{{ noop }}" style="width:30px;height:30px;border-radius:8px;background:none;border:none;color:#707077;cursor:pointer;display:flex;align-items:center;justify-content:center">{{ chevL }}</button><button onClick="{{ noop }}" style="width:30px;height:30px;border-radius:8px;background:none;border:none;color:#707077;cursor:pointer;display:flex;align-items:center;justify-content:center">{{ chevR }}</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+        <sc-for list="{{ weekHdr }}" as="w" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;color:#707077;padding:4px 0">{{ w.l }}</div></sc-for>
+        <sc-for list="{{ monthDays }}" as="d" hint-placeholder-count="35">
+          <button onClick="{{ d.on }}" style="height:36px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:9px;background:{{ d.bg }};border:1px solid {{ d.bd }};cursor:pointer;font-family:inherit;transition:background .15s" style-active="transform:scale(.92)">
+            <span style="font-size:13px;font-weight:{{ d.w }};color:{{ d.c }}">{{ d.n }}</span>
+            <span style="width:4px;height:4px;border-radius:50%;background:{{ d.dot }};margin-top:1px"></span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin:-4px 0 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <span style="font-size:17px;font-weight:500;color:#F5F5F5">{{ selDataLabel }}</span>
+        <button onClick="{{ openNewEvent }}" style="height:38px;padding:0 14px;border-radius:10px;background:#121214;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px" style-active="background:#0E0E10">{{ plusIconSm }} Compromisso</button>
+      </div>
+      <sc-if value="{{ selDataHasEvents }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ selDataEvents }}" as="e" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid #121214">
+            <span style="width:44px;flex:none;font-size:13px;font-weight:500;color:#A3A3AA;font-variant-numeric:tabular-nums">{{ e.time }}</span>
+            <span style="flex:1;font-size:15px;color:#F5F5F5">{{ e.t }}</span>
+            <span style="font-size:12px;color:#707077">{{ e.tag }}</span>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ selDataEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:14px 2px;border-bottom:1px solid #121214;font-size:14px;color:#707077">Nenhum compromisso neste dia.</div>
+      </sc-if>
+    </div>
+    <sc-for list="{{ dates }}" as="e" hint-placeholder-count="3">
+      <div style="padding:0 2px">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.08em;color:#707077;text-transform:uppercase;margin-bottom:2px">{{ e.when }}</div>
+        <div style="display:flex;align-items:flex-start;gap:13px;padding:10px 0 18px;border-bottom:1px solid #121214;margin-bottom:16px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:17px;font-weight:500;color:#F5F5F5;letter-spacing:-.01em">{{ e.t }}</div>
+            <div style="font-size:13px;color:#A3A3AA;margin-top:3px">{{ e.d }}</div>
+            <sc-if value="{{ e.cta }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ e.onCta }}" style="margin-top:10px;height:38px;padding:0 14px;border-radius:10px;background:#121214;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer" style-active="background:#0E0E10">{{ e.ctaLabel }}</button>
+            </sc-if>
+          </div>
+          <div style="text-align:right;flex:none">
+            <div style="font-size:20px;font-weight:600;color:#F5F5F5;letter-spacing:-.02em;line-height:1">{{ e.count }}</div>
+            <div style="font-size:12px;color:#707077;margin-top:3px">{{ e.unit }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFocusSetup }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Preparar foco" style="flex:1;overflow-y:auto;padding:8px 20px 120px;display:flex;flex-direction:column">
+  <h1 style="flex:none;margin:0 0 4px;font-size:31px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Foco</h1>
+  <p style="flex:none;margin:0 0 24px;font-size:14px;color:#707077">Prepare a sessão antes de começar.</p>
+  <div style="flex:none;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:16px;padding:16px 16px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)">
+    <div style="font-size:11px;font-weight:600;letter-spacing:.09em;color:#707077;text-transform:uppercase">Tarefa vinculada</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+      <div><div style="font-size:18px;font-weight:500;color:#F5F5F5">Estudar Spring Boot</div><div style="font-size:13px;color:#A3A3AA;margin-top:2px">Meta: finalizar autenticação JWT</div></div>
+      <span style="color:#707077;display:flex">{{ chevR }}</span>
+    </div>
+  </div>
+  <div style="flex:none;margin:26px 0 12px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Duração</div>
+  <div style="flex:none;display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:3px;gap:3px">
+    <sc-for list="{{ focusDurSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:44px;border:none;border-radius:9px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+  </div>
+  <div style="flex:none;margin:26px 0 12px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Modo</div>
+  <div style="flex:none;display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:12px;padding:3px;gap:3px">
+    <sc-for list="{{ modeSeg }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:44px;border:none;border-radius:9px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+  </div>
+  <p style="flex:none;margin:10px 2px 0;font-size:13px;line-height:1.5;color:#707077">{{ modeDesc }}</p>
+  <div style="flex:none;margin-top:22px">
+    <button onClick="{{ goBlockedApps }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:15px 2px;background:none;border:none;border-top:1px solid #121214;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit" style-active="opacity:.7">
+      <span style="font-size:15px;color:#F5F5F5">Apps bloqueados</span><span style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;color:#707077">{{ blockedSummary }}</span><span style="color:#707077;display:flex">{{ chevR }}</span></span>
+    </button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 2px;border-bottom:1px solid #121214">
+      <span style="font-size:15px;color:#F5F5F5">Apps permitidos</span><span style="font-size:13px;color:#707077">Spotify, Anki</span>
+    </div>
+  </div>
+  <div style="flex:1;min-height:16px"></div>
+  <button onClick="{{ beginSession }}" style="flex:none;margin-top:24px;width:100%;height:52px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-active="transform:scale(.98);filter:brightness(.93)">Iniciar sessão {{ playIcon }}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFocusSession }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Sessão de foco" style="flex:1;display:flex;flex-direction:column;padding:4px 20px 34px;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex:none">
+    <button onClick="{{ askEnd }}" style="background:none;border:none;padding:10px 10px 10px 0;cursor:pointer;color:#A3A3AA;display:flex;align-items:center;gap:7px;font-family:inherit;font-size:14px">{{ xIcon }} Sair</button>
+    <span style="display:flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:16px;background:#0A0A0B;border:1px solid #1B1B1E;font-size:12px;font-weight:500;color:#A3A3AA"><span style="width:6px;height:6px;border-radius:50%;background:#F5F5F5;animation:pulse 2.4s ease-in-out infinite"></span>{{ modeLabel }} ativo</span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+    <span style="font-size:12px;font-weight:600;letter-spacing:.09em;color:#707077;text-transform:uppercase">Estudar Spring Boot</span>
+    <div style="font-size:20px;font-weight:500;color:#F5F5F5;margin:8px 0 40px;text-align:center;letter-spacing:-.01em;text-wrap:pretty">Finalizar autenticação JWT</div>
+    <div style="position:relative;width:264px;height:264px;opacity:{{ ringOp }};transition:opacity .25s">
+      <div style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(#F5F5F5 {{ ringPct }}%, #1B1B1E 0);-webkit-mask:radial-gradient(closest-side,transparent 77%,#000 78%);mask:radial-gradient(closest-side,transparent 77%,#000 78%);transition:background .5s"></div>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <span style="font-size:58px;font-weight:600;letter-spacing:-.02em;color:#F5F5F5;font-variant-numeric:tabular-nums">{{ timerStr }}</span>
+        <span style="font-size:13px;color:#707077;margin-top:2px">{{ timerSub }}</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:44px">
+      <button onClick="{{ togglePause }}" style="width:54px;height:54px;border-radius:50%;background:{{ pauseBg }};border:1px solid #29292D;color:{{ pauseC }};cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s" style-active="transform:scale(.94)">{{ pauseIcon }}</button>
+      <button onClick="{{ askEnd }}" style="height:54px;padding:0 30px;border-radius:27px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.97);filter:brightness(.93)">Concluir sessão</button>
+      <button onClick="{{ plus5 }}" style="width:54px;height:54px;border-radius:50%;background:transparent;border:1px solid #29292D;color:#F5F5F5;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600" style-active="transform:scale(.94);background:#121214">+5</button>
+    </div>
+  </div>
+  <div style="flex:none;display:flex;justify-content:center;gap:36px;padding-top:10px">
+    <div style="text-align:center"><div style="font-size:17px;font-weight:600;color:#F5F5F5">{{ interruptions }}</div><div style="font-size:12px;color:#707077;margin-top:2px">interrupções</div></div>
+    <div style="width:1px;background:#1B1B1E"></div>
+    <div style="text-align:center"><div style="font-size:17px;font-weight:600;color:#F5F5F5">2</div><div style="font-size:12px;color:#707077;margin-top:2px">tentativas bloqueadas</div></div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSessionComplete }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Sessão concluída" style="flex:1;overflow-y:auto;padding:24px 20px 34px;display:flex;flex-direction:column">
+  <div style="flex:none;width:52px;height:52px;border-radius:50%;background:#F5F5F5;color:#080808;display:flex;align-items:center;justify-content:center;margin-bottom:20px">{{ checkBig }}</div>
+  <h1 style="flex:none;margin:0;font-size:30px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Sessão concluída</h1>
+  <p style="flex:none;margin:6px 0 26px;font-size:14px;color:#A3A3AA">Estudar Spring Boot · finalizar autenticação JWT</p>
+  <div style="flex:none;display:flex;border:1px solid #1B1B1E;border-radius:14px;background:#0A0A0B;overflow:hidden">
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">{{ focadoStr }}</div><div style="font-size:12px;color:#707077;margin-top:3px">focados</div></div>
+    <div style="width:1px;background:#1B1B1E"></div>
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">{{ interruptions }}</div><div style="font-size:12px;color:#707077;margin-top:3px">interrupções</div></div>
+    <div style="width:1px;background:#1B1B1E"></div>
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">2</div><div style="font-size:12px;color:#707077;margin-top:3px">bloqueios</div></div>
+  </div>
+  <div style="flex:none;margin:30px 0 12px;font-size:16px;font-weight:500;color:#F5F5F5">Você concluiu a meta?</div>
+  <div style="flex:none;display:flex;flex-direction:column;gap:9px">
+    <sc-for list="{{ answerOpts }}" as="o" hint-placeholder-count="3">
+      <button onClick="{{ o.on }}" style="display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-radius:13px;background:{{ o.bg }};border:1px solid {{ o.bd }};cursor:pointer;font-family:inherit;text-align:left;transition:background .15s" style-active="transform:scale(.99)">
+        <span style="width:20px;height:20px;border-radius:50%;border:1.5px solid {{ o.rbd }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:50%;background:{{ o.rdot }};transition:background .15s"></span></span>
+        <span style="font-size:15px;font-weight:500;color:#F5F5F5">{{ o.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+  <sc-if value="{{ answered }}" hint-placeholder-val="{{ false }}">
+    <input value="{{ note }}" onChange="{{ onNote }}" placeholder="Adicionar nota curta (opcional)" style="flex:none;margin-top:18px;width:100%;height:48px;padding:0 15px;border-radius:12px;background:#0A0A0B;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:14px"></input>
+  </sc-if>
+  <div style="flex:1;min-height:16px"></div>
+  <sc-if value="{{ answered }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ finishComplete }}" style="flex:none;margin-top:20px;width:100%;height:52px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">{{ completeCta }}</button>
+  </sc-if>
+  <button onClick="{{ goHome }}" style="flex:none;margin-top:10px;width:100%;height:48px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="background:#121214">Voltar ao início</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHabits }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Hábitos" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ goHome }}" style="background:none;border:none;padding:8px 8px 8px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+    <h1 style="margin:0;font-size:31px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Hábitos</h1>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;margin:18px 0 8px;padding:0 2px">
+    <div style="flex:1"><div style="font-size:13px;color:#A3A3AA">Consistência da semana</div><div style="font-size:26px;font-weight:600;letter-spacing:-.02em;color:#F5F5F5;margin-top:2px">86%</div></div>
+    <div style="display:flex;gap:6px">
+      <sc-for list="{{ weekDots }}" as="d" hint-placeholder-count="7"><div style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:11px;color:#707077">{{ d.l }}</span><span style="width:10px;height:10px;border-radius:50%;background:{{ d.bg }};border:1px solid {{ d.bd }}"></span></div></sc-for>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <sc-for list="{{ habitsList }}" as="h" hint-placeholder-count="4">
+      <div style="display:flex;align-items:center;gap:13px;padding:15px 2px;border-bottom:1px solid #121214;opacity:{{ h.rowOp }}">
+        <button onClick="{{ h.onToggle }}" style="width:24px;height:24px;flex:none;border-radius:50%;border:1.5px solid {{ h.cbd }};background:{{ h.cbg }};display:flex;align-items:center;justify-content:center;color:#080808;cursor:pointer;transition:background .15s,border-color .15s;padding:0" style-active="transform:scale(.9)">{{ h.check }}</button>
+        <button onClick="{{ h.onOpen }}" style="flex:1;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left;min-width:0">
+          <div style="font-size:15px;font-weight:500;color:{{ h.c }}">{{ h.n }}</div>
+          <div style="font-size:13px;color:#707077;margin-top:2px">{{ h.sub }}</div>
+        </button>
+        <span style="color:#707077;display:flex">{{ chevR }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <button onClick="{{ openAddHabit }}" style="margin-top:20px;width:100%;height:50px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-active="background:#121214">{{ plusIcon }} Adicionar hábito</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHabitDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Detalhe do hábito" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ goHabits }}" style="background:none;border:none;padding:8px 8px 8px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+    <h1 style="margin:0;font-size:27px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">{{ hdName }}</h1>
+  </div>
+  <div style="font-size:13px;color:#707077;margin:8px 0 24px;padding-left:34px">Vinculado a Estudos · todos os dias · meta {{ hdMeta }}</div>
+  <div style="display:flex;border:1px solid #1B1B1E;border-radius:14px;background:#0A0A0B;overflow:hidden;margin-bottom:26px">
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">{{ hdStreak }}</div><div style="font-size:12px;color:#707077;margin-top:3px">sequência atual</div></div>
+    <div style="width:1px;background:#1B1B1E"></div>
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">21</div><div style="font-size:12px;color:#707077;margin-top:3px">melhor sequência</div></div>
+    <div style="width:1px;background:#1B1B1E"></div>
+    <div style="flex:1;padding:16px 0;text-align:center"><div style="font-size:22px;font-weight:600;color:#F5F5F5">84%</div><div style="font-size:12px;color:#707077;margin-top:3px">conclusão</div></div>
+  </div>
+  <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:12px">Últimas duas semanas</div>
+  <div style="display:grid;grid-template-columns:repeat(14,1fr);gap:5px;margin-bottom:30px">
+    <sc-for list="{{ hdHistory }}" as="d" hint-placeholder-count="14"><div style="aspect-ratio:1;border-radius:6px;background:{{ d.bg }};border:1px solid {{ d.bd }}"></div></sc-for>
+  </div>
+  <div>
+    <button onClick="{{ openEditHabit }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 2px;background:none;border:none;border-top:1px solid #121214;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit" style-active="opacity:.7"><span style="font-size:15px;color:#F5F5F5">Editar hábito</span><span style="color:#707077;display:flex">{{ chevR }}</span></button>
+    <button onClick="{{ pauseHabit }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit" style-active="opacity:.7"><span style="font-size:15px;color:#F5F5F5">{{ pauseHabitLabel }}</span><span style="color:#707077;display:flex">{{ chevR }}</span></button>
+    <button onClick="{{ archiveHabit }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit" style-active="opacity:.7"><span style="font-size:15px;color:#A3A3AA">Arquivar</span><span style="color:#707077;display:flex">{{ chevR }}</span></button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInsights }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Insights" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <h1 style="margin:0 0 16px;font-size:31px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Insights</h1>
+  <div style="display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:11px;padding:3px;gap:3px;margin-bottom:24px">
+    <sc-for list="{{ insightsSeg }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;height:38px;border:none;border-radius:8px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:14px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+  </div>
+
+  <sc-if value="{{ insIsHoje }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:0 2px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <span style="font-size:13px;color:#A3A3AA">Tempo de tela hoje</span>
+        <span style="font-size:13px;color:#A3A3AA">+42 min vs ontem</span>
+      </div>
+      <div style="font-size:40px;font-weight:600;letter-spacing:-.03em;color:#F5F5F5;margin:4px 0 14px">6h 24m</div>
+      <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px">
+        <div style="width:60%;background:#F5F5F5;border-radius:3px"></div><div style="width:10%;background:#707077;border-radius:3px"></div><div style="width:30%;background:#29292D;border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:18px;margin-top:10px">
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#A3A3AA"><span style="width:8px;height:8px;border-radius:2px;background:#F5F5F5"></span>Produtivo 3h50</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#A3A3AA"><span style="width:8px;height:8px;border-radius:2px;background:#707077"></span>Neutro 40m</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#A3A3AA"><span style="width:8px;height:8px;border-radius:2px;background:#29292D"></span>Distração 2h34</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:13px;padding:24px 2px 0">
+      <div style="width:2px;flex:none;border-radius:1px;background:#29292D"></div>
+      <p style="margin:0;font-size:14px;line-height:1.55;color:#A3A3AA;text-wrap:pretty"><span style="color:#F5F5F5;font-weight:500">46 min</span> das suas distrações aconteceram durante blocos de estudo planejados — principalmente entre <span style="color:#F5F5F5;font-weight:500">14h e 16h</span>.</p>
+    </div>
+
+    <div style="margin:28px 0 0;padding:0 2px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px">
+        <span style="font-size:17px;font-weight:500;color:#F5F5F5">Uso por horário</span>
+        <span style="font-size:13px;color:#707077">pico 14h – 16h</span>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:5px;height:120px">
+        <sc-for list="{{ hourBars }}" as="b" hint-placeholder-count="8">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end">
+            <span style="font-size:11px;font-weight:600;color:{{ b.vc }}">{{ b.val }}</span>
+            <div style="width:100%;height:{{ b.v }}%;border-radius:4px 4px 2px 2px;background:{{ b.bg }};min-height:3px"></div>
+            <span style="font-size:12px;color:{{ b.lc }};font-weight:{{ b.lw }}">{{ b.l }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin:30px 0 0;padding:0 2px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:17px;font-weight:500;color:#F5F5F5">Principais distrações</span>
+        <span style="font-size:13px;color:#707077">14 tentativas bloqueadas</span>
+      </div>
+      <sc-for list="{{ distractions }}" as="d" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #121214">
+          <div style="width:38px;height:38px;flex:none;border-radius:11px;background:#121214;border:1px solid #1B1B1E;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#A3A3AA">{{ d.ini }}</div>
+          <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:500;color:#F5F5F5">{{ d.n }}</div><div style="font-size:13px;color:#707077;margin-top:2px">{{ d.sub }}</div></div>
+          <span style="font-size:14px;font-weight:600;color:#F5F5F5">{{ d.t }}</span>
+        </div>
+      </sc-for>
+      <button onClick="{{ goBlockedApps }}" style="margin-top:18px;width:100%;height:48px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer" style-active="background:#121214">Ajustar limites de apps</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ insIsSemana }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:0 2px">
+      <div style="font-size:12px;font-weight:500;letter-spacing:.08em;color:#707077;text-transform:uppercase">Revisão semanal · 27 jul – 2 ago</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+        <span style="font-size:44px;font-weight:600;letter-spacing:-.03em;color:#F5F5F5">81%</span>
+        <span style="font-size:13px;color:#A3A3AA">taxa de execução · +2 pts vs semana anterior</span>
+      </div>
+      <div style="height:4px;border-radius:2px;background:#1B1B1E;margin-top:12px;overflow:hidden"><div style="width:81%;height:100%;background:#F5F5F5;border-radius:2px"></div></div>
+    </div>
+    <div style="margin-top:22px">
+      <sc-for list="{{ weekMetrics }}" as="m" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 2px;border-bottom:1px solid #121214">
+          <span style="font-size:15px;color:#A3A3AA">{{ m.l }}</span><span style="font-size:15px;font-weight:600;color:#F5F5F5">{{ m.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin:28px 0 0;padding:0 2px">
+      <div style="font-size:17px;font-weight:500;color:#F5F5F5;margin-bottom:6px">Padrões detectados</div>
+      <sc-for list="{{ patterns }}" as="p" hint-placeholder-count="3">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:11px 0;border-bottom:1px solid #121214">
+          <span style="font-size:14px;color:#A3A3AA">{{ p.l }}</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">{{ p.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:26px;background:#0E0E10;border:1px solid #29292D;border-radius:16px;padding:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 12px 32px rgba(0,0,0,.5)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.09em;color:#A3A3AA;text-transform:uppercase">Recomendação da semana</div>
+      <p style="margin:10px 0 16px;font-size:17px;line-height:1.45;font-weight:500;color:#F5F5F5;letter-spacing:-.01em;text-wrap:pretty">Bloqueie apps sociais entre 13:30 e 18:00 na próxima semana para proteger sua janela da tarde.</p>
+      <button onClick="{{ applyRule }}" style="width:100%;height:48px;border-radius:12px;background:{{ ruleBg }};border:1px solid {{ ruleBd }};color:{{ ruleC }};font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background .2s;box-shadow:{{ ruleShadow }}" style-active="transform:scale(.98)">{{ ruleLabel }}</button>
+    </div>
+    <button onClick="{{ toggleReflect }}" style="margin-top:26px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 2px;background:none;border:none;border-top:1px solid #121214;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit" style-active="opacity:.7">
+      <span style="font-size:15px;color:#F5F5F5">Reflexão da semana <span style="color:#707077">· opcional</span></span><span style="color:#707077;display:flex">{{ reflectChev }}</span>
+    </button>
+    <sc-if value="{{ reflectOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:12px;padding-top:16px">
+        <textarea placeholder="O que funcionou?" style="width:100%;min-height:74px;padding:12px 14px;border-radius:12px;background:#0A0A0B;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:14px;resize:none"></textarea>
+        <textarea placeholder="O que deve mudar?" style="width:100%;min-height:74px;padding:12px 14px;border-radius:12px;background:#0A0A0B;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:14px;resize:none"></textarea>
+      </div>
+    </sc-if>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Perfil" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;gap:16px;margin:8px 0 6px">
+    <div style="width:58px;height:58px;border-radius:50%;background:#121214;border:1px solid #29292D;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#F5F5F5">{{ userInitial }}</div>
+    <div><div style="font-size:22px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">{{ usuario }}</div><div style="font-size:13px;color:#707077;margin-top:2px">No StayOn desde março de 2026</div></div>
+  </div>
+  <div style="margin-top:26px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Sistema pessoal</div>
+  <sc-for list="{{ profSystem }}" as="r" hint-placeholder-count="5">
+    <button onClick="{{ r.on }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+      <span style="font-size:15px;color:#F5F5F5">{{ r.l }}</span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;color:#707077">{{ r.v }}</span><span style="color:#707077;display:flex">{{ chevR }}</span></span>
+    </button>
+  </sc-for>
+  <div style="margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Controle de distrações</div>
+  <button onClick="{{ goBlockedApps }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+    <span style="font-size:15px;color:#F5F5F5">Apps bloqueados</span>
+    <span style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;color:#707077">{{ blockedCount }}</span><span style="color:#707077;display:flex">{{ chevR }}</span></span>
+  </button>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px;border-bottom:1px solid #121214">
+    <span style="font-size:15px;color:#F5F5F5">Nível de intervenção</span>
+    <div style="display:flex;background:#0A0A0B;border:1px solid #1B1B1E;border-radius:9px;padding:2px;gap:2px">
+      <sc-for list="{{ profLevelSeg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="height:32px;padding:0 12px;border:none;border-radius:7px;background:{{ o.bg }};color:{{ o.c }};font-family:inherit;font-size:13px;font-weight:{{ o.w }};cursor:pointer">{{ o.label }}</button></sc-for>
+    </div>
+  </div>
+  <button onClick="{{ goFocusRules }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+    <span style="font-size:15px;color:#F5F5F5">Regras de foco</span>
+    <span style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;color:#707077">{{ rulesCount }}</span><span style="color:#707077;display:flex">{{ chevR }}</span></span>
+  </button>
+  <div style="margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Conexões</div>
+  <sc-for list="{{ profConn }}" as="r" hint-placeholder-count="4">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;border-bottom:1px solid #121214">
+      <span style="font-size:15px;color:#F5F5F5">{{ r.l }}</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.dot }}"></span><span style="font-size:13px;color:{{ r.vc }}">{{ r.v }}</span></span>
+    </div>
+  </sc-for>
+  <div style="margin-top:28px;font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase">Aplicativo</div>
+  <sc-for list="{{ profApp }}" as="r" hint-placeholder-count="5">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;border-bottom:1px solid #121214">
+      <span style="font-size:15px;color:#F5F5F5">{{ r.l }}</span>
+      <span style="font-size:13px;color:#707077">{{ r.v }}</span>
+    </div>
+  </sc-for>
+  <button onClick="{{ signOut }}" style="margin:26px 0 0;background:none;border:none;padding:8px 2px;cursor:pointer;font-family:inherit;font-size:14px;color:#707077">Sair da conta</button>
+  <div style="text-align:center;font-size:12px;color:#29292D;margin-top:18px">StayOn 1.0 (42)</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBlockedApps }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Apps bloqueados" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ backFromBlocked }}" style="background:none;border:none;padding:8px 8px 8px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+    <h1 style="margin:0;font-size:27px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Apps bloqueados</h1>
+  </div>
+  <p style="margin:8px 0 18px;padding-left:34px;font-size:13px;line-height:1.5;color:#707077">Bloqueados apenas durante blocos de foco, no nível {{ levelLower }}.</p>
+  <sc-for list="{{ blockedList }}" as="a" hint-placeholder-count="6">
+    <button onClick="{{ a.on }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:14px 2px;background:none;border:none;border-bottom:1px solid #121214;cursor:pointer;font-family:inherit;text-align:left" style-active="opacity:.7">
+      <div style="width:38px;height:38px;flex:none;border-radius:11px;background:#121214;border:1px solid #1B1B1E;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#A3A3AA">{{ a.ini }}</div>
+      <span style="flex:1;font-size:15px;color:#F5F5F5">{{ a.n }}</span>
+      <span style="width:44px;height:26px;flex:none;border-radius:13px;background:{{ a.swBg }};border:1px solid {{ a.swBd }};position:relative;transition:background .2s"><span style="position:absolute;top:2px;left:{{ a.swL }}px;width:20px;height:20px;border-radius:50%;background:{{ a.knob }};transition:left .2s"></span></span>
+    </button>
+  </sc-for>
+  <p style="margin:16px 2px 0;font-size:13px;line-height:1.5;color:#707077">Tentativas de abrir estes apps durante o foco aparecem em Insights.</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFocusRules }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Regras de foco" style="flex:1;overflow-y:auto;padding:8px 20px 120px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onClick="{{ goProfile }}" style="background:none;border:none;padding:8px 8px 8px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+    <h1 style="margin:0;font-size:27px;font-weight:500;letter-spacing:-.02em;color:#F5F5F5">Regras de foco</h1>
+  </div>
+  <p style="margin:8px 0 18px;padding-left:34px;font-size:13px;line-height:1.5;color:#707077">Regras são aplicadas automaticamente na agenda.</p>
+  <sc-for list="{{ rulesList }}" as="r" hint-placeholder-count="2">
+    <div style="display:flex;align-items:center;gap:13px;padding:15px 2px;border-bottom:1px solid #121214">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:500;color:#F5F5F5">{{ r.t }}</div>
+        <div style="font-size:13px;color:#707077;margin-top:2px">{{ r.d }}</div>
+      </div>
+      <button onClick="{{ r.on }}" style="width:44px;height:26px;flex:none;border-radius:13px;background:{{ r.swBg }};border:1px solid {{ r.swBd }};position:relative;transition:background .2s;cursor:pointer;padding:0"><span style="position:absolute;top:2px;left:{{ r.swL }}px;width:20px;height:20px;border-radius:50%;background:{{ r.knob }};transition:left .2s"></span></button>
+    </div>
+  </sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;border-top:1px solid #121214;background:rgba(5,5,5,.92);backdrop-filter:blur(20px);padding:8px 8px 26px;display:flex">
+  <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+    <button onClick="{{ t.on }}" style="flex:1;background:none;border:none;padding:6px 0 0;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;color:{{ t.c }};transition:color .15s" style-active="opacity:.7">
+      {{ t.icon }}
+      <span style="font-size:11px;font-weight:{{ t.w }};letter-spacing:.01em">{{ t.label }}</span>
+    </button>
+  </sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetCapture }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+
+    <sc-if value="{{ capIsMenu }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5;margin-bottom:16px">Capturar</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <sc-for list="{{ captureOpts }}" as="o" hint-placeholder-count="6">
+          <button onClick="{{ o.on }}" style="display:flex;align-items:center;gap:11px;height:54px;padding:0 14px;border-radius:13px;background:#0E0E10;border:1px solid #1B1B1E;cursor:pointer;font-family:inherit;text-align:left" style-active="background:#121214">
+            <span style="color:#A3A3AA;display:flex">{{ o.icon }}</span>
+            <span style="font-size:14px;font-weight:500;color:#F5F5F5">{{ o.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:9px">
+        <input value="{{ captureText }}" onChange="{{ onCaptureText }}" placeholder="Tenho prova de banco sexta e preciso estudar 4 capítulos…" style="flex:1;height:50px;padding:0 15px;border-radius:13px;background:#050505;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:14px"></input>
+        <button onClick="{{ parseCapture }}" style="height:50px;padding:0 18px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF;color:#080808;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;flex:none" style-active="transform:scale(.97);filter:brightness(.93)">Criar</button>
+      </div>
+      <p style="margin:10px 2px 0;font-size:12px;line-height:1.5;color:#707077">Escreva naturalmente — você revisa os campos antes de salvar.</p>
+    </sc-if>
+
+    <sc-if value="{{ capIsForm }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <button onClick="{{ capBack }}" style="background:none;border:none;padding:4px 6px 4px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+        <span style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">{{ capFormTitle }}</span>
+      </div>
+      <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:8px">Título</div>
+      <input value="{{ capName }}" onChange="{{ onCapName }}" placeholder="{{ capPlaceholder }}" style="width:100%;height:50px;padding:0 15px;border-radius:13px;background:#050505;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:15px"></input>
+      <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin:18px 0 8px">{{ capMetaLabel }}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ capMetaChips }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="height:40px;padding:0 16px;border-radius:20px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+      </div>
+      <button onClick="{{ capSave }}" style="margin-top:22px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Adicionar</button>
+    </sc-if>
+
+    <sc-if value="{{ capIsReview }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <button onClick="{{ capBack }}" style="background:none;border:none;padding:4px 6px 4px 0;cursor:pointer;color:#A3A3AA;display:flex">{{ chevL }}</button>
+        <span style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">Revisar antes de salvar</span>
+      </div>
+      <p style="margin:0 0 14px 30px;font-size:13px;color:#707077">Organizamos sua anotação nestes campos.</p>
+      <div style="background:#050505;border:1px solid #1B1B1E;border-radius:14px;padding:4px 15px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 0;border-bottom:1px solid #121214"><span style="font-size:13px;color:#707077">Tipo</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">Tarefa + data importante</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid #121214"><span style="font-size:13px;color:#707077;flex:none">Título</span><span style="font-size:14px;font-weight:500;color:#F5F5F5;text-align:right">{{ parsedTitle }}</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 0;border-bottom:1px solid #121214"><span style="font-size:13px;color:#707077">Quando</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">Sexta, 8 de ago</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 0"><span style="font-size:13px;color:#707077">Vinculado a</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">Estudos</span></div>
+      </div>
+      <button onClick="{{ confirmParsed }}" style="margin-top:16px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Salvar e planejar</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetReplan }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+    <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">Replanejar bloco</div>
+    <p style="margin:6px 0 16px;font-size:14px;color:#A3A3AA">Você perdeu “Estudar Spring Boot” às 14:30.</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ replanOpts }}" as="o" hint-placeholder-count="5">
+        <button onClick="{{ o.on }}" style="display:flex;align-items:center;gap:12px;min-height:50px;padding:12px 15px;border-radius:13px;background:{{ o.bg }};border:1px solid {{ o.bd }};cursor:pointer;font-family:inherit;text-align:left;transition:background .15s" style-active="transform:scale(.99)">
+          <span style="width:20px;height:20px;flex:none;border-radius:50%;border:1.5px solid {{ o.rbd }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:50%;background:{{ o.rdot }};transition:background .15s"></span></span>
+          <span style="flex:1;font-size:15px;font-weight:500;color:#F5F5F5">{{ o.label }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:13px;padding:14px 2px 0">
+      <div style="width:2px;flex:none;border-radius:1px;background:#29292D"></div>
+      <p style="margin:0;font-size:13px;line-height:1.5;color:#707077;text-wrap:pretty">{{ replanImpact }}</p>
+    </div>
+    <button onClick="{{ confirmReplan }}" style="margin-top:16px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Confirmar replanejamento</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetSchedule }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+    <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">Agendar tarefa</div>
+    <p style="margin:6px 0 16px;font-size:14px;color:#A3A3AA">“{{ schedTaskName }}” · horários com espaço livre:</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ schedOpts }}" as="o" hint-placeholder-count="4">
+        <button onClick="{{ o.on }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;padding:12px 15px;border-radius:13px;background:#0E0E10;border:1px solid #1B1B1E;cursor:pointer;font-family:inherit;text-align:left" style-active="background:#121214">
+          <span style="font-size:15px;font-weight:500;color:#F5F5F5">{{ o.label }}</span>
+          <span style="font-size:13px;color:#707077">{{ o.d }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetReview }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+    <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">Resumo da semana</div>
+    <div style="margin-top:12px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Planejadas</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">18h em 6 dias</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Resultados em andamento</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">3</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Sem horário</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">{{ unschedCount }} tarefas</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Sobrecarga</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">quarta · +1h30</span></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;padding:12px 2px;border-bottom:1px solid #121214"><span style="font-size:14px;color:#A3A3AA">Com espaço</span><span style="font-size:14px;font-weight:500;color:#F5F5F5">quinta e sábado</span></div>
+    </div>
+    <p style="margin:12px 2px 0;font-size:13px;line-height:1.5;color:#707077">Nada é alterado sem a sua confirmação.</p>
+    <button onClick="{{ reviewSchedule }}" style="margin-top:14px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Agendar tarefas sem horário</button>
+    <button onClick="{{ closeSheet }}" style="margin-top:9px;width:100%;height:48px;border-radius:13px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="background:#121214">Fechar</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetNewEvent }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+    <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5">Novo compromisso</div>
+    <p style="margin:6px 0 16px;font-size:14px;color:#A3A3AA">{{ selDataLabel }}</p>
+    <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:8px">Título</div>
+    <input value="{{ evName }}" onChange="{{ onEvName }}" placeholder="Ex.: Consulta médica" style="width:100%;height:50px;padding:0 15px;border-radius:13px;background:#050505;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:15px"></input>
+    <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin:18px 0 8px">Horário</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ evTimeChips }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.on }}" style="height:40px;padding:0 16px;border-radius:20px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+    </div>
+    <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin:18px 0 8px">Tipo</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ evTypeChips }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.on }}" style="height:40px;padding:0 16px;border-radius:20px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+    </div>
+    <button onClick="{{ saveEvent }}" style="margin-top:22px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Salvar compromisso</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetEditHabit }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:40">
+  <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(0,0,0,.65);animation:fadeIn .2s"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#0A0A0B;border-top:1px solid #1B1B1E;border-radius:22px 22px 0 0;padding:10px 20px 32px;animation:sheetUp .25s cubic-bezier(.32,.72,.3,1)">
+    <div style="width:36px;height:4px;border-radius:2px;background:#29292D;margin:0 auto 18px"></div>
+    <div style="font-size:19px;font-weight:500;letter-spacing:-.01em;color:#F5F5F5;margin-bottom:16px">{{ habitSheetTitle }}</div>
+    <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin-bottom:8px">Nome</div>
+    <input value="{{ editName }}" onChange="{{ onEditName }}" placeholder="Ex.: Ler 20 min" style="width:100%;height:50px;padding:0 15px;border-radius:13px;background:#050505;border:1px solid #1B1B1E;color:#F5F5F5;font-family:inherit;font-size:15px"></input>
+    <div style="font-size:12px;font-weight:500;letter-spacing:.07em;color:#707077;text-transform:uppercase;margin:18px 0 8px">Frequência</div>
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ freqChips }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="flex:1;height:42px;border-radius:12px;background:{{ o.bg }};border:1px solid {{ o.bd }};color:#F5F5F5;font-family:inherit;font-size:13px;font-weight:{{ o.w }};cursor:pointer;transition:background .15s">{{ o.label }}</button></sc-for>
+    </div>
+    <button onClick="{{ saveHabit }}" style="margin-top:22px;width:100%;height:50px;border-radius:13px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45);color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Salvar</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ confirmEnd }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:32px">
+  <div onClick="{{ cancelEnd }}" style="position:absolute;inset:0;background:rgba(0,0,0,.7);animation:fadeIn .2s"></div>
+  <div style="position:relative;width:100%;background:#0E0E10;border:1px solid #29292D;border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 60px rgba(0,0,0,.7);animation:fadeIn .2s">
+    <div style="font-size:18px;font-weight:500;color:#F5F5F5;letter-spacing:-.01em">Encerrar a sessão?</div>
+    <p style="margin:8px 0 20px;font-size:14px;line-height:1.5;color:#A3A3AA">Faltam {{ timerStr }} para o fim. Você pode pausar em vez de encerrar.</p>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <button onClick="{{ cancelEnd }}" style="width:100%;height:48px;border-radius:12px;background:linear-gradient(180deg,#FFFFFF,#ECECEE);border:none;box-shadow:inset 0 1px 0 #FFFFFF;color:#080808;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="transform:scale(.98);filter:brightness(.93)">Continuar focando</button>
+      <button onClick="{{ endNow }}" style="width:100%;height:48px;border-radius:12px;background:transparent;border:1px solid #29292D;color:#F5F5F5;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer" style-active="background:#121214">Encerrar agora</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastShow }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }}px;z-index:60;display:flex;justify-content:center;pointer-events:none">
+  <div style="display:flex;align-items:center;gap:14px;background:#121214;border:1px solid #29292D;border-radius:12px;padding:12px 16px;box-shadow:0 12px 32px rgba(0,0,0,.6);animation:toastIn .2s;max-width:100%;pointer-events:auto">
+    <span style="font-size:14px;font-weight:500;color:#F5F5F5">{{ toastText }}</span>
+    <sc-if value="{{ toastHasUndo }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ toastUndo }}" style="background:none;border:none;padding:4px 0;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#F5F5F5;text-decoration:underline;text-underline-offset:3px;flex:none">Desfazer</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;usuario&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;João&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Conta&quot;},&quot;telaInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Onboarding&quot;,&quot;Início&quot;],&quot;default&quot;:&quot;Onboarding&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Protótipo&quot;},&quot;nivelIntervencao&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Suave&quot;,&quot;Equilibrado&quot;,&quot;Rígido&quot;],&quot;default&quot;:&quot;Equilibrado&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Foco&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: null, onbStep: 0,
+    sel: { goals:['Estudos'], habits:['Ler 20 min','Estudar 1h'], apps:['Instagram','TikTok','YouTube'], wake:'07:00', dur:'50 min', when:['Manhã'], days:['S','T','Q','Q2','S2'] },
+    level: null, perms: {},
+    plannerView: 'dia', insightsView: 'hoje', selDay: 1,
+    tasks: [
+      {id:1,t:'Aula em vídeo (System Design)',tag:'Aprendizado',done:false},
+      {id:2,t:'Estudar documentação da API',tag:'Dev',done:false},
+      {id:3,t:'Atualizar repositório do portfólio',tag:'Carreira',done:false},
+    ],
+    habits: [
+      {id:1,n:'Ler 20 min',meta:'20 min/dia',streak:12,done:true,prog:'20/20 min',paused:false},
+      {id:2,n:'Estudar 1h',meta:'60 min/dia',streak:21,done:false,prog:'34/60 min',paused:false},
+      {id:3,n:'Beber 8 copos de água',meta:'8 copos',streak:5,done:false,prog:'5/8 copos',paused:false},
+      {id:4,n:'Dormir antes das 23h',meta:'diário',streak:3,done:false,prog:'ontem: 23:40',paused:false},
+    ],
+    habitSel: 1,
+    unscheduled: [
+      {id:1,t:'Revisar anotações',d:'~30 min'},
+      {id:2,t:'E-mail do orientador',d:'~15 min'},
+      {id:3,t:'Comprar presente da Ana',d:'~20 min'},
+      {id:4,t:'Agendar dentista',d:'~10 min'},
+    ],
+    dur: 50, secondsLeft: 3000, focusTotal: 3000, running:false, paused:false, interruptions:0, mode:null,
+    sessionAnswer: null, note:'', captureText:'',
+    capMode: null, capName:'', capMeta:null, parsed:null,
+    editHabitMode: null, editName:'', editFreq:'Diário',
+    schedTask: null,
+    dataSel: 4, userEvents: {}, evName:'', evTime:'09:00', evType:'Pessoal',
+    replanApplied:false, replanChoice:0, ruleApplied:false, rule1:true, reflectOpen:false,
+    sheet:null, confirmEnd:false, toast:null,
+  };
+  componentDidMount(){
+    this._t = setInterval(()=>{
+      const s=this.state;
+      if(s.running && !s.paused && s.screen==='focusSession'){
+        if(s.secondsLeft<=1) this.setState({secondsLeft:0,running:false,screen:'sessionComplete'});
+        else this.setState({secondsLeft:s.secondsLeft-1});
+      }
+    },1000);
+  }
+  componentWillUnmount(){ clearInterval(this._t); clearTimeout(this._tt); }
+  go(sc,extra){ this.setState(Object.assign({screen:sc,sheet:null},extra||{})); }
+  toastMsg(m,undo){ this.setState({toast:{m,undo:undo||null}}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2600); }
+  icon(paths,sz,sw){ return React.createElement('svg',{width:sz||22,height:sz||22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:sw||1.7,strokeLinecap:'round',strokeLinejoin:'round',style:{display:'block',flex:'none'}}, paths.map((d,i)=>React.createElement('path',{key:i,d}))); }
+  seg(opts,cur,on){ return opts.map(o=>({label:o, on:()=>on(o), bg:o===cur?'#FFFFFF':'transparent', c:o===cur?'#080808':'#A3A3AA', w:o===cur?600:400})); }
+  multi(opts,arr,key){ return opts.map(o=>{const label=o.label||o;const sel=arr.includes(label);return Object.assign({},typeof o==='object'?o:{label:o},{ on:()=>this.setState(s=>{const a=s.sel[key].includes(label)?s.sel[key].filter(x=>x!==label):s.sel[key].concat(label);return {sel:Object.assign({},s.sel,{[key]:a})};}), bg:sel?'#121214':'#0A0A0B', bd:sel?'#29292D':'#1B1B1E', w:sel?600:400, cbd:sel?'#F5F5F5':'#29292D', cbg:sel?'#F5F5F5':'transparent', cop:sel?1:0 });}); }
+  toggleHabit(id){
+    const h=this.state.habits.find(x=>x.id===id); if(!h||h.paused) return;
+    const was=h.done;
+    const upd=(done)=>this.setState(s=>({habits:s.habits.map(y=>y.id===id?Object.assign({},y,{done}):y)}));
+    upd(!was);
+    if(!was) this.toastMsg('Hábito concluído',()=>{upd(false);this.setState({toast:null});});
+  }
+  renderVals(){
+    const s=this.state, P=this.props;
+    const screen = s.screen ?? ((P.telaInicial==='Início')?'home':'onboarding');
+    const level = s.level ?? P.nivelIntervencao ?? 'Equilibrado';
+    const usuario = P.usuario ?? 'João';
+    const F = (sc)=> screen===sc;
+    const ic = (p,sz,sw)=>this.icon(p,sz,sw);
+    const goHome=()=>this.go('home'), goHabits=()=>this.go('habits');
+    const icons = {
+      home: ['M3 10.5 12 3l9 7.5','M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5'],
+      planner: ['M4 5.5h16a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1z','M3 10h18','M8 3v4','M16 3v4'],
+      focus: ['M8 3H5.5A2.5 2.5 0 0 0 3 5.5V8','M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8','M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16','M16 21h2.5a2.5 2.5 0 0 0 2.5-2.5V16','M12 9.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z'],
+      insights: ['M5 21v-8','M12 21V6','M19 21v-5'],
+      profile: ['M12 12a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4z','M4.5 21c.6-3.8 3.7-6 7.5-6s6.9 2.2 7.5 6'],
+      grad: ['m3 9 9-4.5L21 9l-9 4.5L3 9z','M7 11.2V16c0 1.2 2.2 2.3 5 2.3s5-1.1 5-2.3v-4.8'],
+      case: ['M4 8.5h16a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1z','M9 8.5V6.8A1.8 1.8 0 0 1 10.8 5h2.4A1.8 1.8 0 0 1 15 6.8v1.7'],
+      heart: ['M12 20.5S4.5 16 4.5 10.4A4.2 4.2 0 0 1 12 7.8a4.2 4.2 0 0 1 7.5 2.6C19.5 16 12 20.5 12 20.5z'],
+      book: ['M12 6.5c-2.2-1.6-5.3-1.6-8 0v12.8c2.7-1.6 5.8-1.6 8 0 2.2-1.6 5.3-1.6 8 0V6.5c-2.7-1.6-5.8-1.6-8 0z','M12 6.5v12.8'],
+      tool: ['M14 7l3 3-8.5 8.5a2.1 2.1 0 0 1-3-3L14 7z','M14 7l2.5-2.5a2.1 2.1 0 0 1 3 3L17 10'],
+      plus: ['M12 5v14','M5 12h14'],
+      target: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z','M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z'],
+      mic: ['M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z','M6 11a6 6 0 0 0 12 0','M12 17v4'],
+      cal2: ['M4 5.5h16a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1z','M3 10h18','M8 3v4','M16 3v4'],
+    };
+    const tabIds=[['home','Início',icons.home],['planner','Planejar',icons.planner],['focusSetup','Foco',icons.focus],['insights','Insights',icons.insights],['profile','Perfil',icons.profile]];
+    const secondaryOf={habits:'home',habitDetail:'home',blockedApps:'profile',focusRules:'profile'};
+    const activeTab = secondaryOf[screen]||screen;
+    const tabs = tabIds.map(([id,label,d])=>({label, icon:ic(d,23,activeTab===id?2:1.6), c:activeTab===id?'#F5F5F5':'#707077', w:activeTab===id?600:400, on:()=>this.go(id)}));
+    // onboarding
+    const steps=[
+      {t:'No que você quer progredir?', s:'Escolha suas áreas principais. Você pode ajustar depois.'},
+      {t:'Como é a sua rotina?', s:'Usamos isso para sugerir os melhores horários de foco.'},
+      {t:'Quais hábitos você quer manter?', s:'Comece pequeno — consistência vale mais que volume.'},
+      {t:'O que mais te distrai?', s:'O StayOn só intervém quando você estiver em foco, e explica cada permissão antes de pedir.'},
+    ];
+    const st=s.onbStep;
+    const goalIcons={'Estudos':icons.grad,'Carreira':icons.case,'Saúde':icons.heart,'Leitura':icons.book,'Projetos pessoais':icons.tool,'Objetivo personalizado':icons.plus};
+    const goalsList=this.multi(['Estudos','Carreira','Saúde','Leitura','Projetos pessoais','Objetivo personalizado'],s.sel.goals,'goals').map(g=>Object.assign(g,{icon:ic(goalIcons[g.label],21)}));
+    const habitDefs=[{label:'Ler 20 min',meta:'diário'},{label:'Exercício',meta:'3x por semana'},{label:'Beber água',meta:'8 copos'},{label:'Dormir cedo',meta:'antes das 23h'},{label:'Estudar 1h',meta:'dias úteis'},{label:'Hábito personalizado',meta:''}];
+    const onbHabitsList=this.multi(habitDefs.map(h=>h.label),s.sel.habits,'habits').map((h,i)=>Object.assign(h,{meta:habitDefs[i].meta}));
+    const appsChips=this.multi(['Instagram','TikTok','YouTube','X','WhatsApp','Jogos'],s.sel.apps,'apps');
+    const setSel=(k,v)=>this.setState(x=>({sel:Object.assign({},x.sel,{[k]:v})}));
+    const levelDescs={'Suave':'Apenas lembretes quando você abrir um app distrativo durante o foco.','Equilibrado':'Bloqueio com opção de adiar por 2 minutos. Recomendado.','Rígido':'Bloqueio total durante blocos de foco. Sem exceções.'};
+    const permTypes=[['notif','Notificações','Lembretes de blocos e replanejamento'],['tempo','Tempo de uso','Necessário para medir distrações'],['cal','Calendário','Sincroniza seus compromissos fixos']];
+    const permsList=permTypes.map(([k,t,d])=>{const on=s.perms[k];return {t,d,label:on?'Permitido':'Permitir',bg:on?'transparent':'#FFFFFF',bd:on?'#29292D':'#FFFFFF',c:on?'#A3A3AA':'#080808',on:()=>this.setState(x=>({perms:Object.assign({},x.perms,{[k]:!x.perms[k]})}))};});
+    const dayLbl=['S','T','Q','Q2','S2','Sa','D'];
+    const daysChips=dayLbl.map(d=>{const sel=s.sel.days.includes(d);return {label:d.replace(/2|a/,''),bg:sel?'#121214':'transparent',bd:sel?'#29292D':'#1B1B1E',c:sel?'#F5F5F5':'#707077',on:()=>this.setState(x=>{const a=x.sel.days.includes(d)?x.sel.days.filter(y=>y!==d):x.sel.days.concat(d);return {sel:Object.assign({},x.sel,{days:a})};})};});
+    // tasks
+    const doneCount=s.tasks.filter(t=>t.done).length+2;
+    const total=s.tasks.length+2;
+    const tarefas=s.tasks.map(t=>({t:t.t,tag:t.tag,deco:t.done?'line-through':'none',c:t.done?'#707077':'#F5F5F5',cbd:t.done?'#F5F5F5':'#29292D',cbg:t.done?'#F5F5F5':'transparent',check:t.done?ic(['m5 12.5 4.5 4.5L19 7.5'],13,2.4):null,
+      on:()=>{const was=t.done;const upd=(done)=>this.setState(x=>({tasks:x.tasks.map(y=>y.id===t.id?Object.assign({},y,{done}):y)}));upd(!was);if(!was)this.toastMsg('Tarefa concluída',()=>{upd(false);this.setState({toast:null});});}}));
+    // habits
+    const mkHabit=(h)=>({n:h.n,prog:h.prog,c:h.done?'#707077':(h.paused?'#707077':'#F5F5F5'),rowOp:h.paused?.55:1,
+      sub:h.paused?'pausado':(h.prog+' · sequência de '+h.streak+' dias'),
+      cbd:h.done?'#F5F5F5':'#29292D',cbg:h.done?'#F5F5F5':'transparent',check:h.done?ic(['m5 12.5 4.5 4.5L19 7.5'],13,2.4):null,
+      on:()=>this.toggleHabit(h.id), onToggle:()=>this.toggleHabit(h.id), onOpen:()=>this.go('habitDetail',{habitSel:h.id})});
+    const habitsHome=s.habits.filter(h=>!h.paused).slice(0,2).map(mkHabit);
+    const habitsList=s.habits.map(mkHabit);
+    const hd=s.habits.find(h=>h.id===s.habitSel)||s.habits[0]||{n:'',meta:'',streak:0};
+    const histPattern=[1,1,0,1,1,1,2,1,1,1,0,1,1,1];
+    const hdHistory=histPattern.map(v=>({bg:v===1?'#F5F5F5':v===2?'#707077':'transparent',bd:v===0?'#29292D':'transparent'}));
+    const weekDots=['S','T','Q','Q','S','S','D'].map((l,i)=>({l,bg:i<4?'#F5F5F5':i===4?'#707077':'transparent',bd:i>4?'#29292D':'transparent'}));
+    // focus
+    const fmt=(t)=>{const m=Math.floor(t/60),ss=t%60;return m+':'+String(ss).padStart(2,'0');};
+    const ringPct=s.focusTotal>0?Math.max(0,Math.round(100*s.secondsLeft/s.focusTotal)):0;
+    const focadoMin=Math.max(1,Math.round((s.focusTotal-s.secondsLeft)/60));
+    const mode=s.mode||'Foco profundo';
+    const answers=['Concluí a meta','Parcialmente','Não concluí'];
+    const answerOpts=answers.map(a=>{const sel=s.sessionAnswer===a;return {label:a,bg:sel?'#121214':'#0A0A0B',bd:sel?'#29292D':'#1B1B1E',rbd:sel?'#F5F5F5':'#29292D',rdot:sel?'#F5F5F5':'transparent',on:()=>this.setState({sessionAnswer:a})};});
+    const ctaMap={'Concluí a meta':'Concluir tarefa','Parcialmente':'Manter pendente e replanejar','Não concluí':'Replanejar tarefa'};
+    // planner
+    const plannerSeg=this.seg(['Dia','Semana','Datas'],{dia:'Dia',semana:'Semana',datas:'Datas'}[s.plannerView],(o)=>this.setState({plannerView:{Dia:'dia',Semana:'semana',Datas:'datas'}[o]}));
+    const wk=[
+      {d:'dom',n:3,h:1,cap:6},{d:'seg',n:4,h:5,cap:8},{d:'ter',n:5,h:4,cap:8},
+      {d:'qua',n:6,h:9.5,cap:8,over:true},{d:'qui',n:7,h:2,cap:8},{d:'sex',n:8,h:5,cap:8},{d:'sáb',n:9,h:0,cap:6},
+    ];
+    const weekDays=wk.map((d,i)=>{const sel=s.selDay===i;return {
+      d:d.d, n:String(d.n), h:d.h?(String(d.h).replace('.5','h30')+(String(d.h).includes('.5')?'':'h')):'—',
+      bg:sel?'#F5F5F5':'transparent', bd:sel?'#F5F5F5':(d.over?'#29292D':'#1B1B1E'),
+      lc:sel?'#525258':'#707077', nc:sel?'#080808':'#F5F5F5', nw:sel?600:500,
+      hc:sel?'#525258':(d.over?'#F5F5F5':'#707077'), hw:d.over?600:400,
+      occ:Math.min(100,Math.round(100*d.h/d.cap)), occC:sel?'#080808':(d.over?'#F5F5F5':'#707077'),
+      on:()=>this.setState({selDay:i}),
+    };});
+    const dayNames=['Domingo, 3 de agosto','Segunda, 4 de agosto','Terça, 5 de agosto','Quarta, 6 de agosto','Quinta, 7 de agosto','Sexta, 8 de agosto','Sábado, 9 de agosto'];
+    const dayBlocks={
+      0:[{h:'10:00',t:'Leitura longa',d:'1h'}],
+      1:[{h:'08:00',t:'Aula em vídeo',d:'2h'},{h:'10:15',t:'Leitura',d:'30m'},{h:'14:30',t:'Estudar Spring Boot',d:'1h30'},{h:'16:30',t:'Portfólio',d:'1h30'}],
+      2:[{h:'09:00',t:'Estudar BD · cap. 1',d:'1h30'},{h:'14:00',t:'Candidaturas',d:'1h'},{h:'19:00',t:'Exercício',d:'45m'}],
+      3:[{h:'08:00',t:'Estudar BD · cap. 2',d:'2h'},{h:'11:00',t:'Projeto freelance',d:'3h'},{h:'15:30',t:'Portfólio',d:'2h'},{h:'19:00',t:'Aula ao vivo',d:'2h30'}],
+      4:[{h:'09:00',t:'Estudar BD · cap. 3',d:'2h'}],
+      5:[{h:'08:00',t:'Revisão geral BD',d:'2h'},{h:'14:00',t:'Simulado',d:'1h30'},{h:'17:00',t:'Descanso ativo',d:'1h'}],
+      6:[],
+    };
+    const selBlocks=(dayBlocks[s.selDay]||[]).slice(0,4);
+    const outcomes=[
+      {t:'Finalizar autenticação JWT',prog:'2 de 3 blocos',pct:66},
+      {t:'Estudar 3 capítulos de BD',prog:'1 de 3 blocos',pct:33},
+      {t:'Enviar 10 candidaturas',prog:'6 de 10 enviadas',pct:60},
+    ];
+    const matrixPat={1:[1,1,1,1,0,2,2],2:[1,1,1,0,2,2,2],3:[1,0,1,1,2,2,2],4:[0,1,1,1,2,2,2]};
+    const habitMatrix=s.habits.filter(h=>!h.paused).map(h=>({n:h.n,dots:(matrixPat[h.id]||[2,2,2,2,2,2,2]).map(v=>({bg:v===1?'#F5F5F5':v===0?'transparent':'transparent',bd:v===1?'#F5F5F5':v===0?'#525258':'#29292D'}))}));
+    const unschedOn=(u)=>()=>this.setState({sheet:'schedule',schedTask:u.id});
+    const unschedRows=s.unscheduled.map(u=>({t:u.t,d:u.d,on:unschedOn(u)}));
+    const unschedChips=s.unscheduled.slice(0,3).map(u=>({t:u.t,on:unschedOn(u)}));
+    const schedT=s.unscheduled.find(u=>u.id===s.schedTask);
+    const schedule=(when)=>{ const task=schedT; if(!task) return; const restore=()=>{this.setState(x=>({unscheduled:x.unscheduled.concat(task).sort((a,b)=>a.id-b.id),toast:null}));};
+      this.setState(x=>({unscheduled:x.unscheduled.filter(u=>u.id!==task.id),sheet:null,schedTask:null}));
+      this.toastMsg('Agendada — '+when,restore); };
+    const schedOpts=[
+      {label:'Hoje às 17:00',d:'livre · 30 min',on:()=>schedule('hoje, 17:00')},
+      {label:'Quinta às 14:00',d:'dia com espaço',on:()=>schedule('quinta, 14:00')},
+      {label:'Sábado às 09:00',d:'dia vazio',on:()=>schedule('sábado, 09:00')},
+      {label:'Escolher outro horário',d:'abre a agenda',on:()=>{this.setState({sheet:null,schedTask:null,plannerView:'dia',screen:'planner'});}},
+    ];
+    const weekHdr=['D','S','T','Q','Q','S','S'].map(l=>({l}));
+    const baseEvents={5:[{time:'10:00',t:'Entrevista final · Acme',tag:'Carreira'}],9:[{time:'09:00',t:'Prova de Banco de Dados',tag:'Estudos'}],12:[{time:'—',t:'Renovação da academia',tag:'Pagamento'}]};
+    const eventsOf=(d)=>(baseEvents[d]||[]).concat(s.userEvents[d]||[]);
+    const monthDays=[];
+    for(let i=0;i<6;i++) monthDays.push({n:'',bg:'transparent',bd:'transparent',c:'#707077',w:400,dot:'transparent',on:()=>{}});
+    for(let d=1;d<=31;d++){const today=d===4;const sel=d===s.dataSel;const dot=eventsOf(d).length>0;
+      monthDays.push({n:String(d),
+        bg:sel?'#F5F5F5':'transparent', bd:!sel&&today?'#29292D':'transparent',
+        c:sel?'#080808':d<4?'#707077':'#F5F5F5', w:(sel||today)?600:400,
+        dot:dot?(sel?'#080808':'#F5F5F5'):'transparent',
+        on:()=>this.setState({dataSel:d})});}
+    const wdNames=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+    const selDataLabel=(wdNames[(6+s.dataSel-1)%7].charAt(0).toUpperCase()+wdNames[(6+s.dataSel-1)%7].slice(1))+', '+s.dataSel+' de agosto';
+    const selDataEvents=eventsOf(s.dataSel).slice().sort((a,b)=>(a.time>b.time?1:-1));
+    const mkChip=(opts,cur,key)=>opts.map(c=>{const sel2=cur===c;return {label:c,bg:sel2?'#121214':'#0A0A0B',bd:sel2?'#29292D':'#1B1B1E',w:sel2?600:400,on:()=>this.setState({[key]:c})};});
+    const saveEvent=()=>{ const name=s.evName.trim(); if(!name){this.toastMsg('Dê um título ao compromisso');return;}
+      const day=s.dataSel; const ev={time:s.evTime,t:name,tag:s.evType};
+      const undo=()=>this.setState(x=>({userEvents:Object.assign({},x.userEvents,{[day]:(x.userEvents[day]||[]).filter(e=>e!==ev)}),toast:null}));
+      this.setState(x=>({userEvents:Object.assign({},x.userEvents,{[day]:(x.userEvents[day]||[]).concat(ev)}),sheet:null,evName:''}));
+      this.toastMsg('Compromisso salvo — '+day+' de ago',undo); };
+    const dates=[
+      {when:'Amanhã',t:'Entrevista final · Acme',d:'10:00 – 11:30 · Google Meet',count:'1',unit:'dia',cta:true,ctaLabel:'Preparar entrevista',onCta:()=>this.toastMsg('Bloco de preparação criado — hoje, 20:00',()=>this.setState({toast:null}))},
+      {when:'Sábado',t:'Prova de Banco de Dados',d:'09:00 · restam 3 capítulos',count:'5',unit:'dias',cta:true,ctaLabel:'Criar plano de estudo',onCta:()=>this.toastMsg('Plano criado: 3 blocos até sexta',()=>this.setState({toast:null}))},
+      {when:'Próxima semana',t:'Renovação da academia',d:'12 de ago · R$ 89,00',count:'8',unit:'dias',cta:false},
+    ];
+    const replanChoices=['Mover para 18:00 hoje','Mover para amanhã, 09:00','Reduzir para 45 min','Marcar como pulado','Escolher outro horário'];
+    const impacts=['Sem conflitos — encaixa entre Portfólio e Candidaturas.','Amanhã fica com 5h30 planejadas, dentro do seu limite.','Cabe hoje às 18:00 sem mover outros blocos.','A meta da prova de sábado perde 1h30 de estudo.','Você escolhe o horário na agenda.'];
+    const replanOpts=replanChoices.map((r,i)=>{const sel=s.replanChoice===i;return {label:r,bg:sel?'#121214':'#0A0A0B',bd:sel?'#29292D':'#1B1B1E',rbd:sel?'#F5F5F5':'#29292D',rdot:sel?'#F5F5F5':'transparent',on:()=>this.setState({replanChoice:i})};});
+    // insights
+    const insightsSeg=this.seg(['Hoje','Semana'],s.insightsView==='hoje'?'Hoje':'Semana',(o)=>this.setState({insightsView:o==='Hoje'?'hoje':'semana'}));
+    const barVals=[['8h',28,'',0],['10h',16,'',0],['12h',40,'',0],['14h',96,'1h24',1],['16h',74,'58m',1],['18h',38,'',0],['20h',58,'',0],['22h',22,'',0]];
+    const hourBars=barVals.map(([l,v,val,peak])=>({l,v,val,vc:peak?'#F5F5F5':'transparent',bg:peak?'#F5F5F5':'#29292D',lc:peak?'#F5F5F5':'#707077',lw:peak?600:400}));
+    const distractions=[
+      {ini:'Ig',n:'Instagram',sub:'46 min durante blocos planejados',t:'2h11'},
+      {ini:'Yt',n:'YouTube',sub:'fora dos blocos de foco',t:'1h20'},
+      {ini:'Wa',n:'WhatsApp',sub:'12 min durante blocos planejados',t:'38m'},
+    ];
+    const weekMetrics=[['Horas de foco','24h'],['Tarefas concluídas','42'],['Consistência de hábitos','86%'],['Tempo de distração','9h10']].map(([l,v])=>({l,v}));
+    const patterns=[['Melhor janela de foco','08:00 – 11:00'],['Maior distração','Instagram · 42%'],['Precisão do planejamento','42 feitas · 8 reagendadas']].map(([l,v])=>({l,v}));
+    // profile
+    const profSystem=[
+      {l:'Objetivos',v:'3 ativos',on:()=>this.go('planner',{plannerView:'semana'})},
+      {l:'Projetos',v:'2',on:()=>this.go('planner',{plannerView:'semana'})},
+      {l:'Rotina',v:'seg – sex',on:()=>this.go('onboarding',{onbStep:1})},
+      {l:'Hábitos',v:'4 ativos',on:goHabits},
+      {l:'Metas da semana',v:'24h de foco',on:()=>this.go('planner',{plannerView:'semana'})},
+    ];
+    const profConn=[
+      {l:'Calendário',v:'Conectado',vc:'#A3A3AA',dot:'#F5F5F5'},
+      {l:'App para desktop',v:'Ativo',vc:'#A3A3AA',dot:'#F5F5F5'},
+      {l:'Extensão do navegador',v:'Não instalada',vc:'#707077',dot:'#29292D'},
+      {l:'Dispositivos',v:'2 conectados',vc:'#A3A3AA',dot:'#F5F5F5'},
+    ];
+    const profApp=[{l:'Notificações',v:'ativadas'},{l:'Aparência',v:'escuro'},{l:'Privacidade e dados',v:'no dispositivo'},{l:'Assinatura',v:'Pro · anual'},{l:'Exportar dados',v:'CSV, JSON'}];
+    // blocked apps
+    const allApps=['Instagram','TikTok','YouTube','X','WhatsApp','Jogos'];
+    const blockedList=allApps.map(a=>{const on=s.sel.apps.includes(a);return {n:a,ini:a.slice(0,2),
+      swBg:on?'#F5F5F5':'#121214',swBd:on?'#F5F5F5':'#29292D',swL:on?21:2,knob:on?'#080808':'#707077',
+      on:()=>this.setState(x=>{const arr=x.sel.apps.includes(a)?x.sel.apps.filter(y=>y!==a):x.sel.apps.concat(a);return {sel:Object.assign({},x.sel,{apps:arr})};})};});
+    const mkRule=(t,d,key)=>{const on=s[key];return {t,d,swBg:on?'#F5F5F5':'#121214',swBd:on?'#F5F5F5':'#29292D',swL:on?21:2,knob:on?'#080808':'#707077',on:()=>this.setState({[key]:!on})};};
+    const rulesList=[mkRule('Bloquear sociais durante o foco','Sempre que uma sessão começar','rule1')];
+    if(s.ruleApplied) rulesList.push(mkRule('Bloquear sociais 13:30 – 18:00','A partir da próxima semana · recomendação','ruleApplied'));
+    // capture
+    const capDefs={
+      'Nova tarefa':{ph:'Ex.: Revisar capítulo 4',metaLabel:'Quando',chips:['Hoje','Amanhã','Sem horário']},
+      'Novo evento':{ph:'Ex.: Reunião com orientador',metaLabel:'Quando',chips:['Hoje','Amanhã','Escolher data']},
+      'Novo hábito':{ph:'Ex.: Meditar 10 min',metaLabel:'Frequência',chips:['Diário','Dias úteis','3x semana']},
+      'Bloco de foco':{ph:'Ex.: Estudar BD · cap. 2',metaLabel:'Duração',chips:['25 min','50 min','90 min']},
+      'Novo objetivo':{ph:'Ex.: Passar na certificação',metaLabel:'Área',chips:['Estudos','Carreira','Saúde']},
+    };
+    const captureOpts=[['Nova tarefa',icons.plus],['Novo evento',icons.cal2],['Novo hábito',icons.heart],['Bloco de foco',icons.focus],['Novo objetivo',icons.target],['Por voz',icons.mic]].map(([label,d])=>({label,icon:ic(d,19),
+      on:()=>{ if(label==='Por voz'){ this.setState({captureText:'Tenho prova de banco sexta e preciso estudar 4 capítulos',capMode:null}); this.toastMsg('Transcrito — revise e toque em Criar'); } else this.setState({capMode:label,capName:'',capMeta:capDefs[label].chips[0]}); }}));
+    const cd=capDefs[s.capMode]||capDefs['Nova tarefa'];
+    const capMetaChips=cd.chips.map(c=>{const sel=s.capMeta===c;return {label:c,bg:sel?'#121214':'#0A0A0B',bd:sel?'#29292D':'#1B1B1E',w:sel?600:400,on:()=>this.setState({capMeta:c})};});
+    const capSave=()=>{ const name=s.capName.trim(); if(!name){this.toastMsg('Dê um título antes de salvar');return;}
+      const m=s.capMode;
+      if(m==='Novo hábito'){ this.setState(x=>({habits:x.habits.concat({id:Date.now(),n:name,meta:s.capMeta,streak:0,done:false,prog:'novo',paused:false}),sheet:null,capMode:null})); this.toastMsg('Hábito criado'); }
+      else if(m==='Nova tarefa'&&s.capMeta==='Sem horário'){ this.setState(x=>({unscheduled:x.unscheduled.concat({id:Date.now(),t:name,d:'~30 min'}),sheet:null,capMode:null})); this.toastMsg('Adicionada em Sem horário'); }
+      else { const msgs={'Nova tarefa':'Tarefa criada','Novo evento':'Evento criado','Bloco de foco':'Bloco de foco criado','Novo objetivo':'Objetivo criado'}; this.setState(x=>({tasks:x.tasks.concat({id:Date.now(),t:name,tag:m==='Bloco de foco'?'Foco':'Novo',done:false}),sheet:null,capMode:null})); this.toastMsg((msgs[m]||'Item criado')+(s.capMeta?' — '+s.capMeta.toLowerCase():'')); } };
+    const parseCapture=()=>{ const txt=s.captureText.trim(); if(!txt){this.toastMsg('Escreva algo primeiro');return;} this.setState({capMode:'review',parsed:txt}); };
+    const confirmParsed=()=>{ this.setState(x=>({tasks:x.tasks.concat({id:Date.now(),t:'Estudar 4 capítulos de BD',tag:'Estudo',done:false}),sheet:null,capMode:null,captureText:'',parsed:null})); this.toastMsg('Salvo — 3 blocos sugeridos até sexta'); };
+    // habit edit / add
+    const openEditHabit=()=>this.setState({sheet:'habit',editHabitMode:'edit',editName:hd.n,editFreq:'Diário'});
+    const openAddHabit=()=>this.setState({sheet:'habit',editHabitMode:'add',editName:'',editFreq:'Diário'});
+    const freqChips=['Diário','Dias úteis','3x semana'].map(c=>{const sel=s.editFreq===c;return {label:c,bg:sel?'#121214':'#0A0A0B',bd:sel?'#29292D':'#1B1B1E',w:sel?600:400,on:()=>this.setState({editFreq:c})};});
+    const saveHabit=()=>{ const name=s.editName.trim(); if(!name){this.toastMsg('Dê um nome ao hábito');return;}
+      if(s.editHabitMode==='add'){ this.setState(x=>({habits:x.habits.concat({id:Date.now(),n:name,meta:s.editFreq,streak:0,done:false,prog:'novo',paused:false}),sheet:null})); this.toastMsg('Hábito criado'); }
+      else { this.setState(x=>({habits:x.habits.map(y=>y.id===s.habitSel?Object.assign({},y,{n:name}):y),sheet:null})); this.toastMsg('Hábito atualizado'); } };
+    const pauseHabit=()=>{ const was=hd.paused; this.setState(x=>({habits:x.habits.map(y=>y.id===s.habitSel?Object.assign({},y,{paused:!was}):y)})); this.toastMsg(was?'Hábito retomado':'Hábito pausado'); };
+    const archiveHabit=()=>{ const h=hd; const restore=()=>this.setState(x=>({habits:x.habits.concat(h).sort((a,b)=>a.id-b.id),toast:null,screen:'habits'}));
+      this.setState(x=>({habits:x.habits.filter(y=>y.id!==h.id),screen:'habits'})); this.toastMsg('“'+h.n+'” arquivado',restore); };
+    const showTabs = !['onboarding','focusSession','sessionComplete'].includes(screen);
+    return {
+      usuario, userInitial: usuario.trim().charAt(0).toUpperCase(),
+      isOnb:F('onboarding'), isHome:F('home'), isPlanner:F('planner'), isFocusSetup:F('focusSetup'), isFocusSession:F('focusSession'), isSessionComplete:F('sessionComplete'), isHabits:F('habits'), isHabitDetail:F('habitDetail'), isInsights:F('insights'), isProfile:F('profile'), isBlockedApps:F('blockedApps'), isFocusRules:F('focusRules'),
+      showTabs, tabs, noop:()=>{},
+      goHome, goHabits, goInsights:()=>this.go('insights'), goFocusSetup:()=>this.go('focusSetup'), goProfile:()=>this.go('profile'),
+      goPlannerDatas:()=>this.go('planner',{plannerView:'datas'}), goDia:()=>this.setState({plannerView:'dia'}),
+      goBlockedApps:()=>{ this._backFrom=screen; this.go('blockedApps'); },
+      backFromBlocked:()=>this.go(this._backFrom||'profile'),
+      goFocusRules:()=>this.go('focusRules'),
+      signOut:()=>this.toastMsg('Sessão encerrada neste dispositivo',()=>this.setState({toast:null})),
+      checkIcon: ic(['m5 12.5 4.5 4.5L19 7.5'],13,2.6), checkSm: ic(['m5 12.5 4.5 4.5L19 7.5'],15,2.2), checkBig: ic(['m5 12.5 4.5 4.5L19 7.5'],24,2.4),
+      plusIcon: ic(['M12 5v14','M5 12h14'],20), plusIconBig: ic(['M12 5v14','M5 12h14'],24,2),
+      chevL: ic(['m14 6-6 6 6 6'],18,2), chevR: ic(['m10 6 6 6-6 6'],18,2),
+      xIcon: ic(['M6 6l12 12','M18 6 6 18'],18,2), calIcon: ic(icons.cal2,20),
+      playIcon: ic(['M8.5 5.5v13l10-6.5-10-6.5z'],16,1.8),
+      pauseIcon: s.paused? ic(['M8.5 5.5v13l10-6.5-10-6.5z'],20,1.8) : ic(['M9 6v12','M15 6v12'],20,2),
+      pauseBg: s.paused?'#F5F5F5':'transparent', pauseC: s.paused?'#080808':'#F5F5F5',
+      ringOp: s.paused?.45:1,
+      onbDots: steps.map((_,i)=>({bg:i<=st?'#F5F5F5':'#29292D'})),
+      onbTitle:steps[st].t, onbSub:steps[st].s,
+      onbIsGoals:st===0, onbIsRoutine:st===1, onbIsHabits:st===2, onbIsApps:st===3,
+      onbHasBack:st>0, onbBtnLabel:st===3?'Começar':'Continuar',
+      onbNext:()=>{ if(st<3) this.setState({onbStep:st+1}); else {this.go('home');this.toastMsg('Seu sistema está pronto.');} },
+      onbBack:()=>this.setState({onbStep:Math.max(0,st-1)}),
+      skipOnb:()=>this.go('home'),
+      goalsList, onbHabitsList, appsChips, permsList, daysChips,
+      wakeSeg:this.seg(['06:00','07:00','08:00'],s.sel.wake,(o)=>setSel('wake',o)),
+      durSeg:this.seg(['25 min','50 min','90 min'],s.sel.dur,(o)=>setSel('dur',o)),
+      whenChips:this.multi(['Manhã','Tarde','Noite'],s.sel.when,'when'),
+      levelSeg:this.seg(['Suave','Equilibrado','Rígido'],level,(o)=>this.setState({level:o})),
+      levelDesc:levelDescs[level], levelLower:level.toLowerCase(),
+      dayPct: Math.round(100*doneCount/total), tasksDone: doneCount+' de '+total, tarefas, habitsHome,
+      plannerSeg, plIsDia:s.plannerView==='dia', plIsSemana:s.plannerView==='semana', plIsDatas:s.plannerView==='datas',
+      showReplanAlert:!s.replanApplied, showMissedBlock:!s.replanApplied, showMovedBlock:s.replanApplied,
+      openReplan:()=>this.setState({sheet:'replan'}),
+      weekDays, selQua:()=>this.setState({selDay:3}),
+      selDayName:dayNames[s.selDay], selDayBlocks:selBlocks, selDayHasBlocks:selBlocks.length>0, selDayEmpty:selBlocks.length===0,
+      outcomes, habitMatrix, unschedRows, unschedChips, unschedCount:s.unscheduled.length,
+      openReview:()=>this.setState({sheet:'review'}),
+      reviewSchedule:()=>{ const first=s.unscheduled[0]; if(first) this.setState({sheet:'schedule',schedTask:first.id}); else this.setState({sheet:null}); },
+      weekHdr, monthDays, dates,
+      selDataLabel, selDataEvents, selDataHasEvents:selDataEvents.length>0, selDataEmpty:selDataEvents.length===0,
+      plusIconSm: ic(['M12 5v14','M5 12h14'],16,2),
+      openNewEvent:()=>this.setState({sheet:'newEvent',evName:'',evTime:'09:00',evType:'Pessoal'}),
+      sheetNewEvent:s.sheet==='newEvent',
+      evName:s.evName, onEvName:(e)=>this.setState({evName:e.target.value}),
+      evTimeChips:mkChip(['09:00','14:00','19:00','Dia todo'],s.evTime,'evTime'),
+      evTypeChips:mkChip(['Pessoal','Estudos','Carreira','Pagamento'],s.evType,'evType'),
+      saveEvent,
+      focusDurSeg:this.seg(['25 min','50 min','90 min'],s.dur+' min',(o)=>{const m=parseInt(o);this.setState({dur:m,secondsLeft:m*60,focusTotal:m*60});}),
+      modeSeg:this.seg(['Foco profundo','Leve'],mode,(o)=>this.setState({mode:o})),
+      modeDesc: mode==='Leve'?'Apenas registra distrações, sem bloquear apps.':'Bloqueia os apps selecionados e silencia notificações.',
+      modeLabel: mode, blockedSummary:s.sel.apps.slice(0,2).join(', ')+(s.sel.apps.length>2?' +'+(s.sel.apps.length-2):''),
+      beginSession:()=>this.setState({screen:'focusSession',running:true,paused:false,secondsLeft:s.dur*60,focusTotal:s.dur*60,interruptions:0,sessionAnswer:null,note:''}),
+      timerStr:fmt(s.secondsLeft), timerSub:s.paused?'pausado':'restantes', ringPct,
+      togglePause:()=>{this.setState(x=>({paused:!x.paused,interruptions:x.paused?x.interruptions:x.interruptions+1}));},
+      plus5:()=>{this.setState(x=>({secondsLeft:x.secondsLeft+300,focusTotal:x.focusTotal+300}));this.toastMsg('+5 minutos adicionados');},
+      askEnd:()=>this.setState({confirmEnd:true,paused:true}),
+      cancelEnd:()=>this.setState({confirmEnd:false,paused:false}),
+      endNow:()=>this.setState({confirmEnd:false,running:false,screen:'sessionComplete'}),
+      interruptions:s.interruptions, confirmEnd:s.confirmEnd,
+      focadoStr:focadoMin+' min', answerOpts, answered:!!s.sessionAnswer,
+      completeCta:ctaMap[s.sessionAnswer]||'Continuar',
+      note:s.note, onNote:(e)=>this.setState({note:e.target.value}),
+      finishComplete:()=>{ if(s.sessionAnswer==='Concluí a meta'){this.go('home');this.toastMsg('Tarefa concluída');} else {this.go('planner',{sheet:'replan'});} },
+      weekDots, habitsList, hdName:hd.n, hdMeta:hd.meta, hdStreak:hd.streak, hdHistory,
+      openEditHabit, openAddHabit, pauseHabit, archiveHabit,
+      pauseHabitLabel: hd.paused?'Retomar hábito':'Pausar temporariamente',
+      habitSheetTitle: s.editHabitMode==='add'?'Novo hábito':'Editar hábito',
+      sheetEditHabit:s.sheet==='habit', editName:s.editName, onEditName:(e)=>this.setState({editName:e.target.value}), freqChips, saveHabit,
+      insightsSeg, insIsHoje:s.insightsView==='hoje', insIsSemana:s.insightsView==='semana',
+      hourBars, distractions, weekMetrics, patterns,
+      ruleLabel:s.ruleApplied?'Regra aplicada à próxima semana':'Aplicar na próxima semana',
+      ruleBg:s.ruleApplied?'transparent':'linear-gradient(180deg,#FFFFFF,#ECECEE)', ruleBd:s.ruleApplied?'#29292D':'rgba(255,255,255,0)', ruleC:s.ruleApplied?'#A3A3AA':'#080808',
+      ruleShadow:s.ruleApplied?'none':'inset 0 1px 0 #FFFFFF,0 2px 10px rgba(0,0,0,.45)',
+      applyRule:()=>{ if(!s.ruleApplied){this.setState({ruleApplied:true});this.toastMsg('Regra criada em Regras de foco',()=>this.setState({ruleApplied:false,toast:null}));} },
+      reflectOpen:s.reflectOpen, toggleReflect:()=>this.setState(x=>({reflectOpen:!x.reflectOpen})),
+      reflectChev: ic(s.reflectOpen?['m6 15 6-6 6 6']:['m6 9 6 6 6-6'],18,2),
+      profSystem, profConn, profApp,
+      blockedCount:s.sel.apps.length+' apps', rulesCount:(s.ruleApplied?2:1)+(s.ruleApplied?' regras':' regra'),
+      profLevelSeg:this.seg(['Suave','Equilibrado','Rígido'],level,(o)=>this.setState({level:o})),
+      blockedList, rulesList,
+      sheetCapture:s.sheet==='capture', sheetReplan:s.sheet==='replan', sheetSchedule:s.sheet==='schedule', sheetReview:s.sheet==='review',
+      capIsMenu:s.sheet==='capture'&&!s.capMode, capIsForm:s.sheet==='capture'&&!!s.capMode&&s.capMode!=='review', capIsReview:s.sheet==='capture'&&s.capMode==='review',
+      capFormTitle:s.capMode||'', capPlaceholder:cd.ph, capMetaLabel:cd.metaLabel, capMetaChips,
+      capName:s.capName, onCapName:(e)=>this.setState({capName:e.target.value}),
+      capBack:()=>this.setState({capMode:null}), capSave,
+      parsedTitle:'Estudar 4 capítulos de BD', parseCapture, confirmParsed,
+      openCapture:()=>this.setState({sheet:'capture',capMode:null}), closeSheet:()=>this.setState({sheet:null,capMode:null,schedTask:null}),
+      captureOpts, captureText:s.captureText, onCaptureText:(e)=>this.setState({captureText:e.target.value}),
+      schedTaskName:schedT?schedT.t:'', schedOpts,
+      replanOpts, replanImpact:impacts[s.replanChoice],
+      confirmReplan:()=>{ const moved=s.replanChoice===0; const undo=()=>this.setState({replanApplied:false,toast:null});
+        this.setState({sheet:null,replanApplied:true,screen:'planner',plannerView:'dia'});
+        this.toastMsg(moved?'Bloco movido para 18:00':replanChoices[s.replanChoice]+' — agenda atualizada',undo); },
+      toastShow:!!s.toast, toastText:s.toast?s.toast.m:'', toastHasUndo:!!(s.toast&&s.toast.undo), toastUndo:s.toast&&s.toast.undo?s.toast.undo:()=>{},
+      toastBottom: s.sheet?(s.sheet==='capture'?360:320):(showTabs?104:40),
+    };
+  }
+}
+</script>
+</body>
+</html>
