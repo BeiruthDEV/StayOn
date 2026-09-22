@@ -3,46 +3,100 @@
 Aplicativo mobile de foco e produtividade, construído em **React Native + Expo**
 a partir de um protótipo HTML de alta fidelidade.
 
-O objetivo do projeto é *mocar* (recriar fielmente) o protótipo no Expo,
-tela por tela, mantendo a mesma paleta, tipografia e comportamento.
+O protótipo em `prototype/` é a fonte da verdade: paleta, tipografia, espaçamento
+e comportamento foram extraídos dele e recriados no Expo, tela por tela.
 
 ---
 
-## Passos do projeto
+## Telas
 
-O repositório começa vazio e é construído nesta ordem, um commit por passo:
+| # | Tela | Rota | O que faz |
+|---|------|------|-----------|
+| 1 | Início | `/` | Próxima ação, progresso do dia, prioridades, hábitos de hoje, próximo evento e nota de distração. Concluir tarefa ou hábito é desfazível. |
+| 2 | Planejar | `/planner` | Linha do tempo do dia com blocos concluídos, perdidos e futuros, marcador do horário atual e replanejamento do bloco perdido. |
+| 3 | Datas importantes | `/dates` | Calendário do mês com marcadores, filtros por categoria, destaque do próximo compromisso e lista de eventos. |
+| 4 | Foco | `/focus` | Sessão de foco com cronômetro regressivo real: pausar, retomar, estender em 5 minutos, encerrar ou abandonar. |
+| 5 | Insights | `/insights` | Tempo de tela dividido entre produtivo e distraído, insight principal, uso por faixa de horário e ranking de distrações. |
+| 6 | Revisão semanal | `/weekly-review` | Taxa de execução contra a meta, foco profundo, janela de pico, precisão do planejamento, recomendação do sistema e campos de reflexão. |
+| 7 | Perfil | `/profile` | Identidade da conta, sistema pessoal, controle de distração, conexões e ajustes do aplicativo. |
+| 8 | Configuração inicial | `/onboarding` | Escolha das áreas de foco, com indicador de passos. |
 
-1. **Commit inicial** — projeto vazio, `.gitignore`, `.nvmrc` e este README com todos os passos.
-2. **Protótipo de referência** — adicionar o HTML original e as capturas de tela que servem de fonte da verdade.
-3. **Esqueleto do app Expo** — `package.json`, `app.json`, `tsconfig.json`, ESLint e `.gitignore` do app.
-4. **Tema: cores** — paleta escura extraída do protótipo.
-5. **Tema: tipografia** — fonte Geist e as variantes de texto.
-6. **Tema: espaçamento, raios, sombras e movimento** — o restante dos tokens.
-7. **Ícones** — traçados SVG do protótipo e o componente `Icon`.
-8. **Componentes base** — `AppText`, `Card`, `Screen`.
-9. **Componentes de ação** — `Button` e `IconButton`.
-10. **Componentes de lista e feedback** — `Checkbox`, `ListRow`, `Progress`, `SectionHeader`, `Toast`.
-11. **Domínio** — modelos e regras de tarefa, hábito e progresso do dia.
-12. **Dados mock** — tarefas, hábitos e conteúdo fixo da Home.
-13. **Estado global** — providers de tarefas, hábitos e toast.
-14. **Layout raiz** — carregamento de fontes e composição dos providers.
-15. **Navegação** — barra inferior com as cinco abas.
-16. **Tela 1 — Início** — próxima ação, progresso do dia, prioridades, hábitos e insight.
-17. **Tela 2 — Planejar** — linha do tempo do dia com blocos e alerta de replanejamento.
-18. **Tela 3 — Datas importantes** — calendário do mês, filtros e próximos eventos.
-19. **Tela 4 — Foco** — sessão de foco com cronômetro regressivo funcional.
-20. **Tela 5 — Insights** — análise comportamental do tempo de tela.
-21. **Tela 6 — Revisão semanal** — métricas da semana e recomendação do sistema.
-22. **Tela 7 — Perfil** — sistema pessoal, controle de distração, conexões e app.
-23. **Tela 8 — Onboarding** — seleção das áreas de foco.
-24. **Limpeza** — remover o placeholder das abas não migradas.
-25. **Documentação final** — README com as telas prontas e instruções de execução.
+As cinco primeiras abas ficam na navegação inferior; Datas importantes, Revisão
+semanal e Configuração inicial abrem a partir delas.
+
+---
+
+## Como rodar
+
+Requer Node 22 (ver `.nvmrc`) e o aplicativo **Expo Go** no celular.
+
+```bash
+cd apps/mobile && npm install && npm start
+```
+
+Leia o QR Code com o Expo Go (Android) ou com a câmera (iOS).
+
+Verificações:
+
+```bash
+cd apps/mobile && npm run typecheck && npm run lint
+```
 
 ---
 
 ## Estrutura
 
 ```
-apps/mobile      aplicativo Expo (expo-router)
-prototype        protótipo HTML original + capturas de tela
+apps/mobile
+  app/            rotas do expo-router (abas + telas de pilha)
+  src/components  componentes de interface reutilizáveis
+  src/features    uma pasta por tela, com seus subcomponentes
+  src/domain      tipos e regras puras (sem React)
+  src/data        dados mock do protótipo
+  src/state       contextos de tarefas, hábitos, blocos e toast
+  src/theme       cores, tipografia, espaçamento, raios, sombras e movimento
+  src/icons       traçados SVG e o componente Icon
+prototype         protótipo HTML original e capturas de tela
 ```
+
+A separação é proposital: `domain` guarda as regras testáveis sem React,
+`data` guarda apenas os mocks que um dia virão do servidor, e `features`
+monta as telas a partir de `components` e `theme`. Nenhuma tela escreve cor,
+fonte ou espaçamento à mão.
+
+---
+
+## Passos da construção
+
+O repositório foi aberto vazio e construído em commits pequenos, nesta ordem:
+
+1. Commit inicial com o plano completo
+2. Protótipo HTML de referência
+3. Esqueleto do app Expo
+4. Tema: cores
+5. Tema: tipografia Geist
+6. Tema: espaçamento, raios, sombras e movimento
+7. Ícones SVG
+8. Componentes base (`AppText`, `Card`, `Screen`)
+9. Componentes de ação (`Button`, `IconButton`)
+10. Componentes de lista e feedback
+11. Domínio de tarefa, hábito e progresso do dia
+12. Dados mock
+13. Estado global (providers)
+14. Layout raiz com fontes e providers
+15. Navegação por abas
+16. Tela Início
+17. Ampliação do conjunto de ícones
+18. Sincronização do lockfile
+19. Cores de alerta e de confirmação
+20. `Chip`, `SegmentedControl`, `ScreenHeader` e `StatTile`
+21. Tela Planejar
+22. Tela Datas importantes
+23. Tela Foco
+24. Tela Insights
+25. Tela Revisão semanal
+26. Tela Perfil
+27. Tela Configuração inicial
+28. Remoção do placeholder das abas
+29. Alinhamento das dependências com o SDK 54
+30. Esta documentação
