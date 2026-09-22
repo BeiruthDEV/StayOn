@@ -40,7 +40,7 @@ export function useHomeActions() {
   const goToPlanner = useCallback(() => router.navigate('/planner'), [router]);
   const goToInsights = useCallback(() => router.navigate('/insights'), [router]);
 
-  /** Telas ainda não migradas (fases 3 a 6) avisam em vez de navegar. */
+  /** Recursos ainda não construídos avisam em vez de navegar. */
   const notifyPending = useCallback(
     (feature: string) => showToast(`${feature} chega em breve`),
     [showToast],
