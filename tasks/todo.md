@@ -101,14 +101,14 @@ Nada de Android instalado hoje: sem Java, sem SDK, sem Android Studio.
 
 ## Passos
 
-- [ ] `npx expo prebuild --platform android`, app vira build próprio → verificar: `npx expo run:android` abre no aparelho
-- [ ] Cronômetro passa a ser por horário de término, não por contagem de ticks → verificar: sair do app 2 min e voltar, tempo restante correto
-- [ ] Módulo nativo local `modules/stay-on-blocker` em Kotlin → verificar: uma função de teste responde do Kotlin no JS
-- [ ] Listar aplicativos instalados que têm ícone na gaveta → verificar: a lista aparece no app
-- [ ] `AccessibilityService` que detecta o app em primeiro plano e expulsa → verificar: critério de sucesso acima
-- [ ] Tela "Apps bloqueados": estado da permissão e seleção salva → verificar: seleção sobrevive a fechar o app
-- [ ] Ligar o bloqueio ao ciclo da sessão, com expiração por horário → verificar: matar o app no meio da sessão não deixa o bloqueio preso
-- [ ] README deixa de falar em Expo Go → verificar: leitura
+- [x] `npx expo prebuild --platform android`, app vira build próprio → verificar: `npx expo run:android` abre no aparelho
+- [x] Cronômetro passa a ser por horário de término, não por contagem de ticks → verificar: sair do app 2 min e voltar, tempo restante correto
+- [x] Módulo nativo local `modules/stay-on-blocker` em Kotlin → verificar: uma função de teste responde do Kotlin no JS
+- [x] Listar aplicativos instalados que têm ícone na gaveta → verificar: a lista aparece no app
+- [x] `AccessibilityService` que detecta o app em primeiro plano e expulsa → verificar: critério de sucesso acima
+- [x] Tela "Apps bloqueados": estado da permissão e seleção salva → verificar: seleção sobrevive a fechar o app
+- [x] Ligar o bloqueio ao ciclo da sessão, com expiração por horário → verificar: matar o app no meio da sessão não deixa o bloqueio preso
+- [x] README deixa de falar em Expo Go → verificar: leitura
 
 ## Decisões
 
@@ -144,3 +144,29 @@ Nada de Android instalado hoje: sem Java, sem SDK, sem Android Studio.
   de `AccessibilityService` e de `QUERY_ALL_PACKAGES`. Como o app é pessoal e
   instalado direto, isso não pesa — mas inviabiliza publicar depois sem
   retrabalho.
+
+## Situação
+
+Tudo que não depende do SDK do Android está escrito e commitado. O que foi
+verificado até aqui, sem aparelho:
+
+- `npm run typecheck` e `npm run lint` limpos
+- `npx expo prebuild --platform android` gera o projeto nativo
+- o autolinking do Expo encontra o `stay-on-blocker`
+- `npx expo export --platform android` empacota o bundle sem erro
+- os XML do serviço de acessibilidade são bem formados
+
+Falta a verificação que só existe no aparelho, e que é o critério de sucesso
+desta fase: compilar com `npx expo run:android`, conceder a permissão e
+confirmar que o aplicativo bloqueado volta para a tela inicial.
+
+## Em aberto
+
+- **Fechar o StayOn à força derruba o bloqueio.** A sessão vive em memória, no
+  componente da tela. Se o aplicativo for morto, ela se perde, e na próxima
+  abertura o estado é "sem sessão" — o que desliga o bloqueio. O serviço nativo
+  continua correto, porque expira pelo horário salvo; o buraco está do lado do
+  JavaScript. Fechar isso significa guardar a sessão em disco, como já é feito
+  com tarefas e hábitos.
+- **Aviso de bloqueio é um toast.** Funciona, mas uma tela própria explicando
+  quanto falta seria mais clara. Precisa de `SYSTEM_ALERT_WINDOW`.
