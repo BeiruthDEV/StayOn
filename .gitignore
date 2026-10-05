@@ -42,3 +42,6 @@ apps/mobile/modules/*/android/build/
 
 # APK gerado localmente
 *.apk
+
+# Cache do Gradle dentro dos modulos nativos
+apps/mobile/modules/*/android/.gradle/
