@@ -12,6 +12,7 @@
       "supportsTablet": false
     },
     "android": {
+      "package": "com.beiruthdev.stayon",
       "adaptiveIcon": {
         "backgroundColor": "#050505",
         "foregroundImage": "./assets/android-icon-foreground.png",
