@@ -1,0 +1,31 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!--
+    Desde o Android 11 um aplicativo só enxerga os outros que declara querer
+    enxergar. Perguntar por quem responde ao atalho de abertura basta para
+    montar a lista de bloqueio e evita a permissão QUERY_ALL_PACKAGES, que é
+    bem mais ampla do que o necessário aqui.
+  -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.MAIN" />
+      <category android:name="android.intent.category.LAUNCHER" />
+    </intent>
+  </queries>
+
+  <application>
+    <service
+      android:name="expo.modules.stayonblocker.BlockerService"
+      android:exported="false"
+      android:label="StayOn"
+      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+      <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService" />
+      </intent-filter>
+      <meta-data
+        android:name="android.accessibilityservice"
+        android:resource="@xml/stay_on_blocker_service" />
+    </service>
+  </application>
+
+</manifest>

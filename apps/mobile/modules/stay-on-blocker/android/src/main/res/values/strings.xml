@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="stay_on_blocker_description">Permite que o StayOn feche os aplicativos que você escolheu enquanto uma sessão de foco estiver em andamento.</string>
+</resources>
