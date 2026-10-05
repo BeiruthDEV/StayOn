@@ -45,7 +45,11 @@ ainda não terminou, o serviço devolve você para a tela inicial. Ele não lê 
 conteúdo da tela — só o nome do pacote que abriu.
 
 O horário de término fica salvo no aparelho, então o bloqueio expira sozinho
-mesmo que o StayOn seja fechado no meio da sessão.
+mesmo que o StayOn seja fechado no meio da sessão — e a sessão em andamento
+também é salva, então fechar o aplicativo à força não libera nada.
+
+No Perfil, o nível de intervenção decide o que acontece: **Rígido** fecha o
+aplicativo bloqueado na hora, **Suave** apenas avisa e deixa você decidir.
 
 ## Telas
 

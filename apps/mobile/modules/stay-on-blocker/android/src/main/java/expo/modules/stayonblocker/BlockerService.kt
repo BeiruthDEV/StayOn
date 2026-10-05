@@ -24,8 +24,13 @@ class BlockerService : AccessibilityService() {
     if (pacote == packageName) return
     if (!BlockerState.shouldBlock(this, pacote)) return
 
-    performGlobalAction(GLOBAL_ACTION_HOME)
-    avisar()
+    val estrito = BlockerState.isStrict(this)
+    if (estrito) performGlobalAction(GLOBAL_ACTION_HOME)
+
+    avisar(
+      if (estrito) "StayOn fechou: sessão de foco em andamento"
+      else "Você está em sessão de foco",
+    )
   }
 
   /**
@@ -33,12 +38,12 @@ class BlockerService : AccessibilityService() {
    * A janela de alguns segundos evita repetir a mensagem quando o sistema
    * dispara vários eventos na mesma tentativa de abrir.
    */
-  private fun avisar() {
+  private fun avisar(mensagem: String) {
     val agora = System.currentTimeMillis()
     if (agora - ultimoAviso < INTERVALO_AVISO) return
 
     ultimoAviso = agora
-    Toast.makeText(this, "StayOn: sessão de foco em andamento", Toast.LENGTH_SHORT).show()
+    Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show()
   }
 
   override fun onInterrupt() = Unit

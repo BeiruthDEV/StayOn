@@ -160,13 +160,27 @@ Falta a verificação que só existe no aparelho, e que é o critério de sucess
 desta fase: compilar com `npx expo run:android`, conceder a permissão e
 confirmar que o aplicativo bloqueado volta para a tela inicial.
 
+## Limpeza e acabamento
+
+- [x] Varredura de código e arquivos sem uso → verificar: typecheck e lint
+- [x] Sessão salva no aparelho, fechar o app à força não derruba o bloqueio
+- [x] Splash escuro com a marca, no lugar do logo padrão em fundo branco
+- [x] Nível de intervenção deixa de ser decorativo e passa a valer no bloqueio
+- [x] Apagar os dados desliga o bloqueio ativo
+
+O que a varredura encontrou e foi removido: 16 ícones nunca usados, o peso 700
+da fonte (que era carregado à toa na abertura), `pendingTasks`, `touchTarget`,
+`colors.dangerStrong`, `motion.fast`, `motion.slow`, `radius.lg` e o
+`favicon.png`. Nenhum arquivo órfão: todos os 116 arquivos de código são
+alcançáveis a partir das rotas.
+
+Ficou de fora de propósito: onze exportações que só são usadas dentro do
+próprio arquivo. Não são código morto, apenas visibilidade mais larga do que o
+necessário, e estreitar isso mexeria em onze arquivos sem ganho real.
+
 ## Em aberto
 
-- **Fechar o StayOn à força derruba o bloqueio.** A sessão vive em memória, no
-  componente da tela. Se o aplicativo for morto, ela se perde, e na próxima
-  abertura o estado é "sem sessão" — o que desliga o bloqueio. O serviço nativo
-  continua correto, porque expira pelo horário salvo; o buraco está do lado do
-  JavaScript. Fechar isso significa guardar a sessão em disco, como já é feito
-  com tarefas e hábitos.
 - **Aviso de bloqueio é um toast.** Funciona, mas uma tela própria explicando
   quanto falta seria mais clara. Precisa de `SYSTEM_ALERT_WINDOW`.
+- **A pasta `prototype/`** tem 1,2 MB de HTML e capturas do protótipo original.
+  Nada no aplicativo a usa; fica como histórico até ser decidido o contrário.

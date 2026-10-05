@@ -12,6 +12,7 @@ import {
 } from '@/components';
 import { Icon } from '@/icons';
 import {
+  useBlockedApps,
   useBlocks,
   useEvents,
   useHabits,
@@ -38,19 +39,25 @@ export function ProfileScreen() {
   const blocks = useBlocks();
   const events = useEvents();
   const sessions = useSessions();
+  const blocked = useBlockedApps();
 
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleReset = useCallback(() => {
     Alert.alert(
       'Apagar todos os dados?',
-      'Tarefas, hábitos, agenda, compromissos, sessões e preferências são apagados. Não dá para desfazer.',
+      'Tarefas, hábitos, agenda, compromissos, sessões, apps bloqueados e preferências são apagados. Não dá para desfazer.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Apagar',
           style: 'destructive',
           onPress: () => {
+            // O bloqueio vive do lado nativo e não some com o armazenamento do
+            // aplicativo: sem isto, apagar os dados durante uma sessão deixaria
+            // os apps barrados até o horário que acabou de ser esquecido.
+            blocked.stopBlocking();
+
             void clearAll().then(() => {
               tasks.replaceAll([]);
               habits.replaceAll([]);
@@ -66,7 +73,7 @@ export function ProfileScreen() {
         },
       ],
     );
-  }, [tasks, habits, blocks, events, sessions, reset, showToast, router]);
+  }, [tasks, habits, blocks, events, sessions, blocked, reset, showToast, router]);
 
   return (
     <Screen bottomInset={spacing.section}>
@@ -99,6 +106,18 @@ export function ProfileScreen() {
       />
 
       <ListRow
+        title="Apps bloqueados"
+        subtitle={
+          blocked.packages.length === 0
+            ? 'Nenhum escolhido'
+            : `${blocked.packages.length} ${blocked.packages.length === 1 ? 'aplicativo' : 'aplicativos'}`
+        }
+        onPress={() => router.navigate('/blocked-apps')}
+        leading={<Icon name="ban" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={<Icon name="chevronRight" size={16} strokeWidth={1.6} color={colors.textDim} />}
+      />
+
+      <ListRow
         title="Hábitos"
         subtitle="Criar, pausar e remover"
         onPress={() => router.navigate('/habits')}
@@ -109,7 +128,8 @@ export function ProfileScreen() {
       <Card style={styles.card}>
         <AppText variant="bodyStrong">Nível de intervenção</AppText>
         <AppText variant="caption" color="textDim" style={styles.cardNote}>
-          Define o tom dos avisos durante uma sessão de foco.
+          Rígido fecha o aplicativo bloqueado na hora. Suave só avisa e deixa você
+          decidir.
         </AppText>
         <View style={styles.segmented}>
           <SegmentedControl

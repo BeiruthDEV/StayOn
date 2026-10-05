@@ -20,17 +20,25 @@ object BlockerState {
   private const val PREFS = "stay_on_blocker"
   private const val PACOTES = "pacotes"
   private const val TERMINA_EM = "terminaEm"
+  private const val ESTRITO = "estrito"
 
   private fun prefs(context: Context) =
     context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-  /** Liga o bloqueio dos pacotes informados até o horário dado, em milissegundos. */
-  fun start(context: Context, pacotes: Set<String>, terminaEm: Long) {
+  /**
+   * Liga o bloqueio dos pacotes informados até o horário dado, em milissegundos.
+   * No modo estrito o aplicativo é fechado; fora dele a pessoa só é avisada.
+   */
+  fun start(context: Context, pacotes: Set<String>, terminaEm: Long, estrito: Boolean) {
     prefs(context).edit()
       .putStringSet(PACOTES, pacotes)
       .putLong(TERMINA_EM, terminaEm)
+      .putBoolean(ESTRITO, estrito)
       .apply()
   }
+
+  /** Se o aplicativo bloqueado deve ser fechado, e não apenas sinalizado. */
+  fun isStrict(context: Context): Boolean = prefs(context).getBoolean(ESTRITO, true)
 
   /** Desliga o bloqueio antes da hora, quando a sessão é encerrada na mão. */
   fun stop(context: Context) {

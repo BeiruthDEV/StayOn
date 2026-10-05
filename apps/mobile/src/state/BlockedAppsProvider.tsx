@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import { storageKeys, usePersistentState } from '@/storage';
 
+import { usePreferences } from './PreferencesProvider';
+
 import StayOnBlocker, { type InstalledApp } from '../../modules/stay-on-blocker';
 
 export type { InstalledApp };
@@ -19,7 +21,10 @@ type BlockedAppsContextValue = {
   listApps: () => Promise<readonly InstalledApp[]>;
   /** Entra ou sai da lista de bloqueio. */
   toggle: (packageName: string) => void;
-  /** Liga o bloqueio até o horário informado, em milissegundos. */
+  /**
+   * Liga o bloqueio até o horário informado, em milissegundos. O rigor vem do
+   * nível de intervenção escolhido no Perfil.
+   */
   startBlocking: (endsAt: number) => void;
   /** Libera tudo antes da hora, quando a sessão é encerrada na mão. */
   stopBlocking: () => void;
@@ -42,6 +47,8 @@ export function BlockedAppsProvider({ children }: { children: React.ReactNode })
     storageKeys.blockedApps,
     NO_APPS,
   );
+  const { preferences } = usePreferences();
+  const strict = preferences.interventionLevel === 'Rígido';
 
   const toggle = useCallback(
     (packageName: string) =>
@@ -56,9 +63,9 @@ export function BlockedAppsProvider({ children }: { children: React.ReactNode })
   const startBlocking = useCallback(
     (endsAt: number) => {
       if (packages.length === 0) return;
-      StayOnBlocker?.startBlocking([...packages], endsAt);
+      StayOnBlocker?.startBlocking([...packages], endsAt, strict);
     },
-    [packages],
+    [packages, strict],
   );
 
   const stopBlocking = useCallback(() => StayOnBlocker?.stopBlocking(), []);

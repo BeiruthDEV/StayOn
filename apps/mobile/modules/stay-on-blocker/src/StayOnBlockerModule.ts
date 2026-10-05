@@ -15,8 +15,11 @@ declare class StayOnBlockerModule extends NativeModule {
   openAccessibilitySettings(): void;
   /** Aplicativos que aparecem na gaveta, em ordem alfabética. */
   listInstalledApps(): Promise<InstalledApp[]>;
-  /** Bloqueia os pacotes até o horário dado, em milissegundos. */
-  startBlocking(packageNames: string[], endsAt: number): void;
+  /**
+   * Bloqueia os pacotes até o horário dado, em milissegundos.
+   * Em modo estrito o aplicativo é fechado; fora dele só aparece um aviso.
+   */
+  startBlocking(packageNames: string[], endsAt: number, strict: boolean): void;
   /** Libera tudo antes da hora. */
   stopBlocking(): void;
   /** Se existe bloqueio valendo agora. */

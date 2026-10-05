@@ -18,7 +18,7 @@ export type Preferences = {
 export const defaultPreferences: Preferences = {
   name: '',
   focusAreas: [],
-  interventionLevel: 'Suave',
+  interventionLevel: 'Rígido',
   sessionMinutes: 45,
   onboarded: false,
 };

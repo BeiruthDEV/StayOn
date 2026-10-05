@@ -32,8 +32,8 @@ class StayOnBlockerModule : Module() {
 
     // O horário de término chega em milissegundos. Vem como Double porque é
     // assim que um número do JavaScript atravessa a ponte.
-    Function("startBlocking") { pacotes: List<String>, terminaEm: Double ->
-      BlockerState.start(context, pacotes.toSet(), terminaEm.toLong())
+    Function("startBlocking") { pacotes: List<String>, terminaEm: Double, estrito: Boolean ->
+      BlockerState.start(context, pacotes.toSet(), terminaEm.toLong(), estrito)
     }
 
     Function("stopBlocking") {
