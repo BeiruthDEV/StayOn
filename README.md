@@ -97,7 +97,6 @@ apps/mobile
   src/storage     leitura e escrita no AsyncStorage
   src/theme       cores, fontes e espaçamento
   src/icons       ícones SVG
-prototype         protótipo HTML original
 ```
 
 A pasta `android/` é gerada por `npx expo prebuild` e não fica no repositório.

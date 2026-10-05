@@ -193,5 +193,6 @@ necessário, e estreitar isso mexeria em onze arquivos sem ganho real.
 
 - **Aviso de bloqueio é um toast.** Funciona, mas uma tela própria explicando
   quanto falta seria mais clara. Precisa de `SYSTEM_ALERT_WINDOW`.
-- **A pasta `prototype/`** tem 1,2 MB de HTML e capturas do protótipo original.
-  Nada no aplicativo a usa; fica como histórico até ser decidido o contrário.
+- **A pasta `prototype/` foi removida.** Eram 1,3 MB de HTML e capturas que o
+  aplicativo não usava. Continua no histórico do Git, então nada se perdeu de
+  verdade: `git show <commit>^:prototype/StayOn.dc.html` recupera o arquivo.

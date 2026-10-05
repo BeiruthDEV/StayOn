@@ -1,5 +1,5 @@
 /**
- * Traçados SVG copiados do protótipo (objeto `icons` em StayOn.dc.html).
+ * Traçados SVG herdados do protótipo HTML original.
  * Todos desenhados na viewBox 0 0 24 24, sem preenchimento, apenas contorno.
  * Novos ícones são adicionados conforme as telas forem migradas.
  */

@@ -1,5 +1,5 @@
 /**
- * Paleta extraída do protótipo (prototype/StayOn.dc.html).
+ * Paleta herdada do protótipo HTML original.
  * Tema escuro único — o protótipo não possui variante clara.
  */
 export const colors = {
