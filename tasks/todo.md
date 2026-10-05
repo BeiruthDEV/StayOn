@@ -145,20 +145,31 @@ Nada de Android instalado hoje: sem Java, sem SDK, sem Android Studio.
   instalado direto, isso não pesa — mas inviabiliza publicar depois sem
   retrabalho.
 
-## Situação
+## Verificação
 
-Tudo que não depende do SDK do Android está escrito e commitado. O que foi
-verificado até aqui, sem aparelho:
+Compilado e rodado num emulador Android (API 37). O critério de sucesso desta
+fase foi atingido:
 
-- `npm run typecheck` e `npm run lint` limpos
-- `npx expo prebuild --platform android` gera o projeto nativo
-- o autolinking do Expo encontra o `stay-on-blocker`
-- `npx expo export --platform android` empacota o bundle sem erro
-- os XML do serviço de acessibilidade são bem formados
+| O que foi testado | Resultado |
+|---|---|
+| Chrome, na lista de bloqueio, com sessão rodando | volta para a tela inicial |
+| Relógio, na lista de bloqueio | volta para a tela inicial |
+| Gmail, **fora** da lista | abre normalmente |
+| Encerrar a sessão | `terminaEm` zera e o Chrome abre |
+| Matar o processo do StayOn no meio da sessão | continua bloqueando |
+| Reabrir depois de morto | sessão volta com o tempo certo, descontado |
 
-Falta a verificação que só existe no aparelho, e que é o critério de sucesso
-desta fase: compilar com `npx expo run:android`, conceder a permissão e
-confirmar que o aplicativo bloqueado volta para a tela inicial.
+O estado gravado pelo módulo nativo foi conferido direto no aparelho:
+`terminaEm` com o horário correto, a lista de pacotes e `estrito=true`.
+
+Também verificado: o ícone adaptativo na gaveta, o splash escuro com a marca, a
+lista de aplicativos instalados vinda do `PackageManager`, a leitura da
+permissão de acessibilidade e o registro da sessão encerrada no histórico.
+
+**Uma limitação que o teste revelou:** Configurações → Forçar parada derruba o
+bloqueio, porque o Android remove o serviço de acessibilidade da lista de
+ativos. Nenhum aplicativo escapa disso; é o sistema desligando o serviço, não o
+StayOn falhando. Matar o processo pela memória, que é o caso comum, não afeta.
 
 ## Limpeza e acabamento
 
