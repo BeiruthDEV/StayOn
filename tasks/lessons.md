@@ -92,3 +92,20 @@ projeto estava sob `StayOn_ Protótipo`, e o "ó" era corrompido na leitura.
 **Regra:** projeto Android fica em caminho sem acento e sem espaço. Mexer em
 `file.encoding` trata o sintoma e ainda deixa `sun.jnu.encoding` de fora, que é
 quem manda em nome de arquivo no Windows.
+
+## Confiei no dump de acessibilidade e dei um recurso como quebrado
+
+Testando se a sessão sobrevive ao processo ser morto, o `uiautomator dump`
+mostrou "Nova sessão" em três tentativas seguidas. Concluí que a persistência
+não funcionava. Uma captura de tela tirada no mesmo instante mostrava o
+cronômetro rodando em 38:33.
+
+**Causa:** a árvore de acessibilidade do React Native não acompanha o render em
+tempo real. O `uiautomator dump` devolveu um retrato antigo.
+
+**Regras:**
+- Em app React Native, a captura de tela é a fonte da verdade sobre o que está
+  na tela. O dump serve para achar coordenadas, não para afirmar estado.
+- Mesmo padrão do erro do `tail`: tomar um sinal indireto por prova. Quando o
+  indireto contradiz o resultado esperado, confirmar pelo direto antes de
+  concluir — e principalmente antes de "consertar" o que não está quebrado.
