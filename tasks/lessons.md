@@ -63,3 +63,32 @@ ocorrências no HTML da própria página de erro. Duas idas e vindas desperdiça
   Um 404 com corpo HTML passa por `grep` como se fosse dado válido.
 - Melhor ainda: não gerar o vestígio. Definir a atribuição de commit antes do
   primeiro push, não depois.
+
+## Dei uma build como bem-sucedida quando ela tinha falhado
+
+Rodei `./gradlew :app:installDebug 2>&1 | tail -60` em segundo plano. A
+notificação chegou com "exit code 0" e eu anunciei que a build tinha passado.
+Não tinha: o Gradle falhou com `Unsupported class file major version 69`.
+
+**Causa:** num pipe, o código de saída é o do *último* comando. O `tail` sempre
+termina em 0, então o status do Gradle foi descartado antes de chegar em mim.
+
+**Regras:**
+- Nunca ler sucesso de um comando cujo status passou por um pipe. Ou acrescentar
+  `; echo "===EXIT=$?==="` antes do pipe, ou usar `set -o pipefail`.
+- Confirmar o efeito, e não só o status: aqui bastava um `adb shell pm list
+  packages` para ver que nada tinha sido instalado. Foi o que acabou revelando
+  o erro, tarde demais.
+
+## Caminho com acento quebra a build do Android no Windows
+
+Com a JDK 17, o Gradle não encontrou `node_modules/@react-native/gradle-plugin`
+mesmo com a pasta existindo. A mensagem de erro mostrava `Prot�tipo`.
+
+**Causa:** a JDK 17 no Windows ainda usa a codificação da plataforma
+(windows-1252) para nomes de arquivo; da 18 em diante o padrão virou UTF-8. O
+projeto estava sob `StayOn_ Protótipo`, e o "ó" era corrompido na leitura.
+
+**Regra:** projeto Android fica em caminho sem acento e sem espaço. Mexer em
+`file.encoding` trata o sintoma e ainda deixa `sun.jnu.encoding` de fora, que é
+quem manda em nome de arquivo no Windows.
