@@ -32,12 +32,14 @@ export function FocusScreen() {
   // cobertos por um caminho só, sem risco de alguma ação esquecer de avisar.
   const { startBlocking, stopBlocking } = blocked;
   useEffect(() => {
+    if (!session.hydrated) return;
+
     if (session.status === 'running' && session.endsAt > 0) {
       startBlocking(session.endsAt);
     } else {
       stopBlocking();
     }
-  }, [session.status, session.endsAt, startBlocking, stopBlocking]);
+  }, [session.hydrated, session.status, session.endsAt, startBlocking, stopBlocking]);
 
   const suggested = useMemo(() => nextBlock(blocks), [blocks]);
   const todaySessions = useMemo(() => sessionsOn(sessions, todayIso()), [sessions]);
@@ -45,10 +47,9 @@ export function FocusScreen() {
   const [label, setLabel] = useState('');
   const [minutes, setMinutes] = useState(String(preferences.sessionMinutes));
   const [error, setError] = useState<string | undefined>(undefined);
-  /** Bloco vinculado à sessão em andamento, para marcar como concluído no fim. */
-  const [linkedBlock, setLinkedBlock] = useState<TimeBlock | undefined>(undefined);
 
-  const runningLabel = label.trim() === '' ? 'Sessão livre' : label.trim();
+  /** Rótulo da sessão salva; o campo do formulário só vale antes de começar. */
+  const runningLabel = session.label === '' ? 'Sessão livre' : session.label;
 
   const handleStart = useCallback(() => {
     const parsed = Number(minutes);
@@ -63,27 +64,25 @@ export function FocusScreen() {
     }
 
     setError(undefined);
-    setLinkedBlock(undefined);
-    session.start(parsed);
-  }, [minutes, session, blocked, showToast]);
+    session.start(parsed, label.trim() === '' ? 'Sessão livre' : label.trim());
+  }, [minutes, label, session, blocked, showToast]);
 
   const handleUseBlock = useCallback(
     (block: TimeBlock) => {
       setLabel(block.title);
       setMinutes(String(durationOf(block)));
       setError(undefined);
-      setLinkedBlock(block);
-      session.start(durationOf(block));
+      session.start(durationOf(block), block.title, block.id);
     },
     [session],
   );
 
   const finish = useCallback(() => {
     record(runningLabel, session.elapsed, 'completed');
-    if (linkedBlock) setStatus(linkedBlock.id, 'done');
+    if (session.blockId !== undefined) setStatus(session.blockId, 'done');
     showToast(`Sessão registrada: ${durationLabel(session.elapsed)}`);
     session.stop();
-  }, [record, runningLabel, session, linkedBlock, setStatus, showToast]);
+  }, [record, runningLabel, session, setStatus, showToast]);
 
   const abandon = useCallback(() => {
     if (session.elapsed > 0) {
@@ -94,6 +93,9 @@ export function FocusScreen() {
     }
     session.stop();
   }, [session, record, runningLabel, showToast]);
+
+  // Enquanto a sessão salva não chega do disco, qualquer tela seria a errada.
+  if (!session.hydrated) return <Screen scroll={false}>{null}</Screen>;
 
   if (session.status === 'idle') {
     return (
