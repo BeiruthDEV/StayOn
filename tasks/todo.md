@@ -74,3 +74,73 @@ exemplos. Registrado em `lessons.md`.
 - [x] Encerrar sessão sai da aba: deve registrar e continuar em Foco
 - [x] Fundir Insights e Revisão semanal numa aba só
 - [x] README direto, sem enchimento
+
+---
+
+# Fase 2 — bloqueio real de aplicativos (Android)
+
+O projeto deixa de ser trabalho de faculdade e passa a ser pessoal, então a
+restrição que matava a ideia original cai: não precisa mais rodar no Expo Go.
+
+Objetivo: ao dar play numa sessão, o aparelho realmente impede o acesso aos
+aplicativos escolhidos até a sessão terminar.
+
+## Critério de sucesso
+
+Com uma sessão de 25 min rodando e o Instagram na lista de bloqueio: abrir o
+Instagram volta para a tela inicial do sistema. Ao fim dos 25 min, o Instagram
+abre normalmente — inclusive se o StayOn tiver sido fechado no meio.
+
+## Pré-requisito na máquina
+
+Nada de Android instalado hoje: sem Java, sem SDK, sem Android Studio.
+
+- [ ] Instalar Android Studio com o Android SDK → verificar: `adb version` responde
+- [ ] `ANDROID_HOME` apontando para o SDK e `platform-tools` no PATH
+- [ ] Depuração USB ligada no celular → verificar: `adb devices` lista o aparelho
+
+## Passos
+
+- [ ] `npx expo prebuild --platform android`, app vira build próprio → verificar: `npx expo run:android` abre no aparelho
+- [ ] Cronômetro passa a ser por horário de término, não por contagem de ticks → verificar: sair do app 2 min e voltar, tempo restante correto
+- [ ] Módulo nativo local `modules/stay-on-blocker` em Kotlin → verificar: uma função de teste responde do Kotlin no JS
+- [ ] Listar aplicativos instalados que têm ícone na gaveta → verificar: a lista aparece no app
+- [ ] `AccessibilityService` que detecta o app em primeiro plano e expulsa → verificar: critério de sucesso acima
+- [ ] Tela "Apps bloqueados": estado da permissão e seleção salva → verificar: seleção sobrevive a fechar o app
+- [ ] Ligar o bloqueio ao ciclo da sessão, com expiração por horário → verificar: matar o app no meio da sessão não deixa o bloqueio preso
+- [ ] README deixa de falar em Expo Go → verificar: leitura
+
+## Decisões
+
+- **`AccessibilityService`, não `UsageStatsManager`.** Os dois conseguem saber
+  qual app está na frente, mas o `UsageStatsManager` exige ficar consultando em
+  laço, o que gasta bateria e atrasa a reação. O serviço de acessibilidade é
+  avisado pelo sistema na hora que a janela troca.
+
+- **Expulsar com `GLOBAL_ACTION_HOME`, não com janela sobreposta.** Jogar o
+  usuário para a tela inicial não pede permissão nenhuma além da própria
+  acessibilidade. Uma tela de aviso por cima do app bloqueado é mais bonita,
+  mas precisa de `SYSTEM_ALERT_WINDOW` e esbarra na restrição do Android 10+
+  para abrir tela em segundo plano. Fica para depois, se incomodar.
+
+- **Estado do bloqueio em `SharedPreferences`, não em memória.** O serviço de
+  acessibilidade vive fora do React e pode ser reiniciado pelo sistema a
+  qualquer momento. Guardar "bloqueado até tal horário" e a lista de pacotes no
+  disco significa que ele acorda já sabendo o que fazer, e que o bloqueio
+  expira sozinho mesmo se o StayOn tiver sido morto.
+
+- **Cronômetro por horário de término.** Hoje o tempo restante é um contador
+  decrementado de segundo em segundo por `setInterval`. Com o app em segundo
+  plano o JavaScript é estrangulado pelo sistema e esse contador atrasa — o que
+  num app de bloqueio é justamente o cenário normal, já que a pessoa sai do app
+  para tentar abrir outro. Guardando o horário em que a sessão acaba, o tempo
+  restante é sempre calculado a partir do relógio e não existe atraso.
+
+- **Módulo local do Expo, com manifesto próprio.** As permissões e a declaração
+  do serviço ficam dentro de `modules/stay-on-blocker` e são mescladas no build.
+  Assim a pasta `android/` continua descartável e regenerável por `prebuild`.
+
+- **Loja de aplicativos não é objetivo.** O Google Play restringe bastante o uso
+  de `AccessibilityService` e de `QUERY_ALL_PACKAGES`. Como o app é pessoal e
+  instalado direto, isso não pesa — mas inviabiliza publicar depois sem
+  retrabalho.
