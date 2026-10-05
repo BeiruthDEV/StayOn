@@ -42,6 +42,18 @@ depois disso `npm start` já basta para o dia a dia.
 Para o bloqueio funcionar, conceda a permissão uma vez: aba **Foco** → **Apps
 bloqueados** → **Abrir ajustes do sistema** → **StayOn** → ativar.
 
+## Instalar sem o ambiente de desenvolvimento
+
+Para rodar no celular sem nada instalado no computador, gere o APK uma vez e
+copie para o aparelho:
+
+```bash
+cd StayOn/apps/mobile/android && ./gradlew :app:assembleRelease
+```
+
+O arquivo sai em `app/build/outputs/apk/release/app-release.apk`. Ele já vem
+assinado e com o JavaScript embutido, então funciona sozinho.
+
 ## Como o bloqueio funciona
 
 Um serviço de acessibilidade é avisado pelo Android toda vez que a janela em

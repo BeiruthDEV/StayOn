@@ -39,3 +39,6 @@ Thumbs.db
 claude.md
 # Saída de build dos módulos nativos
 apps/mobile/modules/*/android/build/
+
+# APK gerado localmente
+*.apk
