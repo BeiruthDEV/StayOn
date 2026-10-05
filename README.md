@@ -21,6 +21,11 @@ nativo. Precisa de:
 - Node 22
 - [Android Studio](https://developer.android.com/studio) com o Android SDK,
   com `ANDROID_HOME` apontando para ele
+- **JDK 17**, com `JAVA_HOME` apontando para ela. A JDK que vem dentro do
+  Android Studio é mais nova e o Gradle não aceita
+- o projeto num caminho **sem acento e sem espaço**. No Windows a JDK 17 lê
+  nomes de arquivo na codificação da plataforma, e um "ó" no caminho faz o
+  Gradle não achar as próprias dependências
 - o celular ligado por cabo, com a depuração USB ativada
 
 ```bash

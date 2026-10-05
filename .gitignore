@@ -37,3 +37,5 @@ Thumbs.db
 *.tsbuildinfo
 
 claude.md
+# Saída de build dos módulos nativos
+apps/mobile/modules/*/android/build/
