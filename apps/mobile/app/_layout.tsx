@@ -11,6 +11,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import {
+  BlockedAppsProvider,
   BlocksProvider,
   EventsProvider,
   HabitsProvider,
@@ -42,11 +43,13 @@ export default function RootLayout() {
             <BlocksProvider>
               <EventsProvider>
                 <SessionsProvider>
-                  <ToastProvider>
-                    <Stack
-                      screenOptions={{ headerShown: false, contentStyle: styles.screen }}
-                    />
-                  </ToastProvider>
+                  <BlockedAppsProvider>
+                    <ToastProvider>
+                      <Stack
+                        screenOptions={{ headerShown: false, contentStyle: styles.screen }}
+                      />
+                    </ToastProvider>
+                  </BlockedAppsProvider>
                 </SessionsProvider>
               </EventsProvider>
             </BlocksProvider>

@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Chip, ProgressRing, Screen, StatTile } from '@/components';
@@ -8,7 +9,7 @@ import { sessionsOn } from '@/domain/session';
 import { durationOf, nextBlock, type TimeBlock } from '@/domain/timeBlock';
 import { durationLabel } from '@/domain/usage';
 import { Icon } from '@/icons';
-import { useBlocks, usePreferences, useSessions, useToast } from '@/state';
+import { useBlockedApps, useBlocks, usePreferences, useSessions, useToast } from '@/state';
 import { colors, motion, spacing } from '@/theme';
 
 import { SessionControls } from './SessionControls';
@@ -17,12 +18,26 @@ import { useFocusSession } from './useFocusSession';
 
 /** Tela Foco: monta a sessão, roda o cronômetro e grava no histórico. */
 export function FocusScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
   const { blocks, setStatus } = useBlocks();
   const { sessions, record } = useSessions();
   const { preferences } = usePreferences();
+  const blocked = useBlockedApps();
 
   const session = useFocusSession();
+
+  // O bloqueio acompanha o estado da sessão em vez de ser ligado e desligado
+  // em cada ação: assim começar, pausar, retomar, estender e encerrar ficam
+  // cobertos por um caminho só, sem risco de alguma ação esquecer de avisar.
+  const { startBlocking, stopBlocking } = blocked;
+  useEffect(() => {
+    if (session.status === 'running' && session.endsAt > 0) {
+      startBlocking(session.endsAt);
+    } else {
+      stopBlocking();
+    }
+  }, [session.status, session.endsAt, startBlocking, stopBlocking]);
 
   const suggested = useMemo(() => nextBlock(blocks), [blocks]);
   const todaySessions = useMemo(() => sessionsOn(sessions, todayIso()), [sessions]);
@@ -43,10 +58,14 @@ export function FocusScreen() {
       return;
     }
 
+    if (blocked.packages.length > 0 && !blocked.hasPermission()) {
+      showToast('Sem a permissão de acessibilidade, nada será bloqueado');
+    }
+
     setError(undefined);
     setLinkedBlock(undefined);
     session.start(parsed);
-  }, [minutes, session]);
+  }, [minutes, session, blocked, showToast]);
 
   const handleUseBlock = useCallback(
     (block: TimeBlock) => {
@@ -92,6 +111,8 @@ export function FocusScreen() {
           onUseBlock={handleUseBlock}
           onStart={handleStart}
           todayCount={todaySessions.length}
+          blockedCount={blocked.packages.length}
+          onOpenBlocked={() => router.navigate('/blocked-apps')}
         />
       </Screen>
     );

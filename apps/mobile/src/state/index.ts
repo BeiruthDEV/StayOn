@@ -1,3 +1,4 @@
+export { BlockedAppsProvider, useBlockedApps, type InstalledApp } from './BlockedAppsProvider';
 export { BlocksProvider, useBlocks } from './BlocksProvider';
 export { EventsProvider, useEvents } from './EventsProvider';
 export { HabitsProvider, useHabits } from './HabitsProvider';

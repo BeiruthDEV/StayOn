@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Card, OptionPicker, TextField } from '@/components';
+import { AppText, Button, Card, ListRow, OptionPicker, TextField } from '@/components';
 import { scheduleLabel, type TimeBlock } from '@/domain/timeBlock';
 import { Icon } from '@/icons';
 import { colors, motion, spacing } from '@/theme';
@@ -21,6 +21,9 @@ type SessionSetupProps = {
   onStart: () => void;
   /** Sessões já registradas hoje. */
   todayCount: number;
+  /** Quantos aplicativos ficam barrados durante a sessão. */
+  blockedCount: number;
+  onOpenBlocked: () => void;
 };
 
 /** Passo anterior ao cronômetro: escolher o que focar e por quanto tempo. */
@@ -34,6 +37,8 @@ export function SessionSetup({
   onUseBlock,
   onStart,
   todayCount,
+  blockedCount,
+  onOpenBlocked,
 }: SessionSetupProps) {
   return (
     <>
@@ -77,6 +82,19 @@ export function SessionSetup({
         trailing={<Icon name="play" size={16} strokeWidth={1.8} color={colors.onLight} />}
       />
 
+      <ListRow
+        title="Apps bloqueados"
+        subtitle={
+          blockedCount === 0
+            ? 'Nenhum escolhido — nada será barrado'
+            : `${blockedCount} ${blockedCount === 1 ? 'aplicativo' : 'aplicativos'} durante a sessão`
+        }
+        onPress={onOpenBlocked}
+        leading={<Icon name="ban" size={20} strokeWidth={1.6} color={colors.textMuted} />}
+        trailing={<Icon name="chevronRight" size={18} strokeWidth={1.6} color={colors.textDim} />}
+        style={styles.blockedRow}
+      />
+
       {block ? (
         <View style={styles.blockArea}>
           <AppText variant="overlineSmall" color="textDim" style={styles.blockTitle}>
@@ -110,6 +128,9 @@ export function SessionSetup({
 }
 
 const styles = StyleSheet.create({
+  blockedRow: {
+    marginTop: spacing.section,
+  },
   title: {
     marginBottom: spacing.xs,
   },
