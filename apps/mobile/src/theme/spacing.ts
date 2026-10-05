@@ -11,6 +11,3 @@ export const spacing = {
   screen: 20,
   section: 24,
 } as const;
-
-/** Altura mínima de alvo de toque (recomendação de acessibilidade). */
-export const touchTarget = 44;

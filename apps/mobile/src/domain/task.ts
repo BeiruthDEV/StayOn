@@ -45,8 +45,3 @@ export function editTask(
     task.id === id ? { ...task, title: title.trim(), tag: tag.trim() } : task,
   );
 }
-
-/** Tarefas ainda em aberto, na ordem em que foram criadas. */
-export function pendingTasks(tasks: readonly Task[]): Task[] {
-  return tasks.filter((task) => !task.done);
-}

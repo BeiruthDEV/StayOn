@@ -10,7 +10,6 @@ export type TextColor =
   | 'textFaint'
   | 'onLight'
   | 'danger'
-  | 'dangerStrong'
   | 'success';
 
 type AppTextProps = {

@@ -29,8 +29,6 @@ export const colors = {
   fillLight: '#F5F5F5',
   /** Texto de alerta — bloco perdido, aumento de distração. */
   danger: '#EFA3A3',
-  /** Texto de alerta com ênfase (rótulo de botão de alerta). */
-  dangerStrong: '#F7BEBE',
   /** Superfície do cartão de alerta. */
   dangerSurface: '#1C0F11',
   /** Borda do cartão de alerta. */
