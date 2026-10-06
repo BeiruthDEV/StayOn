@@ -14,9 +14,9 @@
   :root {
     /* Fundo profundo, nunca preto puro: as bordas translúcidas precisam de
        alguma luz embaixo para existirem. */
-    --fundo: #08090C;
-    --superficie: #0E1014;
-    --alta: #14161B;
+    --fundo: #040508;
+    --superficie: #090B0F;
+    --alta: #0F1116;
     --fio: rgba(255, 255, 255, .07);
     --fio-forte: rgba(255, 255, 255, .13);
 
@@ -88,7 +88,7 @@
     padding: 9px 9px 9px 18px;
     border: 1px solid var(--fio);
     border-radius: 999px;
-    background: rgba(14, 16, 20, .72);
+    background: rgba(9, 11, 15, .78);
     backdrop-filter: blur(16px);
   }
 
@@ -119,7 +119,7 @@
   }
 
   .botao:active { transform: scale(.97); }
-  .claro { background: var(--texto); color: #0A0B0E; }
+  .claro { background: var(--texto); color: #050609; }
   .claro:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(242, 243, 245, .16); }
   .vazado { border-color: var(--fio-forte); color: var(--texto); }
   .vazado:hover { background: var(--alta); transform: translateY(-2px); }
@@ -564,12 +564,12 @@
       <span class="ponto-vivo"></span> sessão de foco ativa · <b id="relogio-selo">44:57</b>
     </span>
 
-    <h1 class="sobe">Fiz um app de foco que <em>não aceita</em> um não.</h1>
+    <h1 class="sobe">Um app de foco que <em>não aceita</em> um não.</h1>
 
     <p class="chamada sobe">
-      Eu tentei os outros. Todos pediam força de vontade, e às duas da tarde eu
-      não tenho. Então escrevi um que fecha o Instagram sozinho e só devolve ele
-      quando a sessão acaba.
+      A maioria dos apps de foco pede força de vontade e avisa quando ela falha.
+      O StayOn fecha o Instagram sozinho e só devolve ele quando a sessão
+      termina.
     </p>
 
     <div class="acoes sobe">
@@ -589,8 +589,8 @@
   </section>
 
   <section id="cenarios" class="faixa cenarios">
-    <p class="mono sobe">Para quê eu uso</p>
-    <h2 class="sobe">Três coisas que eu não conseguia terminar.</h2>
+    <p class="mono sobe">Onde entra</p>
+    <h2 class="sobe">Três coisas que não terminam com o celular do lado.</h2>
 
     <div class="historico">
       <div class="registro sobe" style="--parte: .5">
@@ -740,12 +740,12 @@
 
   <section id="pilares" class="faixa pilares">
     <p class="mono sobe">Sem letra miúda</p>
-    <h2 class="sobe">O que eu não faço com ele.</h2>
+    <h2 class="sobe">Sem taxa, sem conta, sem servidor.</h2>
 
     <div class="ficha sobe">
       <div><b>Grátis</b><span>Inteiro. Sem versão paga nem recurso trancado.</span></div>
       <div><b>Sem conta</b><span>Abre e usa. Nenhum e-mail, nenhuma senha.</span></div>
-      <div><b>Sem servidor</b><span>Não existe backend. Não tenho para onde mandar.</span></div>
+      <div><b>Sem servidor</b><span>Não existe backend. Não há para onde mandar.</span></div>
       <div><b>No aparelho</b><span>Tudo fica no seu celular e some se você desinstalar.</span></div>
       <div><b>Código aberto</b><span>O serviço que bloqueia tem 54 linhas de Kotlin.</span></div>
     </div>
@@ -768,8 +768,8 @@
     <p class="mono sobe">Instalar</p>
     <h2 class="sobe">Ainda não está na Play Store.</h2>
     <p class="chamada sobe">
-      Publicar lá custa uma taxa anual que eu não paguei. Até lá a instalação é
-      manual, e são três passos.
+      Publicar lá custa uma taxa anual, ainda não paga. Até então a instalação
+      é manual, em três passos.
     </p>
 
     <ol class="passos sobe">
@@ -789,7 +789,7 @@
 
 <footer>
   <div class="faixa rodape">
-    <span>StayOn · feito por uma pessoa só, para uso próprio</span>
+    <span>StayOn · projeto pessoal, código aberto</span>
     <span><a href="https://github.com/BeiruthDEV/StayOn">github.com/BeiruthDEV/StayOn</a></span>
   </div>
 </footer>
