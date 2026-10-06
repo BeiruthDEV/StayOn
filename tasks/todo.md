@@ -196,3 +196,39 @@ necessário, e estreitar isso mexeria em onze arquivos sem ganho real.
 - **A pasta `prototype/` foi removida.** Eram 1,3 MB de HTML e capturas que o
   aplicativo não usava. Continua no histórico do Git, então nada se perdeu de
   verdade: `git show <commit>^:prototype/StayOn.dc.html` recupera o arquivo.
+
+## Versão web, para iPhone
+
+O bloqueio é um serviço de acessibilidade do Android e não existe no iOS.
+Publicar na App Store ou distribuir por TestFlight custa 99 dólares por ano, o
+que não se justifica para mostrar o aplicativo a algumas pessoas. A saída é
+exportar o mesmo código como site instalável: quem abre no Safari e escolhe
+"Adicionar à Tela de Início" passa a ter o StayOn em tela cheia, com ícone, sem
+loja e sem revisão.
+
+Vale para tudo menos o bloqueio: tarefas, hábitos, planner, datas, cronômetro e
+insights são React Native puro e atravessam sem mudança.
+
+- [ ] Habilitar a plataforma web: `npx expo install react-native-web
+      @expo/metro-runtime` → verificar: `npx expo start --web` abre o
+      aplicativo e as sete rotas navegam
+- [ ] Esconder o bloqueio onde ele não existe: a linha "Apps bloqueados" sai da
+      tela Foco e a tela de escolha explica a ausência sem citar Expo Go →
+      verificar: `npm run typecheck` e `npm run lint` limpos, e nenhuma menção a
+      bloqueio no navegador
+- [ ] Exportar estático: `npx expo export --platform web` → verificar: servir a
+      pasta gerada e percorrer as rotas sem erro no console
+- [ ] Manifesto e ícones: `manifest.json` com `display: standalone` e fundo
+      `#050505`, mais `apple-touch-icon` de 180px → verificar: no iPhone, o
+      ícone correto aparece em "Adicionar à Tela de Início" e o aplicativo abre
+      sem a barra do Safari
+- [ ] Service worker guardando o essencial → verificar: abrir em modo avião
+- [ ] Hospedar landing e aplicativo no mesmo endereço, a landing na raiz e o
+      aplicativo em `/app` → verificar: as duas URLs abrem em rede externa
+- [ ] Convite na landing explicando o passo a passo do Safari → verificar:
+      visível em tela de celular
+
+Limites conhecidos, para registrar antes e não descobrir depois: a instalação
+na tela de início só acontece pelo Safari, no Chrome do iPhone vira atalho
+comum; e o iOS descarta dados de sites pouco usados, o que torna o histórico
+menos durável do que no aplicativo instalado.
