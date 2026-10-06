@@ -526,6 +526,37 @@
   .passos .mono { padding-top: 3px; }
   .passos em { font-style: normal; color: var(--texto); }
 
+  /* Dois caminhos de instalação que não entregam a mesma coisa: a divisão em
+     duas colunas é a própria informação, não enfeite. */
+  .plataformas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 42px;
+    text-align: left;
+  }
+
+  @media (max-width: 860px) { .plataformas { grid-template-columns: minmax(0, 1fr); } }
+
+  .plataforma {
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    border: 1px solid var(--fio);
+    border-radius: 16px;
+    background: var(--superficie);
+    transition: border-color .25s, transform .3s var(--curva);
+  }
+
+  .plataforma:hover { border-color: var(--fio-forte); transform: translateY(-3px); }
+  .plataforma h3 { margin: 11px 0 0; font-size: 20px; font-weight: 500; letter-spacing: -.015em; }
+  .plataforma .passos { margin: 20px 0 0; max-width: none; }
+  .plataforma .passos li { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; font-size: 14.5px; }
+  .plataforma .selo-sob { margin-top: 14px; }
+
+  .ressalva { margin: 12px 0 0; color: var(--fraco); font-size: 14.5px; }
+  .fim { margin-top: auto; padding-top: 24px; }
+
   code { font-family: var(--mono); font-size: 13px; padding: 2px 7px; border-radius: 6px; background: var(--alta); color: var(--texto); }
 
   footer { margin-top: 112px; padding: 26px 0 44px; border-top: 1px solid var(--fio); }
@@ -766,21 +797,50 @@
 
   <section id="baixar" class="faixa baixar">
     <p class="mono sobe">Instalar</p>
-    <h2 class="sobe">Ainda não está na Play Store.</h2>
+    <h2 class="sobe">Ainda não está nas lojas.</h2>
     <p class="chamada sobe">
-      Publicar lá custa uma taxa anual, ainda não paga. Até então a instalação
-      é manual, em três passos.
+      Publicar custa uma taxa anual, ainda não paga. Até então são dois
+      caminhos — e eles não entregam a mesma coisa.
     </p>
 
-    <ol class="passos sobe">
-      <li><span class="mono">01</span><span>Baixe o <em>APK</em> e abra o arquivo no celular. O Android vai pedir para permitir instalação de fonte desconhecida.</span></li>
-      <li><span class="mono">02</span><span>No app, escolha o que barrar em <em>Foco → Apps bloqueados</em>.</span></li>
-      <li><span class="mono">03</span><span>Ative a permissão uma única vez em <em>Configurações → Acessibilidade → StayOn</em>. Sem ela o app funciona, mas não bloqueia nada.</span></li>
-    </ol>
+    <div class="plataformas">
+      <article class="plataforma sobe">
+        <p class="mono">Android</p>
+        <h3>O StayOn inteiro, bloqueio incluído.</h3>
 
-    <div class="acoes sobe">
-      <a class="botao claro" href="https://github.com/BeiruthDEV/StayOn/releases/latest/download/StayOn.apk" download>Baixar o APK</a>
-      <a class="botao vazado" href="https://github.com/BeiruthDEV/StayOn">Ver o código</a>
+        <ol class="passos">
+          <li><span class="mono">01</span><span>Baixe o <em>APK</em> e abra o arquivo no celular. O Android vai pedir para permitir instalação de fonte desconhecida.</span></li>
+          <li><span class="mono">02</span><span>No app, escolha o que barrar em <em>Foco → Apps bloqueados</em>.</span></li>
+          <li><span class="mono">03</span><span>Ative a permissão uma única vez em <em>Configurações → Acessibilidade → StayOn</em>. Sem ela o app funciona, mas não bloqueia nada.</span></li>
+        </ol>
+
+        <div class="fim">
+          <a class="botao claro" href="https://github.com/BeiruthDEV/StayOn/releases/latest/download/StayOn.apk" download>Baixar o APK</a>
+          <p class="selo-sob">android 7+ · 72 mb</p>
+        </div>
+      </article>
+
+      <article class="plataforma sobe">
+        <p class="mono">iPhone</p>
+        <h3>Tudo menos o bloqueio.</h3>
+        <p class="ressalva">
+          Barrar aplicativo é um serviço do Android, e o iOS não tem equivalente
+          aberto a quem não publica na App Store. No iPhone ficam as tarefas, os
+          hábitos, a agenda e o cronômetro com os números no fim —
+          <strong>mas nada fecha o Instagram para você.</strong>
+        </p>
+
+        <ol class="passos">
+          <li><span class="mono">01</span><span>Abra o StayOn no <em>Safari</em>. Precisa ser o Safari: nos outros navegadores do iPhone o atalho não vira aplicativo.</span></li>
+          <li><span class="mono">02</span><span>Toque em <em>Compartilhar</em>, o quadrado com a seta para cima.</span></li>
+          <li><span class="mono">03</span><span>Escolha <em>Adicionar à Tela de Início</em>. O ícone entra junto dos outros e abre em tela cheia, sem barra de navegador.</span></li>
+        </ol>
+
+        <div class="fim">
+          <a class="botao vazado" href="/app">Abrir o StayOn</a>
+          <p class="selo-sob">sem loja · sem conta · nada para instalar</p>
+        </div>
+      </article>
     </div>
 
   </section>
@@ -788,7 +848,7 @@
 
 <footer>
   <div class="faixa rodape">
-    <span>StayOn · projeto pessoal, código aberto</span>
+    <span>StayOn · projeto pessoal</span>
     <span><a href="https://github.com/BeiruthDEV/StayOn">github.com/BeiruthDEV/StayOn</a></span>
   </div>
 </footer>

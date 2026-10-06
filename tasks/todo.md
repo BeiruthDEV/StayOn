@@ -225,7 +225,7 @@ insights são React Native puro e atravessam sem mudança.
 - [ ] Service worker guardando o essencial → verificar: abrir em modo avião
 - [ ] Hospedar landing e aplicativo no mesmo endereço, a landing na raiz e o
       aplicativo em `/app` → verificar: as duas URLs abrem em rede externa
-- [ ] Convite na landing explicando o passo a passo do Safari → verificar:
+- [x] Convite na landing explicando o passo a passo do Safari → verificar:
       visível em tela de celular
 
 Limites conhecidos, para registrar antes e não descobrir depois: a instalação
