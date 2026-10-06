@@ -21,9 +21,10 @@
     --fio-forte: rgba(255, 255, 255, .13);
 
     --texto: #F2F3F5;
-    --medio: #9A9DA6;
-    --fraco: #6B6E78;
-    --apagado: #4C4F58;
+    /* Cinzas levantados para 80%, 72% e 62% de branco sobre o fundo. */
+    --medio: #C9CBD1;
+    --fraco: #B0B3BA;
+    --apagado: #9DA0A8;
 
     /* Duas cores, ambas vindas do app, ambas presas a um significado:
        verde é o que está vivo, rosa é o que foi barrado. */
@@ -207,7 +208,7 @@
     height: 520px;
     translate: -50% 0;
     border-radius: 50%;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(150, 160, 200, .11), transparent 72%);
+    background: radial-gradient(50% 50% at 50% 50%, rgba(150, 165, 210, .2), transparent 72%);
     filter: blur(18px);
     pointer-events: none;
   }
@@ -220,7 +221,10 @@
     border: 1px solid var(--fio-forte);
     border-radius: 50px;
     background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .01));
-    box-shadow: 0 50px 110px rgba(0, 0, 0, .75);
+    box-shadow:
+      0 70px 150px rgba(0, 0, 0, .9),
+      0 24px 60px rgba(0, 0, 0, .6),
+      0 0 100px rgba(150, 165, 210, .16);
   }
 
   .aparelho img { width: 100%; height: auto; display: block; border-radius: 41px; }
@@ -370,7 +374,7 @@
     margin-top: 32px;
     border: 1px solid var(--fio);
     border-radius: 18px;
-    background: var(--superficie);
+    background: #000;
     overflow: hidden;
   }
 
@@ -408,18 +412,14 @@
 
   .alvo:hover { border-color: var(--fio-forte); background: #191C22; transform: translateY(-2px); }
 
-  /* Instagram e YouTube têm fundo claro; X e TikTok são quase pretos e
-     sumiriam no cartão. O contorno dá borda a todos por igual. */
   .alvo .logo {
-    width: 25px; height: 25px; flex: none;
+    width: 26px; height: 26px; flex: none;
     border-radius: 7px;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, .12);
     transition: transform .25s var(--curva), filter .35s;
   }
 
   .alvo:hover .logo { transform: scale(1.08); }
-  .alvo .nome { display: block; font-size: 14.5px; font-weight: 500; }
-  .alvo .pacote { display: block; margin-top: 1px; font-family: var(--mono); font-size: 10.5px; color: var(--apagado); }
+  .alvo .nome { font-size: 15px; font-weight: 500; }
 
   .alvo.barrado {
     animation: tremer .42s cubic-bezier(.36, .07, .19, .97);
@@ -428,7 +428,6 @@
     transform: none;
   }
 
-  .alvo.barrado .pacote { color: var(--rosa); }
   .alvo.barrado .logo { filter: grayscale(1) brightness(.55); transform: none; }
 
   @keyframes tremer {
@@ -693,19 +692,19 @@
               <div class="alvos">
                 <button class="alvo" type="button">
                   <img class="logo" src="assets/app-instagram.png" width="48" height="48" alt="" />
-                  <span><span class="nome">Instagram</span><span class="pacote">com.instagram.android</span></span>
+                  <span class="nome">Instagram</span>
                 </button>
                 <button class="alvo" type="button">
                   <img class="logo" src="assets/app-tiktok.png" width="48" height="48" alt="" />
-                  <span><span class="nome">TikTok</span><span class="pacote">com.zhiliaoapp.musically</span></span>
+                  <span class="nome">TikTok</span>
                 </button>
                 <button class="alvo" type="button">
                   <img class="logo" src="assets/app-x.png" width="48" height="48" alt="" />
-                  <span><span class="nome">X</span><span class="pacote">com.twitter.android</span></span>
+                  <span class="nome">X</span>
                 </button>
                 <button class="alvo" type="button">
                   <img class="logo" src="assets/app-youtube.png" width="48" height="48" alt="" />
-                  <span><span class="nome">YouTube</span><span class="pacote">com.google.android.youtube</span></span>
+                  <span class="nome">YouTube</span>
                 </button>
               </div>
             </div>
