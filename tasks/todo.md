@@ -209,16 +209,16 @@ loja e sem revisão.
 Vale para tudo menos o bloqueio: tarefas, hábitos, planner, datas, cronômetro e
 insights são React Native puro e atravessam sem mudança.
 
-- [ ] Habilitar a plataforma web: `npx expo install react-native-web
+- [x] Habilitar a plataforma web: `npx expo install react-native-web
       @expo/metro-runtime` → verificar: `npx expo start --web` abre o
       aplicativo e as sete rotas navegam
-- [ ] Esconder o bloqueio onde ele não existe: a linha "Apps bloqueados" sai da
+- [x] Esconder o bloqueio onde ele não existe: a linha "Apps bloqueados" sai da
       tela Foco e a tela de escolha explica a ausência sem citar Expo Go →
       verificar: `npm run typecheck` e `npm run lint` limpos, e nenhuma menção a
       bloqueio no navegador
-- [ ] Exportar estático: `npx expo export --platform web` → verificar: servir a
+- [x] Exportar estático: `npx expo export --platform web` → verificar: servir a
       pasta gerada e percorrer as rotas sem erro no console
-- [ ] Manifesto e ícones: `manifest.json` com `display: standalone` e fundo
+- [x] Manifesto e ícones: `manifest.json` com `display: standalone` e fundo
       `#050505`, mais `apple-touch-icon` de 180px → verificar: no iPhone, o
       ícone correto aparece em "Adicionar à Tela de Início" e o aplicativo abre
       sem a barra do Safari
@@ -232,3 +232,23 @@ Limites conhecidos, para registrar antes e não descobrir depois: a instalação
 na tela de início só acontece pelo Safari, no Chrome do iPhone vira atalho
 comum; e o iOS descarta dados de sites pouco usados, o que torna o histórico
 menos durável do que no aplicativo instalado.
+
+O export estático gera um arquivo por rota — `focus.html`, `planner.html` e
+assim por diante — em vez de uma página só. O Cloudflare Pages entrega
+`/focus` a partir de `focus.html` sem configuração nenhuma; servidores que não
+fazem essa associação devolvem 404, que foi o que apareceu no teste local até
+o servidor de teste passar a imitar esse comportamento.
+
+Duas coisas ficaram verificadas pela metade e vale registrar por quê:
+
+- **O service worker não pôde ser testado aqui.** O navegador embutido recusa
+  qualquer registro, inclusive servindo sem cabeçalho nenhum: `Failed to
+  register a ServiceWorker ... An unknown error occurred when fetching the
+  script`. O arquivo está sintaticamente válido e é servido com o tipo certo,
+  mas quem confirma que ele guarda o aplicativo é o primeiro acesso ao
+  endereço publicado.
+- **A pré-renderização e o cliente discordam na primeira pintura.** O React
+  reclama de hidratação (`Minified React error #418`) porque o HTML é gerado na
+  compilação, quando ainda não existe nem saudação por horário nem dado salvo.
+  Ele se recupera sozinho redesenhando no cliente e o aplicativo funciona, mas
+  é um remendo e não uma solução.
