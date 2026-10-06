@@ -70,8 +70,8 @@ export function BlockedAppsScreen() {
         <ScreenHeader title="Apps bloqueados" action={fechar} />
         <EmptyState
           icon="ban"
-          title="Só no aplicativo instalado"
-          description="O bloqueio depende de código nativo, que o Expo Go não carrega. Rode npx expo run:android para instalar o StayOn no aparelho."
+          title="Só no StayOn do Android"
+          description="O bloqueio depende de um serviço do sistema que só existe no Android, no aplicativo instalado no aparelho. O resto do StayOn funciona normalmente."
         />
       </Screen>
     );

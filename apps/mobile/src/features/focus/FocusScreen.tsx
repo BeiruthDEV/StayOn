@@ -114,7 +114,9 @@ export function FocusScreen() {
           onStart={handleStart}
           todayCount={todaySessions.length}
           blockedCount={blocked.packages.length}
-          onOpenBlocked={() => router.navigate('/blocked-apps')}
+          onOpenBlocked={
+            blocked.available ? () => router.navigate('/blocked-apps') : undefined
+          }
         />
       </Screen>
     );
