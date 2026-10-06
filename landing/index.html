@@ -400,9 +400,9 @@
     gap: 12px;
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid var(--fio);
+    border: 1px solid transparent;
     border-radius: 12px;
-    background: var(--alta);
+    background: transparent;
     color: var(--texto);
     font-family: var(--sans);
     text-align: left;
@@ -410,7 +410,7 @@
     transition: border-color .2s, background .2s, transform .25s var(--curva);
   }
 
-  .alvo:hover { border-color: var(--fio-forte); background: #191C22; transform: translateY(-2px); }
+  .alvo:hover { background: rgba(255, 255, 255, .05); transform: translateY(-2px); }
 
   .alvo .logo {
     width: 26px; height: 26px; flex: none;
