@@ -1,11 +1,16 @@
 name: APK
 
 # Gera o APK de release e anexa à release quando ela é publicada no GitHub.
-# Também pode ser disparado à mão na aba Actions (só gera o arquivo, sem release).
+# Em pull requests e no disparo manual (aba Actions), só compila e guarda o
+# arquivo como artefato, para conferir que o build passa.
 
 on:
   release:
     types: [published]
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/apk.yml'
   workflow_dispatch:
 
 permissions:
