@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react';
 
 import {
   createRoutineItem,
+  reuseIds,
   toggleDone,
   type RoutineItem,
   type RoutineLog,
@@ -9,18 +10,32 @@ import {
 } from '@/domain/routine';
 import { storageKeys, usePersistentState } from '@/storage';
 
+/** Campos de um bloco que a pessoa preenche. */
+export type RoutineDraft = {
+  title: string;
+  start: string;
+  end: string;
+  tag: string;
+};
+
 type RoutineContextValue = {
   items: readonly RoutineItem[];
   log: RoutineLog;
   /** Falso até a rotina e o registro serem lidos do aparelho. */
   hydrated: boolean;
-  add: (weekday: Weekday, title: string, start: string, end: string, tag: string) => void;
-  edit: (id: string, title: string, start: string, end: string, tag: string) => void;
+  /** Cria o mesmo bloco em cada um dos dias e devolve os criados. */
+  addToDays: (days: readonly Weekday[], draft: RoutineDraft) => RoutineItem[];
+  /** Altera um bloco, inclusive o dia. */
+  edit: (id: string, weekday: Weekday, draft: RoutineDraft) => void;
   remove: (id: string) => void;
-  /** Recoloca um bloco removido (ação de desfazer). */
-  restore: (item: RoutineItem) => void;
-  /** Troca a rotina inteira, usado na importação por texto. */
+  /** Recoloca blocos removidos (ação de desfazer). */
+  restore: (items: readonly RoutineItem[]) => void;
+  /** Tira blocos criados (ação de desfazer). */
+  removeMany: (ids: readonly string[]) => void;
+  /** Troca a rotina inteira (importação com substituição, copiar dia). */
   replaceAll: (items: readonly RoutineItem[]) => void;
+  /** Soma blocos à rotina (importação sem substituição). */
+  addMany: (items: readonly RoutineItem[]) => void;
   /** Marca ou desmarca um bloco numa data. */
   toggle: (date: string, id: string) => void;
 };
@@ -37,23 +52,29 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
   const setItems = routine.setValue;
   const setLog = history.setValue;
 
-  const add = useCallback(
-    (weekday: Weekday, title: string, start: string, end: string, tag: string) =>
-      setItems((current) => [...current, createRoutineItem(weekday, title, start, end, tag)]),
+  const addToDays = useCallback(
+    (days: readonly Weekday[], draft: RoutineDraft) => {
+      const created = days.map((day) =>
+        createRoutineItem(day, draft.title, draft.start, draft.end, draft.tag),
+      );
+      setItems((current) => [...current, ...created]);
+      return created;
+    },
     [setItems],
   );
 
   const edit = useCallback(
-    (id: string, title: string, start: string, end: string, tag: string) =>
+    (id: string, weekday: Weekday, draft: RoutineDraft) =>
       setItems((current) =>
         current.map((item) =>
           item.id === id
             ? {
                 ...item,
-                title: title.trim(),
-                start,
-                end,
-                tag: tag.trim() || item.tag,
+                weekday,
+                title: draft.title.trim(),
+                start: draft.start,
+                end: draft.end,
+                tag: draft.tag.trim() || item.tag,
               }
             : item,
         ),
@@ -67,12 +88,27 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
   );
 
   const restore = useCallback(
-    (item: RoutineItem) => setItems((current) => [...current, item]),
+    (removed: readonly RoutineItem[]) =>
+      setItems((current) => [
+        ...current.filter((item) => !removed.some((back) => back.id === item.id)),
+        ...removed,
+      ]),
+    [setItems],
+  );
+
+  const removeMany = useCallback(
+    (ids: readonly string[]) =>
+      setItems((current) => current.filter((item) => !ids.includes(item.id))),
     [setItems],
   );
 
   const replaceAll = useCallback(
-    (next: readonly RoutineItem[]) => setItems(() => [...next]),
+    (next: readonly RoutineItem[]) => setItems((current) => reuseIds(current, next)),
+    [setItems],
+  );
+
+  const addMany = useCallback(
+    (more: readonly RoutineItem[]) => setItems((current) => [...current, ...more]),
     [setItems],
   );
 
@@ -86,11 +122,13 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
       items: routine.value,
       log: history.value,
       hydrated: routine.hydrated && history.hydrated,
-      add,
+      addToDays,
       edit,
       remove,
       restore,
+      removeMany,
       replaceAll,
+      addMany,
       toggle,
     }),
     [
@@ -98,11 +136,13 @@ export function RoutineProvider({ children }: { children: React.ReactNode }) {
       history.value,
       routine.hydrated,
       history.hydrated,
-      add,
+      addToDays,
       edit,
       remove,
       restore,
+      removeMany,
       replaceAll,
+      addMany,
       toggle,
     ],
   );

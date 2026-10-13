@@ -1,66 +1,123 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Button, OptionPicker, Sheet, TextField } from '@/components';
-import { WEEK_ORDER, weekdayShort, type RoutineItem, type Weekday } from '@/domain/routine';
-import { isValidRange, isValidTime } from '@/domain/timeBlock';
+import { AppText, Button, Sheet, TextField } from '@/components';
+import {
+  addMinutes,
+  overlapping,
+  usedTags,
+  weekdayShort,
+  WEEK_ORDER,
+  type RoutineItem,
+  type Weekday,
+} from '@/domain/routine';
+import { toMinutes } from '@/domain/timeBlock';
 import { useRoutine, useToast } from '@/state';
-import { spacing } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
+
+import { DayPicker, TagPicker } from './RoutinePickers';
+import { SelectChip } from './SelectChip';
+import { TimeDisplay, TimePanel } from './TimePicker';
 
 type RoutineItemSheetProps = {
   visible: boolean;
   /** Bloco em edição. Ausente significa criação. */
   item?: RoutineItem | undefined;
-  /** Dia em que o bloco novo entra. */
+  /** Dia sugerido para o bloco novo: o dia aberto na tela. */
   weekday: Weekday;
   onClose: () => void;
 };
 
-type Errors = { title?: string; start?: string; end?: string };
+type Errors = { days?: string; title?: string; start?: string; end?: string };
 
-/** Formulário de criação e edição de um bloco da rotina semanal. */
+const DURATIONS: readonly { label: string; minutes: number }[] = [
+  { label: '30 min', minutes: 30 },
+  { label: '1h', minutes: 60 },
+  { label: '1h30', minutes: 90 },
+  { label: '2h', minutes: 120 },
+  { label: '3h', minutes: 180 },
+  { label: '4h', minutes: 240 },
+];
+
+/** Criação e edição de bloco da rotina, sem nada para digitar além do nome. */
 export function RoutineItemSheet({ visible, item, weekday, onClose }: RoutineItemSheetProps) {
-  const { add, edit, remove, restore } = useRoutine();
+  const { items, addToDays, edit, remove, restore, removeMany } = useRoutine();
   const { showToast } = useToast();
+  const tags = useMemo(() => usedTags(items), [items]);
 
-  const [day, setDay] = useState<Weekday>(weekday);
+  const [days, setDays] = useState<Weekday[]>([weekday]);
   const [title, setTitle] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [tag, setTag] = useState('');
+  const [customTag, setCustomTag] = useState(false);
+  const [picking, setPicking] = useState<'start' | 'end' | null>(null);
   const [errors, setErrors] = useState<Errors>({});
 
   useEffect(() => {
     if (!visible) return;
-    setDay(item?.weekday ?? weekday);
+    setDays([item?.weekday ?? weekday]);
     setTitle(item?.title ?? '');
     setStart(item?.start ?? '');
     setEnd(item?.end ?? '');
-    setTag(item?.tag ?? '');
+    const initialTag = item?.tag ?? tags[0] ?? 'Estudo';
+    setTag(initialTag);
+    setCustomTag(false);
+    setPicking(item ? null : 'start');
     setErrors({});
+    // só ao abrir: as áreas mudam enquanto o formulário está aberto
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, item, weekday]);
+
+  const duration = start && end ? toMinutes(end) - toMinutes(start) : undefined;
+
+  const changeStart = (next: string) => {
+    setStart(next);
+    setErrors((current) => ({ ...current, start: undefined, end: undefined }));
+    // mantém a duração já escolhida ao mudar o início
+    if (duration !== undefined && duration > 0) {
+      setEnd(addMinutes(next, duration) ?? '');
+    } else if (end && toMinutes(end) <= toMinutes(next)) {
+      setEnd('');
+    }
+  };
+
+  const changeEnd = (next: string) => {
+    setEnd(next);
+    setErrors((current) => ({ ...current, end: undefined }));
+  };
+
+  const conflicts = useMemo(() => {
+    if (!start || !end || toMinutes(end) <= toMinutes(start)) return [];
+    return days.flatMap((day) => overlapping(items, day, start, end, item?.id));
+  }, [days, start, end, items, item]);
 
   const validate = (): boolean => {
     const next: Errors = {};
+    if (days.length === 0) next.days = 'Escolha pelo menos um dia';
     if (title.trim() === '') next.title = 'Dê um nome ao bloco';
-    if (!isValidTime(start)) next.start = 'Use HH:MM, ex.: 09:00';
-    if (!isValidTime(end)) next.end = 'Use HH:MM, ex.: 12:00';
-    else if (isValidTime(start) && !isValidRange(start, end)) {
-      next.end = 'O fim precisa vir depois do início';
-    }
+    if (!start) next.start = 'Escolha o início';
+    if (!end) next.end = 'Escolha o fim';
+    else if (start && toMinutes(end) <= toMinutes(start))
+      next.end = 'O fim precisa ser depois do início';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
   const handleSave = () => {
     if (!validate()) return;
+    const draft = { title, start, end, tag: tag.trim() || 'Rotina' };
 
     if (item) {
-      edit(item.id, title, start, end, tag);
-      showToast('Bloco atualizado');
+      edit(item.id, days[0] ?? item.weekday, draft);
+      showToast('Bloco atualizado', () => restore([item]));
     } else {
-      add(day, title, start, end, tag);
-      showToast(`Bloco criado na ${weekdayShort(day).toLowerCase()}`);
+      const ordered = WEEK_ORDER.filter((day) => days.includes(day));
+      const created = addToDays(ordered, draft);
+      showToast(
+        created.length === 1 ? 'Bloco criado' : `Bloco criado em ${created.length} dias`,
+        () => removeMany(created.map((c) => c.id)),
+      );
     }
     onClose();
   };
@@ -68,86 +125,122 @@ export function RoutineItemSheet({ visible, item, weekday, onClose }: RoutineIte
   const handleDelete = () => {
     if (!item) return;
     remove(item.id);
-    showToast('Bloco removido da rotina', () => restore(item));
+    showToast('Bloco removido da rotina', () => restore([item]));
     onClose();
   };
 
   return (
     <Sheet
       visible={visible}
-      title={item ? 'Editar bloco da rotina' : 'Novo bloco da rotina'}
+      title={item ? 'Editar bloco' : 'Novo bloco'}
       onClose={onClose}
       footer={
         <>
-          <Button label={item ? 'Salvar' : 'Criar bloco'} onPress={handleSave} />
+          <Button
+            label={
+              item ? 'Salvar' : days.length > 1 ? `Criar em ${days.length} dias` : 'Criar bloco'
+            }
+            onPress={handleSave}
+          />
           {item ? (
             <Button label="Remover da rotina" variant="ghost" onPress={handleDelete} />
           ) : null}
         </>
       }
     >
-      {item ? null : (
-        <OptionPicker
-          label="Dia da semana"
-          options={WEEK_ORDER.map((option) => ({
-            value: String(option),
-            label: weekdayShort(option),
-          }))}
-          value={String(day)}
-          onChange={(value) => setDay(Number(value) as Weekday)}
+      <DayPicker
+        label={item ? 'Dia' : 'Dias (pode marcar vários)'}
+        value={days}
+        onChange={(next) => {
+          setDays(next);
+          setErrors((current) => ({ ...current, days: undefined }));
+        }}
+        multiple={!item}
+        error={errors.days}
+      />
+
+      <View style={styles.times}>
+        <TimeDisplay
+          label="Início"
+          value={start}
+          open={picking === 'start'}
+          onToggle={() => setPicking(picking === 'start' ? null : 'start')}
+          error={errors.start}
         />
-      )}
+        <TimeDisplay
+          label="Fim"
+          value={end}
+          open={picking === 'end'}
+          onToggle={() => setPicking(picking === 'end' ? null : 'end')}
+          error={errors.end}
+        />
+      </View>
+
+      {picking === 'start' ? (
+        <TimePanel label="Início" value={start} onChange={changeStart} />
+      ) : null}
+      {picking === 'end' ? <TimePanel label="Fim" value={end} onChange={changeEnd} /> : null}
+
+      {start ? (
+        <View style={styles.field}>
+          <AppText variant="overlineSmall" color="textDim" style={styles.label}>
+            Duração
+          </AppText>
+          <View style={styles.chips}>
+            {DURATIONS.map((option) => {
+              const fits = addMinutes(start, option.minutes) !== undefined;
+              return (
+                <SelectChip
+                  key={option.minutes}
+                  label={option.label}
+                  selected={duration === option.minutes}
+                  disabled={!fits}
+                  onPress={() => {
+                    changeEnd(addMinutes(start, option.minutes) ?? end);
+                    setPicking(null);
+                  }}
+                />
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
+
+      {conflicts.length > 0 ? (
+        <View style={styles.warning} accessibilityRole="alert">
+          <AppText variant="captionStrong" color="danger">
+            Esse horário bate com{' '}
+            {conflicts.length === 1 ? 'outro bloco' : `${conflicts.length} blocos`}
+          </AppText>
+          {conflicts.slice(0, 3).map((conflict) => (
+            <AppText key={conflict.id} variant="caption" color="textMuted">
+              {weekdayShort(conflict.weekday)} {conflict.start}–{conflict.end} · {conflict.title}
+            </AppText>
+          ))}
+          <AppText variant="caption" color="textDim">
+            Dá para salvar mesmo assim.
+          </AppText>
+        </View>
+      ) : null}
 
       <TextField
-        label="Bloco"
+        label="Nome do bloco"
         value={title}
         onChangeText={(text) => {
           setTitle(text);
           setErrors((current) => ({ ...current, title: undefined }));
         }}
-        placeholder="Específicos: teoria"
+        placeholder="Ex.: Estudar teoria, Academia, Aula"
         error={errors.title}
         maxLength={60}
       />
 
-      <View style={styles.times}>
-        <View style={styles.time}>
-          <TextField
-            label="Início"
-            value={start}
-            onChangeText={(text) => {
-              setStart(text);
-              setErrors((current) => ({ ...current, start: undefined }));
-            }}
-            placeholder="09:00"
-            error={errors.start}
-            keyboardType="numbers-and-punctuation"
-            maxLength={5}
-          />
-        </View>
-        <View style={styles.time}>
-          <TextField
-            label="Fim"
-            value={end}
-            onChangeText={(text) => {
-              setEnd(text);
-              setErrors((current) => ({ ...current, end: undefined }));
-            }}
-            placeholder="12:00"
-            error={errors.end}
-            keyboardType="numbers-and-punctuation"
-            maxLength={5}
-          />
-        </View>
-      </View>
-
-      <TextField
-        label="Área"
+      <TagPicker
         value={tag}
-        onChangeText={setTag}
-        placeholder="Concurso"
-        hint="Aparece como etiqueta. Vazio vira Rotina."
-        maxLength={24}
+        onChange={setTag}
+        suggestions={tags}
+        custom={customTag}
+        onCustomChange={setCustomTag}
       />
     </Sheet>
   );
@@ -157,8 +250,26 @@ const styles = StyleSheet.create({
   times: {
     flexDirection: 'row',
     gap: spacing.xl,
+    marginBottom: spacing.xxl,
   },
-  time: {
-    flex: 1,
+  field: {
+    marginBottom: spacing.xxl,
+  },
+  label: {
+    marginBottom: spacing.md,
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  warning: {
+    gap: spacing.xs,
+    marginBottom: spacing.xxl,
+    padding: spacing.xl,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.dangerBorder,
+    backgroundColor: colors.dangerSurface,
   },
 });
