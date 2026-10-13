@@ -73,7 +73,7 @@ aplicativo bloqueado na hora, **Suave** apenas avisa e deixa você decidir.
 | Tela | Rota | O que faz |
 |---|---|---|
 | Início | `/` | Tarefas do dia, próxima ação, hábitos e resumo de foco |
-| Rotina | `/routine` | Semana fixa por dia da semana; cada dia os blocos voltam desmarcados e o que foi cumprido vira histórico |
+| Rotina | `/routine` | Semana fixa por dia da semana: cada dia os blocos voltam desmarcados e o que foi cumprido vira histórico. Bloco criado por toque (vários dias de uma vez, duração, aviso de conflito), copiar dia e importação de TXT, PDF ou texto colado com prévia |
 | Planejar | `/planner` | Agenda do dia em blocos de tempo |
 | Datas importantes | `/dates` | Calendário e compromissos |
 | Foco | `/focus` | Cronômetro de sessão de foco |
