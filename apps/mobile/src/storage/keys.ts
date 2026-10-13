@@ -12,6 +12,8 @@ export const storageKeys = {
   reflections: 'stayon:reflections',
   blockedApps: 'stayon:blockedApps',
   focusSession: 'stayon:focusSession',
+  routine: 'stayon:routine',
+  routineLog: 'stayon:routineLog',
 } as const;
 
 export type StorageKey = (typeof storageKeys)[keyof typeof storageKeys];

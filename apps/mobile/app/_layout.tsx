@@ -15,6 +15,7 @@ import {
   EventsProvider,
   HabitsProvider,
   PreferencesProvider,
+  RoutineProvider,
   SessionsProvider,
   TasksProvider,
   ToastProvider,
@@ -39,17 +40,22 @@ export default function RootLayout() {
         <TasksProvider>
           <HabitsProvider>
             <BlocksProvider>
-              <EventsProvider>
-                <SessionsProvider>
-                  <BlockedAppsProvider>
-                    <ToastProvider>
-                      <Stack
-                        screenOptions={{ headerShown: false, contentStyle: styles.screen }}
-                      />
-                    </ToastProvider>
-                  </BlockedAppsProvider>
-                </SessionsProvider>
-              </EventsProvider>
+              <RoutineProvider>
+                <EventsProvider>
+                  <SessionsProvider>
+                    <BlockedAppsProvider>
+                      <ToastProvider>
+                        <Stack
+                          screenOptions={{
+                            headerShown: false,
+                            contentStyle: styles.screen,
+                          }}
+                        />
+                      </ToastProvider>
+                    </BlockedAppsProvider>
+                  </SessionsProvider>
+                </EventsProvider>
+              </RoutineProvider>
             </BlocksProvider>
           </HabitsProvider>
         </TasksProvider>
