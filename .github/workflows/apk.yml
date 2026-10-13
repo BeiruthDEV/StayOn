@@ -1,11 +1,11 @@
 name: APK
 
-# Gera o APK de release e publica no GitHub Releases quando uma tag v* é enviada.
+# Gera o APK de release e anexa à release quando ela é publicada no GitHub.
 # Também pode ser disparado à mão na aba Actions (só gera o arquivo, sem release).
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -50,11 +50,7 @@ jobs:
           path: apps/mobile/StayOn.apk
 
       - name: Publicar release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: apps/mobile/StayOn.apk
-          body: |
-            Nova aba **Rotina**: semana fixa por dia da semana. Cada dia os blocos voltam desmarcados e o que foi cumprido fica no histórico, com o placar da semana.
-
-            Instale por cima da versão anterior: os dados continuam no aparelho.
