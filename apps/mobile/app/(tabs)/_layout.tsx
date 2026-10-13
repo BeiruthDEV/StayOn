@@ -7,6 +7,7 @@ import { colors, textVariants } from '@/theme';
 /** Abas da navegação inferior, na ordem definida para o produto. */
 const TABS: readonly { name: string; title: string; icon: IconName }[] = [
   { name: 'index', title: 'Início', icon: 'home' },
+  { name: 'routine', title: 'Rotina', icon: 'target' },
   { name: 'planner', title: 'Planejar', icon: 'planner' },
   { name: 'focus', title: 'Foco', icon: 'focus' },
   { name: 'insights', title: 'Insights', icon: 'insights' },

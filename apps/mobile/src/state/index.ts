@@ -2,6 +2,7 @@ export { BlockedAppsProvider, useBlockedApps, type InstalledApp } from './Blocke
 export { BlocksProvider, useBlocks } from './BlocksProvider';
 export { EventsProvider, useEvents } from './EventsProvider';
 export { HabitsProvider, useHabits } from './HabitsProvider';
+export { RoutineProvider, useRoutine } from './RoutineProvider';
 export { PreferencesProvider, usePreferences } from './PreferencesProvider';
 export { SessionsProvider, useSessions } from './SessionsProvider';
 export { TasksProvider, useTasks } from './TasksProvider';
