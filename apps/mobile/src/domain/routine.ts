@@ -481,27 +481,41 @@ export function usedTags(items: readonly RoutineItem[]): string[] {
 }
 
 /**
- * Ao trocar a rotina, mantém o id dos blocos que continuam iguais (mesmo dia,
- * horário e título), para que as marcações já feitas neles não se percam.
+ * Ao trocar a rotina, mantém o id dos blocos que continuam no mesmo lugar,
+ * para que as marcações já feitas neles não se percam.
+ *
+ * Primeiro casa os blocos iguais (mesmo dia, horário e título). Depois casa
+ * os que só mudaram de nome ou de área, pelo mesmo dia e horário: renomear
+ * a rotina inteira não pode zerar o histórico.
  */
 export function reuseIds(
   previous: readonly RoutineItem[],
   next: readonly RoutineItem[],
 ): RoutineItem[] {
-  const key = (item: RoutineItem) =>
-    `${item.weekday}|${item.start}|${item.end}|${item.title.trim().toLowerCase()}`;
-  const available = new Map<string, string[]>();
-  for (const item of previous) {
-    const ids = available.get(key(item)) ?? [];
-    ids.push(item.id);
-    available.set(key(item), ids);
-  }
+  const slot = (item: RoutineItem) => `${item.weekday}|${item.start}|${item.end}`;
+  const exact = (item: RoutineItem) => `${slot(item)}|${item.title.trim().toLowerCase()}`;
+  const previousIds = new Set(previous.map((item) => item.id));
   const used = new Set<string>();
-  return next.map((item) => {
-    if (previous.some((old) => old.id === item.id)) return item;
-    const id = available.get(key(item))?.find((candidate) => !used.has(candidate));
-    if (!id) return item;
-    used.add(id);
-    return { ...item, id };
+
+  const pick = (key: (item: RoutineItem) => string, item: RoutineItem) => {
+    const match = previous.find((old) => !used.has(old.id) && key(old) === key(item));
+    if (!match) return undefined;
+    used.add(match.id);
+    return match.id;
+  };
+
+  const result = next.map((item) => {
+    if (previousIds.has(item.id)) {
+      used.add(item.id);
+      return item;
+    }
+    const id = pick(exact, item);
+    return id ? { ...item, id } : item;
+  });
+
+  return result.map((item) => {
+    if (previousIds.has(item.id)) return item;
+    const id = pick(slot, item);
+    return id ? { ...item, id } : item;
   });
 }
