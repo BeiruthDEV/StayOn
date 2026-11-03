@@ -8,6 +8,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from '@/state/AuthContext';
 
 import {
   BlockedAppsProvider,
@@ -45,12 +46,14 @@ export default function RootLayout() {
                   <SessionsProvider>
                     <BlockedAppsProvider>
                       <ToastProvider>
-                        <Stack
-                          screenOptions={{
-                            headerShown: false,
-                            contentStyle: styles.screen,
-                          }}
-                        />
+                        <AuthProvider>
+                          <Stack
+                            screenOptions={{
+                              headerShown: false,
+                              contentStyle: styles.screen,
+                            }}
+                          />
+                        </AuthProvider>
                       </ToastProvider>
                     </BlockedAppsProvider>
                   </SessionsProvider>
