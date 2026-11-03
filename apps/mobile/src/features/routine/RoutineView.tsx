@@ -1,7 +1,16 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Checkbox, Chip, EmptyState, Progress, SectionHeader } from '@/components';
+import {
+  AppText,
+  Button,
+  Checkbox,
+  Chip,
+  EmptyState,
+  IconButton,
+  Progress,
+  SectionHeader,
+} from '@/components';
 import { rangeLabel, todayIso } from '@/domain/clock';
 import {
   dayScore,
@@ -18,6 +27,7 @@ import {
 import { useRoutine, useToast } from '@/state';
 import { colors, motion, radius, spacing } from '@/theme';
 
+import { CopyDaySheet } from './CopyDaySheet';
 import { RoutineImportSheet } from './RoutineImportSheet';
 import { RoutineItemSheet } from './RoutineItemSheet';
 
@@ -34,6 +44,7 @@ export function RoutineView() {
   const [selected, setSelected] = useState(today);
 
   const [importOpen, setImportOpen] = useState(false);
+  const [copyOpen, setCopyOpen] = useState(false);
   const [itemSheetOpen, setItemSheetOpen] = useState(false);
   const [editing, setEditing] = useState<RoutineItem | undefined>(undefined);
 
@@ -68,9 +79,24 @@ export function RoutineView() {
       <>
         <EmptyState
           icon="planner"
-          title="Sem rotina ainda"
-          description="Monte a semana fixa: os mesmos blocos todo dia da semana. Cada dia você marca o que cumpriu, e o app guarda o histórico."
-          action={<Button label="Importar rotina" onPress={() => setImportOpen(true)} />}
+          title="Monte sua semana fixa"
+          description="Cadastre os blocos de cada dia uma vez. Todo dia eles voltam desmarcados para você marcar o que cumpriu, e o app guarda o histórico."
+          action={
+            <View style={styles.emptyActions}>
+              <Button label="Criar o primeiro bloco" onPress={openNew} />
+              <Button
+                label="Importar de arquivo ou texto"
+                variant="ghost"
+                onPress={() => setImportOpen(true)}
+              />
+            </View>
+          }
+        />
+        <RoutineItemSheet
+          visible={itemSheetOpen}
+          item={editing}
+          weekday={selectedWeekday}
+          onClose={() => setItemSheetOpen(false)}
         />
         <RoutineImportSheet visible={importOpen} onClose={() => setImportOpen(false)} />
       </>
@@ -128,9 +154,21 @@ export function RoutineView() {
         })}
       </View>
 
+      <View style={styles.dayBar}>
+        <AppText variant="sectionTitle" style={styles.dayTitle}>
+          {weekdayShort(selectedWeekday)}
+          {selected === today ? ' · hoje' : ''}
+        </AppText>
+        <Button label="+ Bloco" variant="ghost" onPress={openNew} />
+        {dayItems.length > 0 ? (
+          <Button label="Copiar dia" variant="ghost" onPress={() => setCopyOpen(true)} />
+        ) : null}
+      </View>
+
       {dayItems.length === 0 ? (
         <AppText variant="supporting" color="textDim" style={styles.dayEmpty}>
-          Nenhum bloco neste dia.
+          Nenhum bloco na {weekdayShort(selectedWeekday).toLowerCase()}. Toque em + Bloco, ou abra
+          outro dia e use Copiar dia.
         </AppText>
       ) : null}
 
@@ -144,7 +182,8 @@ export function RoutineView() {
             onLongPress={() => openEdit(item)}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: done, disabled: isFuture }}
-            accessibilityHint="Toque longo para editar"
+            accessibilityLabel={`${item.start} a ${item.end}, ${item.title}`}
+            accessibilityHint="Toque para marcar como feito"
             style={({ pressed }) => [
               styles.row,
               isFuture && styles.rowFuture,
@@ -165,17 +204,27 @@ export function RoutineView() {
               </AppText>
             </View>
             <Chip label={item.tag} tone="outline" />
+            <IconButton
+              name="chevronRight"
+              onPress={() => openEdit(item)}
+              accessibilityLabel={`Editar ${item.title}`}
+              size={18}
+              style={styles.edit}
+            />
           </Pressable>
         );
       })}
 
+      <AppText variant="caption" color="textDim" style={styles.hint}>
+        Toque no bloco para marcar. Na seta, para editar.
+      </AppText>
+
       <View style={styles.actions}>
         <Button
-          label={`Novo bloco na ${weekdayShort(selectedWeekday).toLowerCase()}`}
+          label="Importar de arquivo ou texto"
           variant="ghost"
-          onPress={openNew}
+          onPress={() => setImportOpen(true)}
         />
-        <Button label="Importar rotina" variant="ghost" onPress={() => setImportOpen(true)} />
       </View>
 
       {history.length > 0 ? (
@@ -207,6 +256,7 @@ export function RoutineView() {
         weekday={selectedWeekday}
         onClose={() => setItemSheetOpen(false)}
       />
+      <CopyDaySheet visible={copyOpen} from={selectedWeekday} onClose={() => setCopyOpen(false)} />
       <RoutineImportSheet visible={importOpen} onClose={() => setImportOpen(false)} />
     </View>
   );
@@ -248,6 +298,24 @@ const styles = StyleSheet.create({
   },
   dayToday: {
     borderColor: colors.textDim,
+  },
+  emptyActions: {
+    gap: spacing.md,
+    alignSelf: 'stretch',
+  },
+  dayBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  dayTitle: {
+    flex: 1,
+  },
+  edit: {
+    marginRight: -spacing.md,
+  },
+  hint: {
+    marginTop: spacing.md,
   },
   dayEmpty: {
     paddingVertical: spacing.xl,
