@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useRouter } from "expo-router";
 
 import { AppText, Checkbox, EmptyState, IconButton, ListRow, SectionHeader } from '@/components';
 import type { Task } from '@/domain/task';
@@ -36,7 +37,12 @@ export function PriorityList({ tasks, onToggleTask, onEditTask, onAddTask }: Pri
           title={task.title}
           completed={task.done}
           strikethrough={task.done}
-          onPress={() => onToggleTask(task)}
+          onPress={() =>
+            router.push({
+              pathname: "/task/[id]",
+              params: { id: task.id },
+            })
+          }
           onLongPress={() => onEditTask(task)}
           leading={<Checkbox checked={task.done} />}
           trailing={
