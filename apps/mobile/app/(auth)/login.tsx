@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Screen, TextField } from '@/components';
 import { useAuth } from '@/state/AuthContext';
-import { spacing } from '@/theme';
+import { radius, spacing } from '@/theme';
 
 export default function Login() {
   const [nome, setNome] = useState('');
@@ -23,20 +23,26 @@ export default function Login() {
 
   return (
     <Screen scroll={false} contentStyle={styles.content}>
-      <View style={styles.header}>
-        <AppText variant="display">StayOn</AppText>
-        <AppText variant="supporting" color="textMuted" style={styles.subtitle}>
-          Foco no que importa. Diga como podemos te chamar para começar.
+      <View style={styles.brand}>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.logo}
+          accessibilityIgnoresInvertColors
+        />
+        <AppText variant="display" style={styles.name}>
+          StayOn
+        </AppText>
+        <AppText variant="supporting" color="textDim">
+          Foco no que importa.
         </AppText>
       </View>
 
       <TextField
         label="SEU NOME"
-        placeholder="Ex.: Matheus"
+        placeholder="Como devemos te chamar?"
         value={nome}
         onChangeText={setNome}
         maxLength={40}
-        autoFocus
       />
 
       <Button
@@ -53,11 +59,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: spacing.section * 3,
   },
-  header: {
-    marginBottom: spacing.section * 1.5,
+  brand: {
+    alignItems: 'center',
+    marginBottom: spacing.section * 2,
   },
-  subtitle: {
-    marginTop: spacing.md,
+  logo: {
+    width: 84,
+    height: 84,
+    borderRadius: radius.xl,
+  },
+  name: {
+    marginTop: spacing.xxl,
+    marginBottom: spacing.xs,
   },
   desabilitado: {
     opacity: 0.4,
