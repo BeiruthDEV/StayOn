@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
@@ -21,6 +22,7 @@ import {
   useTasks,
   useToast,
 } from '@/state';
+import { useAuth } from '@/state/AuthContext';
 import { clearAll } from '@/storage';
 import { colors, spacing } from '@/theme';
 
@@ -32,6 +34,7 @@ const INTERVENTION_LEVELS = ['Suave', 'Rígido'] as const;
 /** Tela Perfil: identidade, preferências de foco, dados e informações do app. */
 export function ProfileScreen() {
   const router = useRouter();
+  const { sair } = useAuth();
   const { showToast } = useToast();
   const { preferences, setInterventionLevel, reset } = usePreferences();
   const tasks = useTasks();
@@ -150,6 +153,16 @@ export function ProfileScreen() {
       </Card>
 
       <ListRow
+        title="Sair"
+        subtitle="Volta para a tela de login"
+        onPress={() => {
+          sair();
+          router.replace('/login');
+        }}
+        leading={<Icon name="profile" size={20} strokeWidth={1.6} color={colors.text} />}
+      />
+
+      <ListRow
         title="Apagar todos os dados"
         subtitle="Deixa o aplicativo vazio, como na primeira abertura"
         onPress={handleReset}
@@ -178,7 +191,7 @@ export function ProfileScreen() {
           <AppText variant="body" color="textMuted">
             Versão
           </AppText>
-          <AppText variant="bodyStrong">1.0.0</AppText>
+          <AppText variant="bodyStrong">{Constants.expoConfig?.version ?? '1.0.0'}</AppText>
         </View>
       </Card>
 
