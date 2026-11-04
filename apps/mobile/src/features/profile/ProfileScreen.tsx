@@ -21,6 +21,7 @@ import {
   useTasks,
   useToast,
 } from '@/state';
+import { useAuth } from '@/state/AuthContext';
 import { clearAll } from '@/storage';
 import { colors, spacing } from '@/theme';
 
@@ -32,6 +33,7 @@ const INTERVENTION_LEVELS = ['Suave', 'Rígido'] as const;
 /** Tela Perfil: identidade, preferências de foco, dados e informações do app. */
 export function ProfileScreen() {
   const router = useRouter();
+  const { sair } = useAuth();
   const { showToast } = useToast();
   const { preferences, setInterventionLevel, reset } = usePreferences();
   const tasks = useTasks();
@@ -148,6 +150,16 @@ export function ProfileScreen() {
           servidor nenhum e funciona sem internet.
         </AppText>
       </Card>
+
+      <ListRow
+        title="Sair"
+        subtitle="Volta para a tela de login"
+        onPress={() => {
+          sair();
+          router.replace('/login');
+        }}
+        leading={<Icon name="profile" size={20} strokeWidth={1.6} color={colors.text} />}
+      />
 
       <ListRow
         title="Apagar todos os dados"
