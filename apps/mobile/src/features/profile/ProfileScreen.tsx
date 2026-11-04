@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
@@ -190,7 +191,7 @@ export function ProfileScreen() {
           <AppText variant="body" color="textMuted">
             Versão
           </AppText>
-          <AppText variant="bodyStrong">1.0.0</AppText>
+          <AppText variant="bodyStrong">{Constants.expoConfig?.version ?? '1.0.0'}</AppText>
         </View>
       </Card>
 
