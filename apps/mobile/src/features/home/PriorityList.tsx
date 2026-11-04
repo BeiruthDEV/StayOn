@@ -1,5 +1,5 @@
-import { StyleSheet, View } from 'react-native';
-import { useRouter } from "expo-router";
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { AppText, Checkbox, EmptyState, IconButton, ListRow, SectionHeader } from '@/components';
 import type { Task } from '@/domain/task';
@@ -14,6 +14,8 @@ type PriorityListProps = {
 
 /** Seção "Prioridades" com as tarefas do dia. */
 export function PriorityList({ tasks, onToggleTask, onEditTask, onAddTask }: PriorityListProps) {
+  const router = useRouter();
+
   return (
     <View>
       <SectionHeader
@@ -39,12 +41,21 @@ export function PriorityList({ tasks, onToggleTask, onEditTask, onAddTask }: Pri
           strikethrough={task.done}
           onPress={() =>
             router.push({
-              pathname: "/task/[id]",
+              pathname: '/task/[id]',
               params: { id: task.id },
             })
           }
           onLongPress={() => onEditTask(task)}
-          leading={<Checkbox checked={task.done} />}
+          leading={
+            <Pressable
+              onPress={() => onToggleTask(task)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={task.done ? 'Desmarcar tarefa' : 'Concluir tarefa'}
+            >
+              <Checkbox checked={task.done} />
+            </Pressable>
+          }
           trailing={
             <AppText variant="tag" color="textDim">
               {task.tag}
