@@ -1,0 +1,45 @@
+name: CI
+
+# Confere tipos, estilo e testes a cada pull request e a cada push no main.
+# Permissão mínima: o workflow só lê o repositório.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes
+        run: npm test

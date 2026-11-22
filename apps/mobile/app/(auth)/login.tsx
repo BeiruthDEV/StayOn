@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Screen, TextField } from '@/components';
+import { MAX_NAME_LENGTH, normalizeName } from '@/domain/userSession';
 import { useAuth } from '@/state/AuthContext';
 import { radius, spacing } from '@/theme';
 
@@ -11,14 +12,15 @@ export default function Login() {
   const { entrar } = useAuth();
   const router = useRouter();
 
-  const podeEntrar = nome.trim().length > 0;
+  const podeEntrar = normalizeName(nome) !== null;
 
   const handleEntrar = () => {
     if (!podeEntrar) {
       return;
     }
-    entrar(nome.trim());
-    router.replace('/');
+    if (entrar(nome)) {
+      router.replace('/');
+    }
   };
 
   return (
@@ -42,7 +44,7 @@ export default function Login() {
         placeholder="Como devemos te chamar?"
         value={nome}
         onChangeText={setNome}
-        maxLength={40}
+        maxLength={MAX_NAME_LENGTH}
       />
 
       <Button

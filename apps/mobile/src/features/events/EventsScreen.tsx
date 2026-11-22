@@ -6,6 +6,7 @@ import {
   Button,
   EmptyState,
   IconButton,
+  ListRow,
   Screen,
   ScreenHeader,
   SectionHeader,
@@ -122,6 +123,14 @@ export function EventsScreen() {
           <UpNextCard event={upNext} onRemove={() => handleRemove(upNext)} />
         </View>
       ) : null}
+
+      <ListRow
+        title="Feriados nacionais"
+        subtitle="Consulte os feriados do ano"
+        onPress={() => router.push('/feriados')}
+        leading={<Icon name="calendar" size={20} strokeWidth={1.6} color={colors.text} />}
+        trailing={<Icon name="chevronRight" size={18} strokeWidth={1.6} color={colors.textDim} />}
+      />
 
       <SectionHeader title="Próximos" style={styles.sectionHeader} />
 

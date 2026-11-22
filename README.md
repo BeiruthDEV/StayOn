@@ -11,7 +11,9 @@ Durante uma sessão, o app bloqueia os aplicativos que você escolher: abrir o
 Instagram devolve você para a tela inicial até o tempo acabar.
 
 Funciona offline, é gratuito, não pede cadastro e guarda tudo no próprio
-celular. Nenhum dado sai do aparelho.
+celular. Nenhum dado seu sai do aparelho: a única chamada de rede é a lista
+pública de feriados nacionais (BrasilAPI), que só leva o ano consultado e fica
+em cache para uso sem internet.
 
 ## Como rodar
 
