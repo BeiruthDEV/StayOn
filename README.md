@@ -105,7 +105,7 @@ faz o mesmo no GitHub e anexa o APK a cada release publicada.
 |---|---|
 | Aplicativo | React Native 0.81 · Expo SDK 54 · TypeScript estrito |
 | Navegação | Expo Router (rotas por arquivo, grupos `(auth)` e `(app)`, rotas dinâmicas) |
-| Dados locais | AsyncStorage para listas e preferências · SecureStore para a sessão |
+| Dados locais | AsyncStorage com os valores **cifrados** (XChaCha20-Poly1305) · chave e sessão no SecureStore |
 | Rede | `fetch` atrás de uma camada própria, com cache de validade (TTL) |
 | Bloqueio | Módulo nativo Android em Kotlin, usando um serviço de acessibilidade |
 | Qualidade | `node --test` via tsx · ESLint · GitHub Actions |
@@ -123,7 +123,7 @@ apps/mobile
     ├── hooks/       hooks reutilizáveis (ex.: useFetch)
     ├── services/    acesso à rede (api.ts) e feriados
     ├── state/       estado global, salvo no aparelho
-    ├── storage/     AsyncStorage, SecureStore e cache com TTL
+    ├── storage/     armazenamento cifrado, SecureStore e cache com TTL
     ├── theme/       cores, fontes e espaçamento
     └── icons/       ícones SVG
 ```
@@ -166,10 +166,19 @@ fecha o aplicativo bloqueado na hora; **Suave** só avisa.
 
 - **Os dados ficam no aparelho.** A única chamada de rede é a lista pública de
   feriados (BrasilAPI), que leva apenas o ano consultado.
-- **Sessão no cofre do sistema.** O nome do usuário é guardado no SecureStore
-  (Keystore no Android, Keychain no iOS), não em texto puro.
-- **Listas em AsyncStorage, sem criptografia.** Tarefas, hábitos e reflexões
-  não são criptografados; quem tiver acesso root ao aparelho pode lê-los.
+- **Dados cifrados no aparelho.** Tarefas, hábitos, rotina, agenda, sessões,
+  reflexões e preferências são gravados cifrados com XChaCha20-Poly1305
+  (biblioteca auditada `@noble/ciphers`). A cifra também detecta adulteração:
+  um dado alterado ou copiado para outra chave de armazenamento é recusado.
+- **A chave fica no cofre do sistema.** Uma chave de 256 bits é gerada no
+  próprio aparelho e guardada no SecureStore (Keystore no Android, Keychain no
+  iOS). Ela nunca vai para o AsyncStorage. O nome do usuário (a sessão) também
+  fica no SecureStore.
+- **Falha segura.** Se o cofre estiver indisponível, o app não grava em texto
+  puro e não cria outra chave, o que tornaria ilegível o que já foi salvo.
+  Apagar os dados destrói a chave, e o que sobrar no disco vira lixo.
+- **Dados de versões antigas** (em texto puro) são migrados para o formato
+  cifrado na primeira leitura.
 - **Rede endurecida.** Só HTTPS, com tempo limite de 10 s. A resposta da API é
   validada e recusada por inteiro se vier fora do formato esperado. As
   mensagens de erro não expõem a URL.
@@ -177,6 +186,10 @@ fecha o aplicativo bloqueado na hora; **Suave** só avisa.
   passam por validação antes de serem usados.
 - **Sair limpa o rastro.** Encerrar a sessão apaga o nome do cofre e o cache de
   rede.
+- **O que não é cifrado:** o cache dos feriados (dado público) e o estado do
+  bloqueio no lado nativo (nomes dos pacotes bloqueados e o horário de término),
+  que ficam em armazenamento privado do app. Quem tem acesso root ao aparelho
+  desbloqueado ainda pode agir como o app.
 - **O serviço de bloqueio não é exportado** para outros aplicativos e exige a
   permissão de sistema `BIND_ACCESSIBILITY_SERVICE`.
 

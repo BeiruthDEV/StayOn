@@ -147,9 +147,9 @@ export function ProfileScreen() {
 
       <Card>
         <AppText variant="supporting" color="textMuted">
-          Tudo o que você cria fica guardado só neste aparelho. A única consulta à internet é a lista
-          pública de feriados (BrasilAPI), e ela não leva nenhum dado seu. O resto funciona sem
-          internet.
+          Tudo o que você cria fica guardado cifrado, só neste aparelho. A única consulta à
+          internet é a lista pública de feriados (BrasilAPI), e ela não leva nenhum dado seu. O
+          resto funciona sem internet.
         </AppText>
       </Card>
 
