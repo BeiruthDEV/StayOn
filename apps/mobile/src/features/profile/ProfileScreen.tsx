@@ -147,8 +147,9 @@ export function ProfileScreen() {
 
       <Card>
         <AppText variant="supporting" color="textMuted">
-          Tudo o que você cria fica guardado só neste aparelho. O StayOn não envia nada para
-          servidor nenhum e funciona sem internet.
+          Tudo o que você cria fica guardado só neste aparelho. A única consulta à internet é a lista
+          pública de feriados (BrasilAPI), e ela não leva nenhum dado seu. O resto funciona sem
+          internet.
         </AppText>
       </Card>
 
@@ -185,7 +186,7 @@ export function ProfileScreen() {
           <AppText variant="body" color="textMuted">
             Conta
           </AppText>
-          <AppText variant="bodyStrong">Não precisa</AppText>
+          <AppText variant="bodyStrong">Só o seu nome</AppText>
         </View>
         <View style={styles.aboutRow}>
           <AppText variant="body" color="textMuted">
