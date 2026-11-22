@@ -1,5 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
+import type { SecureRead } from './keyProvider';
+
 /**
  * Armazenamento criptografado (Keychain no iOS, Keystore no Android).
  *
@@ -13,6 +15,8 @@ import * as SecureStore from 'expo-secure-store';
 
 export const secureKeys = {
   session: 'stayon.session',
+  /** Chave que cifra os dados do app (listas, preferências, rotina). */
+  dataKey: 'stayon.datakey',
 } as const;
 
 export type SecureKey = (typeof secureKeys)[keyof typeof secureKeys];
@@ -38,6 +42,21 @@ export async function readSecure(key: SecureKey): Promise<string | null> {
     return await SecureStore.getItemAsync(key, OPTIONS);
   } catch {
     return null;
+  }
+}
+
+/**
+ * Lê distinguindo "não existe" (`ok: true, value: null`) de "não consegui ler"
+ * (`ok: false`). Quem cria chaves precisa dessa diferença: criar uma chave nova
+ * por causa de um erro de leitura destruiria os dados já cifrados.
+ */
+export async function readSecureStrict(key: SecureKey): Promise<SecureRead> {
+  if (!(await available())) return { ok: false };
+
+  try {
+    return { ok: true, value: await SecureStore.getItemAsync(key, OPTIONS) };
+  } catch {
+    return { ok: false };
   }
 }
 
