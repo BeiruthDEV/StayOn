@@ -67,7 +67,7 @@ export function HolidayDetailScreen() {
           icon="info"
           title="Não foi possível carregar"
           description={error}
-          action={<Button label="Tentar de novo" onPress={reload} />}
+          action={<Button label="Tentar de novo" onPress={reload} style={styles.retry} />}
         />
       </Screen>
     );
@@ -122,6 +122,9 @@ export function HolidayDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  retry: {
+    minWidth: 200,
+  },
   centered: {
     flex: 1,
     alignItems: 'center',

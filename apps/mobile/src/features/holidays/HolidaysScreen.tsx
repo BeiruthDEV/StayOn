@@ -67,7 +67,7 @@ export function HolidaysScreen() {
   if (loading) {
     return (
       <Screen scroll={false}>
-        <Stack.Screen options={{ title: 'Feriados' }} />
+        <Stack.Screen options={{ title: '' }} />
         {header}
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.text} />
@@ -82,13 +82,13 @@ export function HolidaysScreen() {
   if (error !== null || data === null) {
     return (
       <Screen scroll={false}>
-        <Stack.Screen options={{ title: 'Feriados' }} />
+        <Stack.Screen options={{ title: '' }} />
         {header}
         <EmptyState
           icon="info"
           title="Não foi possível carregar"
           description={error ?? 'Tente de novo em instantes.'}
-          action={<Button label="Tentar de novo" onPress={reload} />}
+          action={<Button label="Tentar de novo" onPress={reload} style={styles.retry} />}
         />
       </Screen>
     );
@@ -99,7 +99,7 @@ export function HolidaysScreen() {
 
   return (
     <Screen scroll={false}>
-      <Stack.Screen options={{ title: 'Feriados' }} />
+      <Stack.Screen options={{ title: '' }} />
       <FlatList
         data={data.data}
         keyExtractor={(holiday) => holiday.date}
@@ -148,6 +148,9 @@ function formatDay(iso: string): string {
 }
 
 const styles = StyleSheet.create({
+  retry: {
+    minWidth: 200,
+  },
   yearControls: {
     flexDirection: 'row',
     gap: spacing.md,
