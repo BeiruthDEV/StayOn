@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { clearCache } from './cache';
+import { removeSecure, secureKeys } from './secure';
 import { allStorageKeys, type StorageKey } from './keys';
 
 /**
@@ -34,6 +35,7 @@ export async function clearAll(): Promise<void> {
   try {
     await AsyncStorage.multiRemove([...allStorageKeys]);
     await clearCache();
+    await removeSecure(secureKeys.session);
   } catch {
     // Nada a fazer: a próxima abertura simplesmente mantém os dados.
   }

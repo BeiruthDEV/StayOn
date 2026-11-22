@@ -1,7 +1,15 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { normalizeName, parseSession, type Session } from '@/domain/userSession';
-import { clearCache, storageKeys, usePersistentState } from '@/storage';
+import { clearCache, readSecure, removeSecure, secureKeys, writeSecure } from '@/storage';
 
 type Auth = {
   /** Nome de quem está usando o app, ou `null` sem sessão. */
@@ -15,36 +23,57 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null);
 
+/** Lê a sessão do cofre. Texto corrompido ou adulterado vira "sem sessão". */
+async function loadSession(): Promise<Session | null> {
+  const raw = await readSecure(secureKeys.session);
+  if (raw === null) return null;
+
+  try {
+    return parseSession(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { value, setValue, hydrated } = usePersistentState<Session | null>(
-    storageKeys.session,
-    null,
-  );
+  const [session, setSession] = useState<Session | null>(null);
+  const [pronto, setPronto] = useState(false);
 
-  // O que veio do disco passa por validação: JSON corrompido ou adulterado
-  // vira "sem sessão" em vez de quebrar o app.
-  const session = hydrated ? parseSession(value) : null;
+  useEffect(() => {
+    let active = true;
 
-  const entrar = useCallback(
-    (nome: string) => {
-      const name = normalizeName(nome);
-      if (name === null) return false;
+    loadSession().then((stored) => {
+      if (!active) return;
+      setSession(stored);
+      setPronto(true);
+    });
 
-      setValue({ name, signedInAt: Date.now() });
-      return true;
-    },
-    [setValue],
-  );
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const entrar = useCallback((nome: string) => {
+    const name = normalizeName(nome);
+    if (name === null) return false;
+
+    const next: Session = { name, signedInAt: Date.now() };
+    setSession(next);
+    // Se o cofre falhar, o login vale nesta abertura e só não é lembrado depois.
+    void writeSecure(secureKeys.session, JSON.stringify(next));
+    return true;
+  }, []);
 
   const sair = useCallback(() => {
-    setValue(null);
+    setSession(null);
+    void removeSecure(secureKeys.session);
     // Dado de rede guardado no aparelho não deve sobrar para o próximo usuário.
     void clearCache();
-  }, [setValue]);
+  }, []);
 
   const auth = useMemo<Auth>(
-    () => ({ usuario: session?.name ?? null, pronto: hydrated, entrar, sair }),
-    [session?.name, hydrated, entrar, sair],
+    () => ({ usuario: session?.name ?? null, pronto, entrar, sair }),
+    [session?.name, pronto, entrar, sair],
   );
 
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
