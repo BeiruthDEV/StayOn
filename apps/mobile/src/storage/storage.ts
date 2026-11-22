@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { clearCache } from './cache';
 import { allStorageKeys, type StorageKey } from './keys';
 
 /**
@@ -32,6 +33,7 @@ export async function writeValue<T>(key: StorageKey, value: T): Promise<void> {
 export async function clearAll(): Promise<void> {
   try {
     await AsyncStorage.multiRemove([...allStorageKeys]);
+    await clearCache();
   } catch {
     // Nada a fazer: a próxima abertura simplesmente mantém os dados.
   }
