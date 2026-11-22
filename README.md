@@ -1,114 +1,198 @@
+<div align="center">
+
+<img src="StayOn_Icon.png" alt="StayOn" width="96" />
+
 # StayOn
 
-Projeto pessoal: um app de produtividade e foco, feito em React Native + Expo.
+**App de foco para Android que fecha de verdade os aplicativos que distraem.**
 
-A ideia é juntar num lugar só o que costuma ficar espalhado — as tarefas do
-dia, os hábitos que você quer manter, a agenda em blocos de tempo e as sessões
-de foco cronometradas. No fim, o app mostra quanto tempo você realmente focou,
-calculado a partir das sessões que você fez, e não de estimativa.
+[![CI](https://github.com/BeiruthDEV/StayOn/actions/workflows/ci.yml/badge.svg)](https://github.com/BeiruthDEV/StayOn/actions/workflows/ci.yml)
+[![Última versão](https://img.shields.io/github/v/release/BeiruthDEV/StayOn?label=vers%C3%A3o)](https://github.com/BeiruthDEV/StayOn/releases/latest)
+![Plataforma](https://img.shields.io/badge/plataforma-Android-3ddc84)
+![Expo SDK](https://img.shields.io/badge/Expo-SDK%2054-000020)
+[![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
 
-Durante uma sessão, o app bloqueia os aplicativos que você escolher: abrir o
+[Baixar o APK](https://github.com/BeiruthDEV/StayOn/releases/latest) · [Como rodar](#como-rodar) · [Arquitetura](#arquitetura) · [Segurança e privacidade](#segurança-e-privacidade)
+
+</div>
+
+---
+
+## Sobre
+
+O StayOn junta num lugar só o que costuma ficar espalhado: as tarefas do dia, os
+hábitos, a rotina da semana, a agenda em blocos e as sessões de foco
+cronometradas. Os números de foco vêm das sessões que você de fato fez, não de
+estimativa.
+
+Durante uma sessão, o app bloqueia os aplicativos que você escolher. Abrir o
 Instagram devolve você para a tela inicial até o tempo acabar.
 
-Funciona offline, é gratuito, não pede cadastro e guarda tudo no próprio
-celular. Nenhum dado seu sai do aparelho: a única chamada de rede é a lista
-pública de feriados nacionais (BrasilAPI), que só leva o ano consultado e fica
-em cache para uso sem internet.
+- **Gratuito, sem anúncios e sem cadastro.** Entrar pede só um nome.
+- **Funciona offline.** Tudo o que você cria fica no próprio aparelho.
+- **Código aberto**, sob licença MIT.
+
+## Funcionalidades
+
+| | |
+|---|---|
+| **Foco com bloqueio** | Cronômetro de sessão. Aplicativos da sua lista ficam barrados até o fim, mesmo que o StayOn seja fechado. |
+| **Tarefas e hábitos** | Prioridades do dia e hábitos que podem ser pausados. |
+| **Rotina semanal** | Semana fixa: a cada dia os blocos voltam desmarcados e o cumprido vira histórico. Importa de TXT, PDF ou texto colado. |
+| **Agenda** | Planejamento em blocos de tempo, calendário e compromissos. |
+| **Feriados nacionais** | Lista por ano e detalhe por data, vindos da BrasilAPI, com cache para uso sem internet. |
+| **Insights** | Foco do dia e da semana, calculado a partir das suas sessões. |
 
 ## Como rodar
 
-Android apenas. Não roda no Expo Go, porque o bloqueio depende de código
-nativo. Precisa de:
+### Instalar o APK (mais simples)
 
-- Node 22
-- [Android Studio](https://developer.android.com/studio) com o Android SDK,
-  com `ANDROID_HOME` apontando para ele
-- **JDK 17**, com `JAVA_HOME` apontando para ela. A JDK que vem dentro do
-  Android Studio é mais nova e o Gradle não aceita
-- o projeto num caminho **sem acento e sem espaço**. No Windows a JDK 17 lê
-  nomes de arquivo na codificação da plataforma, e um "ó" no caminho faz o
-  Gradle não achar as próprias dependências
-- o celular ligado por cabo, com a depuração USB ativada
+1. Abra a [última release](https://github.com/BeiruthDEV/StayOn/releases/latest).
+2. Baixe o `StayOn.apk` no celular Android e instale. O Android pode pedir para
+   permitir a instalação de fontes desconhecidas.
+3. Para o bloqueio funcionar, conceda a permissão uma vez: aba **Foco** →
+   **Apps bloqueados** → **Abrir ajustes do sistema** → **StayOn** → ativar.
+
+### Rodar o código
+
+O bloqueio depende de código nativo, então o app é **só Android** e **não roda
+no Expo Go**. Sem o módulo nativo ele ainda abre, mas com o bloqueio
+desativado. É preciso:
+
+- Node 22 (versão em [`.nvmrc`](.nvmrc))
+- [Android Studio](https://developer.android.com/studio) com o Android SDK e
+  `ANDROID_HOME` configurado
+- **JDK 17** com `JAVA_HOME` configurado. A JDK que vem no Android Studio é mais
+  nova e o Gradle não a aceita
+- o projeto num caminho **sem acento e sem espaço**. No Windows, a JDK 17 lê
+  nomes de arquivo na codificação da plataforma, e um "ó" no caminho impede o
+  Gradle de achar as próprias dependências
+- celular com depuração USB ativada, ligado por cabo
 
 ```bash
 git clone https://github.com/BeiruthDEV/StayOn.git
+cd StayOn/apps/mobile
+npm install
+npx expo run:android
 ```
+
+A primeira vez compila o projeto nativo e instala o app no aparelho. Depois,
+`npm start` basta para o dia a dia.
+
+### Gerar o APK localmente
 
 ```bash
-cd StayOn/apps/mobile && npm install && npx expo run:android
+cd apps/mobile/android && ./gradlew :app:assembleRelease
 ```
 
-A primeira vez compila o projeto nativo e instala o aplicativo no aparelho;
-depois disso `npm start` já basta para o dia a dia.
+O arquivo sai em `app/build/outputs/apk/release/app-release.apk`, já assinado e
+com o JavaScript embutido. O workflow [`apk.yml`](.github/workflows/apk.yml)
+faz o mesmo no GitHub e anexa o APK a cada release publicada.
 
-Para o bloqueio funcionar, conceda a permissão uma vez: aba **Foco** → **Apps
-bloqueados** → **Abrir ajustes do sistema** → **StayOn** → ativar.
+### Comandos
 
-## Instalar sem o ambiente de desenvolvimento
+| Comando | O que faz |
+|---|---|
+| `npm start` | Sobe o bundler, com o app já instalado |
+| `npx expo run:android` | Compila o nativo e instala no aparelho |
+| `npm run typecheck` | Confere os tipos (TypeScript estrito) |
+| `npm run lint` | Confere o estilo do código |
+| `npm test` | Roda os testes automatizados |
 
-Para rodar no celular sem nada instalado no computador, gere o APK uma vez e
-copie para o aparelho:
+## Arquitetura
 
-```bash
-cd StayOn/apps/mobile/android && ./gradlew :app:assembleRelease
+| Camada | Tecnologia |
+|---|---|
+| Aplicativo | React Native 0.81 · Expo SDK 54 · TypeScript estrito |
+| Navegação | Expo Router (rotas por arquivo, grupos `(auth)` e `(app)`, rotas dinâmicas) |
+| Dados locais | AsyncStorage para listas e preferências · SecureStore para a sessão |
+| Rede | `fetch` atrás de uma camada própria, com cache de validade (TTL) |
+| Bloqueio | Módulo nativo Android em Kotlin, usando um serviço de acessibilidade |
+| Qualidade | `node --test` via tsx · ESLint · GitHub Actions |
+
+### Estrutura
+
+```
+apps/mobile
+├── app/             rotas (Expo Router)
+├── modules/         módulo nativo do bloqueio (Kotlin)
+└── src/
+    ├── components/  componentes de interface
+    ├── features/    uma pasta por tela
+    ├── domain/      regras e cálculos, sem React e testáveis
+    ├── hooks/       hooks reutilizáveis (ex.: useFetch)
+    ├── services/    acesso à rede (api.ts) e feriados
+    ├── state/       estado global, salvo no aparelho
+    ├── storage/     AsyncStorage, SecureStore e cache com TTL
+    ├── theme/       cores, fontes e espaçamento
+    └── icons/       ícones SVG
 ```
 
-O arquivo sai em `app/build/outputs/apk/release/app-release.apk`. Ele já vem
-assinado e com o JavaScript embutido, então funciona sozinho.
+A pasta `android/` é gerada por `npx expo prebuild` e não fica no repositório.
+
+### Rotas
+
+| Rota | Tela |
+|---|---|
+| `/login` | Entrada por nome |
+| `/` | Início: tarefas do dia, próxima ação, hábitos e resumo de foco |
+| `/routine` | Rotina semanal |
+| `/planner` | Agenda do dia em blocos |
+| `/focus` | Cronômetro de foco |
+| `/insights` | Números do dia e da semana |
+| `/profile` | Nome, preferências, sair e apagar dados |
+| `/dates` | Calendário e compromissos |
+| `/habits` | Hábitos |
+| `/blocked-apps` | Aplicativos bloqueados na sessão |
+| `/feriados` e `/feriado/[date]` | Feriados nacionais e detalhe |
+| `/task/[id]` | Detalhe da tarefa |
+| `/onboarding` | Configuração inicial: nome e áreas de foco |
+
+O app começa vazio: tudo o que aparece foi você quem criou.
 
 ## Como o bloqueio funciona
 
 Um serviço de acessibilidade é avisado pelo Android toda vez que a janela em
 primeiro plano muda. Se o aplicativo que abriu está na sua lista e a sessão
 ainda não terminou, o serviço devolve você para a tela inicial. Ele não lê o
-conteúdo da tela — só o nome do pacote que abriu.
+conteúdo da tela, só o nome do pacote que abriu.
 
-O horário de término fica salvo no aparelho, então o bloqueio expira sozinho
-mesmo que o StayOn seja fechado no meio da sessão — e a sessão em andamento
-também é salva, então fechar o aplicativo à força não libera nada.
+O horário de término fica salvo no aparelho. O bloqueio expira sozinho mesmo
+que o StayOn seja fechado no meio da sessão, e fechar o app à força não libera
+nada. No Perfil, o nível de intervenção define o comportamento: **Rígido**
+fecha o aplicativo bloqueado na hora; **Suave** só avisa.
 
-No Perfil, o nível de intervenção decide o que acontece: **Rígido** fecha o
-aplicativo bloqueado na hora, **Suave** apenas avisa e deixa você decidir.
+## Segurança e privacidade
 
-## Telas
+- **Os dados ficam no aparelho.** A única chamada de rede é a lista pública de
+  feriados (BrasilAPI), que leva apenas o ano consultado.
+- **Sessão no cofre do sistema.** O nome do usuário é guardado no SecureStore
+  (Keystore no Android, Keychain no iOS), não em texto puro.
+- **Listas em AsyncStorage, sem criptografia.** Tarefas, hábitos e reflexões
+  não são criptografados; quem tiver acesso root ao aparelho pode lê-los.
+- **Rede endurecida.** Só HTTPS, com tempo limite de 10 s. A resposta da API é
+  validada e recusada por inteiro se vier fora do formato esperado. As
+  mensagens de erro não expõem a URL.
+- **Entrada externa é validada.** Parâmetros de rota, como a data do feriado,
+  passam por validação antes de serem usados.
+- **Sair limpa o rastro.** Encerrar a sessão apaga o nome do cofre e o cache de
+  rede.
+- **O serviço de bloqueio não é exportado** para outros aplicativos e exige a
+  permissão de sistema `BIND_ACCESSIBILITY_SERVICE`.
 
-| Tela | Rota | O que faz |
-|---|---|---|
-| Início | `/` | Tarefas do dia, próxima ação, hábitos e resumo de foco |
-| Rotina | `/routine` | Semana fixa por dia da semana: cada dia os blocos voltam desmarcados e o que foi cumprido vira histórico. Bloco criado por toque (vários dias de uma vez, duração, aviso de conflito), copiar dia e importação de TXT, PDF ou texto colado com prévia |
-| Planejar | `/planner` | Agenda do dia em blocos de tempo |
-| Datas importantes | `/dates` | Calendário e compromissos |
-| Foco | `/focus` | Cronômetro de sessão de foco |
-| Apps bloqueados | `/blocked-apps` | Escolha do que fica barrado na sessão |
-| Insights | `/insights` | Números do dia e da semana |
-| Perfil | `/profile` | Nome, preferências e apagar dados |
-| Configuração inicial | `/onboarding` | Nome e áreas de foco |
-| Hábitos | `/habits` | Lista de hábitos |
-
-O app começa vazio. Tudo que aparece é o que você cria.
-
-## Estrutura
-
-```
-apps/mobile
-  app/            rotas (expo-router)
-  modules/        módulo nativo do bloqueio (Kotlin)
-  src/components  componentes de interface
-  src/features    uma pasta por tela
-  src/domain      regras e cálculos, sem React
-  src/state       estado global, salvo no aparelho
-  src/storage     leitura e escrita no AsyncStorage
-  src/theme       cores, fontes e espaçamento
-  src/icons       ícones SVG
-```
-
-A pasta `android/` é gerada por `npx expo prebuild` e não fica no repositório.
-
-## Comandos
+## Testes e integração contínua
 
 ```bash
-npx expo run:android   # compila o nativo e instala no aparelho
-npm start              # sobe o bundler, com o app já instalado
-npm run typecheck
-npm run lint
+cd apps/mobile
+npm test
 ```
+
+Os testes cobrem a lógica sem interface: validação do JSON da API, camada de
+rede (HTTPS, status HTTP, tempo limite, resposta inválida), cache com validade e
+modo offline, e a sessão do usuário. A cada pull request e a cada push no
+`main`, o workflow [`ci.yml`](.github/workflows/ci.yml) roda tipos, lint e
+testes.
+
+## Licença
+
+Distribuído sob a licença [MIT](LICENSE).
