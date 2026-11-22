@@ -31,6 +31,7 @@
     "@types/react": "~19.1.10",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~10.0.0",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.2"
   },
   "scripts": {
@@ -38,7 +39,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "tsx --test \"src/**/*.test.ts\""
   },
   "private": true
 }
