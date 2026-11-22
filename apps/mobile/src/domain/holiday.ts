@@ -77,3 +77,13 @@ export function daysBetween(from: string, to: string): number {
 
   return Math.round((toUtc(to) - toUtc(from)) / 86_400_000);
 }
+
+/** Distância legível até a data: "Hoje", "Amanhã", "Em 12 dias" ou "Há 3 dias". */
+export function distanceLabel(today: string, date: string): string {
+  const days = daysBetween(today, date);
+
+  if (days === 0) return 'Hoje';
+  if (days === 1) return 'Amanhã';
+  if (days === -1) return 'Ontem';
+  return days > 0 ? `Em ${days} dias` : `Há ${-days} dias`;
+}
